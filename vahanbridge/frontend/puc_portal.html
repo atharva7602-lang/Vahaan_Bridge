@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VahanBridge — PUC Certificate Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb;
+  --surface: #eef1f8;
+  --card: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --pink: #c8193a;
+  --pink-light: #e8305a;
+  --cyan: #0077cc;
+  --amber: #d97a00;
+  --green: #00875a;
+  --puc-green: #1a8c3c;
+  --text: #1a1a2e;
+  --muted: #6b7080;
+  --subtle: #b0b8cc;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+/* ── MARQUEE ── */
+.marquee-bar { background: var(--puc-green); color: #fff; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; padding: 0.4rem 0; overflow: hidden; white-space: nowrap; }
+.marquee-track { display: inline-block; animation: marquee 30s linear infinite; }
+.marquee-track span { margin: 0 2.5rem; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ── NAV ── */
+nav { position: sticky; top: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 3rem; background: rgba(244,246,251,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+.logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--pink), #ff8c42); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+nav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+nav ul li a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s; }
+nav ul li a:hover, nav ul li a.active-link { color: var(--text); }
+.nav-badge { background: rgba(26,140,60,0.1); color: var(--puc-green); border: 1px solid rgba(26,140,60,0.25); padding: 0.3rem 0.8rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── HERO ── */
+.hero { min-height: 86vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 5rem 2rem 4rem; position: relative; overflow: hidden; }
+.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(26,140,60,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(26,140,60,0.05) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 100%); }
+.hero-glow { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 700px; height: 400px; border-radius: 50%; background: radial-gradient(ellipse, rgba(26,140,60,0.06), rgba(0,119,204,0.04), transparent 70%); pointer-events: none; }
+.hero-content { position: relative; z-index: 2; max-width: 840px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(26,140,60,0.08); border: 1px solid rgba(26,140,60,0.25); color: var(--puc-green); padding: 0.4rem 1.1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 1.5rem; }
+.hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--puc-green); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.6rem, 6vw, 4.8rem); font-weight: 800; line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 1.2rem; }
+.hero h1 .accent { color: var(--puc-green); }
+.hero h1 .accent2 { color: var(--cyan); }
+.hero-sub { font-size: 1.05rem; color: var(--muted); max-width: 540px; margin: 0 auto 2.5rem; line-height: 1.75; }
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-primary { background: linear-gradient(135deg, var(--puc-green), #116930); color: #fff; padding: 0.9rem 2.2rem; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 24px rgba(26,140,60,0.35); font-family: inherit; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(26,140,60,0.5); }
+.btn-outline { background: transparent; color: var(--text); padding: 0.9rem 2.2rem; border-radius: 12px; font-weight: 500; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s; font-family: inherit; }
+.btn-outline:hover { border-color: var(--subtle); background: rgba(255,255,255,0.6); }
+
+/* ── PUC CERT PREVIEW HERO ── */
+.puc-cert-hero { display: inline-block; margin: 2.5rem auto 0; background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.4rem 2rem; box-shadow: 0 8px 40px rgba(0,0,0,0.1); animation: floatCard 4s ease-in-out infinite; position: relative; min-width: 300px; }
+@keyframes floatCard { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+.puc-cert-hero-top { height: 4px; background: linear-gradient(90deg, #003893 33%, #fff 33%, #fff 66%, #138808 66%); border-radius: 12px 12px 0 0; position: absolute; top: 0; left: 0; right: 0; }
+.puc-cert-hero-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--puc-green); margin-bottom: 0.6rem; }
+.puc-cert-hero-reg { font-family: 'Space Mono', monospace; font-size: 1.6rem; font-weight: 700; color: var(--text); letter-spacing: 4px; margin-bottom: 0.4rem; }
+.puc-cert-hero-meta { font-size: 0.75rem; color: var(--muted); display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.puc-valid-pill { background: rgba(26,140,60,0.1); border: 1px solid rgba(26,140,60,0.25); color: var(--puc-green); border-radius: 100px; padding: 0.2rem 0.8rem; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px; }
+
+.hero-stats { display: flex; gap: 3rem; justify-content: center; margin-top: 4rem; padding-top: 2.5rem; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--text), var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-num .unit { font-size: 1.1rem; color: var(--puc-green); -webkit-text-fill-color: var(--puc-green); }
+.stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.2rem; }
+
+/* ── ABOUT ── */
+#about { background: var(--surface); padding: 5rem 3rem; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+.section-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--puc-green); margin-bottom: 0.7rem; }
+.section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1rem; line-height: 1.2; }
+.section-desc { color: var(--muted); max-width: 540px; font-size: 1rem; line-height: 1.7; }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; margin-top: 3rem; }
+.about-features { display: flex; flex-direction: column; gap: 1rem; }
+.about-feat { display: flex; gap: 1rem; align-items: flex-start; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem; transition: border-color 0.2s, transform 0.2s; }
+.about-feat:hover { border-color: rgba(26,140,60,0.3); transform: translateX(4px); }
+.feat-icon { width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0; background: rgba(26,140,60,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.feat-icon.cyan { background: rgba(0,119,204,0.1); }
+.feat-icon.amber { background: rgba(217,122,0,0.1); }
+.feat-icon.pink { background: rgba(200,25,58,0.1); }
+.feat-text h4 { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700; margin-bottom: 0.2rem; }
+.feat-text p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+.validity-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; }
+.validity-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.validity-row { display: flex; justify-content: space-between; align-items: center; padding: 0.7rem 0; border-bottom: 1px solid var(--border); font-size: 0.83rem; }
+.validity-row:last-child { border-bottom: none; }
+.validity-fuel { font-weight: 600; }
+.validity-months { background: rgba(26,140,60,0.1); color: var(--puc-green); border-radius: 100px; padding: 0.2rem 0.8rem; font-weight: 700; font-size: 0.78rem; }
+.validity-months.amber { background: rgba(217,122,0,0.1); color: var(--amber); }
+
+/* ── APP ── */
+#app { display: none; max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+
+/* ── TABS ── */
+.tab-bar { display: flex; gap: 0; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 0.4rem; margin-bottom: 2rem; flex-wrap: wrap; gap: 0.3rem; }
+.tab-btn { background: transparent; border: none; padding: 0.65rem 1.2rem; border-radius: 10px; font-family: inherit; font-size: 0.85rem; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.tab-btn:hover { background: var(--surface); color: var(--text); }
+.tab-btn.active { background: var(--puc-green); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(26,140,60,0.3); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── PROGRESS ── */
+.wizard-progress { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem 2rem; margin-bottom: 1.5rem; }
+.progress-inner { display: flex; align-items: center; max-width: 500px; position: relative; }
+.progress-track { position: absolute; top: 18px; left: 18px; right: 18px; height: 2px; background: var(--border); }
+.progress-fill-bar { position: absolute; top: 18px; left: 18px; height: 2px; background: linear-gradient(90deg, var(--puc-green), var(--cyan)); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.p-step { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; position: relative; z-index: 1; flex: 1; }
+.p-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 800; color: var(--muted); transition: all 0.3s; }
+.p-dot.active { background: var(--puc-green); border-color: var(--puc-green); color: #fff; box-shadow: 0 4px 16px rgba(26,140,60,0.35); }
+.p-dot.done { background: var(--cyan); border-color: var(--cyan); color: #fff; }
+.p-label { font-size: 0.68rem; color: var(--muted); font-weight: 500; white-space: nowrap; }
+
+/* ── FORM ELEMENTS ── */
+.form-card-white { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; }
+.form-card-white h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.form-group { margin-bottom: 0; }
+.form-group.full { grid-column: 1/-1; }
+.form-group label { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select { width: 100%; background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.7rem 0.9rem; border-radius: 10px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+.form-group input:focus, .form-group select:focus { border-color: var(--puc-green); }
+.form-group input::placeholder { color: var(--subtle); }
+.form-note { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; }
+.req { color: var(--pink); }
+
+/* ── RADIO FUEL CARDS ── */
+.radio-cards { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+.radio-card { display: flex; align-items: center; gap: 0.5rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.6rem 1rem; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: all 0.2s; }
+.radio-card:has(input:checked) { border-color: var(--puc-green); background: rgba(26,140,60,0.06); color: var(--puc-green); font-weight: 600; }
+.radio-card input { accent-color: var(--puc-green); }
+
+/* ── RESULT BOX ── */
+.result-box { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.5rem; margin-top: 1.5rem; display: none; }
+.result-box.show { display: block; animation: slideIn 0.4s ease; }
+@keyframes slideIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+.result-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.result-reg { font-family: 'Space Mono', monospace; font-size: 1.3rem; font-weight: 700; letter-spacing: 3px; }
+.pill-valid { background: rgba(26,140,60,0.1); border: 1px solid rgba(26,140,60,0.2); color: var(--puc-green); border-radius: 100px; padding: 0.3rem 0.9rem; font-size: 0.75rem; font-weight: 700; }
+.pill-expired { background: rgba(200,25,58,0.1); border: 1px solid rgba(200,25,58,0.2); color: var(--pink); border-radius: 100px; padding: 0.3rem 0.9rem; font-size: 0.75rem; font-weight: 700; }
+.result-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.result-item .ri-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 0.2rem; }
+.result-item .ri-val { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+/* ── CERTIFICATE PREVIEW ── */
+.cert-wrap { background: var(--surface); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; display: flex; justify-content: center; }
+.cert-preview { background: #fff; border: 2px solid #dde1ec; border-radius: 12px; width: 100%; max-width: 600px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+.cert-top-bar { background: linear-gradient(90deg, #1a1a2e, #2d2d4a); color: rgba(255,255,255,0.7); padding: 0.5rem 1.2rem; display: flex; justify-content: space-between; font-size: 0.62rem; letter-spacing: 1px; }
+.cert-tricolor { height: 4px; background: linear-gradient(90deg, #FF9933 33%, #fff 33%, #fff 66%, #138808 66%); }
+.cert-body { padding: 1.5rem; }
+.cert-header-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border); }
+.cert-emblem { font-size: 2.2rem; flex-shrink: 0; }
+.cert-title-block { flex: 1; }
+.cert-hin { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.2rem; }
+.cert-title-block h3 { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 800; letter-spacing: 0.5px; margin-bottom: 0.1rem; }
+.cert-title-block p { font-size: 0.7rem; color: var(--muted); }
+.cert-puc-badge { background: var(--puc-green); color: #fff; border-radius: 8px; padding: 0.4rem 0.8rem; text-align: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0; }
+.cert-puc-badge small { display: block; font-size: 0.6rem; font-weight: 600; opacity: 0.85; }
+.cert-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; margin-bottom: 1rem; }
+.cert-field .cf-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 0.15rem; }
+.cert-field .cf-val { font-family: 'Space Mono', monospace; font-size: 0.78rem; font-weight: 700; color: var(--text); }
+.cert-validity-bar { background: var(--surface); border-radius: 8px; padding: 0.8rem 1.2rem; display: flex; justify-content: space-between; margin-bottom: 1rem; }
+.cv-label { font-size: 0.65rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.2rem; }
+.cv-date { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700; }
+.cert-readings { margin-bottom: 1rem; }
+.cert-readings h5 { font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.6rem; }
+.readings-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0.8rem; }
+.reading-item { background: var(--surface); border-radius: 8px; padding: 0.6rem 0.8rem; text-align: center; }
+.ri-param { font-size: 0.68rem; color: var(--muted); font-weight: 600; text-transform: uppercase; margin-bottom: 0.2rem; }
+.ri-val { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; color: var(--puc-green); }
+.ri-unit { font-size: 0.62rem; color: var(--muted); }
+.cert-footer-row { display: flex; justify-content: space-between; align-items: flex-end; padding-top: 0.8rem; border-top: 1px solid var(--border); }
+.cert-qr svg { width: 54px; height: 54px; }
+.cert-sign { font-size: 0.7rem; text-align: right; color: var(--muted); }
+.cert-sign strong { display: block; color: var(--text); font-size: 0.78rem; margin-bottom: 0.2rem; }
+.cert-sign .sig-green { color: var(--puc-green); font-weight: 700; font-size: 0.65rem; }
+
+/* ── TABLES ── */
+.std-table { width: 100%; border-collapse: collapse; font-size: 0.83rem; }
+.std-table th { background: var(--surface); padding: 0.7rem 0.9rem; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); }
+.std-table td { padding: 0.7rem 0.9rem; border-bottom: 1px solid var(--border); }
+.std-table tr:last-child td { border-bottom: none; }
+.penalty-cell { color: var(--pink); font-weight: 700; }
+
+/* ── INFO / WARN BOXES ── */
+.info-box { background: rgba(0,119,204,0.06); border: 1px solid rgba(0,119,204,0.2); border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem; line-height: 1.7; margin-bottom: 1.5rem; }
+.info-box strong { color: var(--cyan); }
+.warn-box { background: rgba(217,122,0,0.06); border: 1px solid rgba(217,122,0,0.2); border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem; line-height: 1.7; margin-bottom: 1.5rem; }
+.warn-box strong { color: var(--amber); }
+.success-box { background: rgba(26,140,60,0.06); border: 1px solid rgba(26,140,60,0.2); border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem; line-height: 1.7; margin-bottom: 1.5rem; }
+.success-box strong { color: var(--puc-green); }
+
+/* ── BUTTONS ── */
+.btn-green { background: linear-gradient(135deg, var(--puc-green), #116930); color: #fff; border: none; padding: 0.75rem 1.8rem; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(26,140,60,0.3); }
+.btn-green:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(26,140,60,0.45); }
+.btn-back { background: transparent; color: var(--muted); border: 1.5px solid var(--border); padding: 0.75rem 1.6rem; border-radius: 10px; font-family: inherit; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+.btn-back:hover { border-color: var(--subtle); color: var(--text); }
+.btn-outline-sm { background: transparent; color: var(--text); border: 1.5px solid var(--border); padding: 0.6rem 1.2rem; border-radius: 10px; font-family: inherit; font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+.btn-outline-sm:hover { border-color: var(--subtle); }
+.btn-row { display: flex; gap: 0.8rem; margin-top: 1.2rem; flex-wrap: wrap; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 0.8rem 1.6rem; border-radius: 100px; font-size: 0.85rem; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s; pointer-events: none; max-width: 90vw; text-align: center; }
+
+/* ── FOOTER ── */
+footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 3rem; text-align: center; }
+.footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+.footer-logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 0.8rem 1.5rem; }
+  nav ul { display: none; }
+  .hero { padding: 4rem 1.5rem 3rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr; }
+  .result-grid { grid-template-columns: 1fr 1fr; }
+  .cert-fields { grid-template-columns: 1fr 1fr; }
+  .readings-grid { grid-template-columns: 1fr 1fr; }
+  .tab-btn { font-size: 0.78rem; padding: 0.5rem 0.8rem; }
+  .p-label { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- MARQUEE -->
+<div class="marquee-bar">
+  <div class="marquee-track">
+    <span>🌿 PUC Certificate mandatory under Section 190, Motor Vehicles Act, 1988</span>
+    <span>⚠️ Driving without valid PUC attracts fine of ₹10,000 and/or imprisonment up to 6 months</span>
+    <span>✅ Digital PUC certificates accepted by all traffic police across India</span>
+    <span>🚗 BS-VI norms in effect — all vehicles must comply with emission standards</span>
+    <span>📱 Download PUC instantly via VahanBridge — verified on Parivahan/VAHAN</span>
+    <span>🌿 PUC Certificate mandatory under Section 190, Motor Vehicles Act, 1988</span>
+    <span>⚠️ Driving without valid PUC attracts fine of ₹10,000 and/or imprisonment up to 6 months</span>
+    <span>✅ Digital PUC certificates accepted by all traffic police across India</span>
+    <span>🚗 BS-VI norms in effect — all vehicles must comply with emission standards</span>
+    <span>📱 Download PUC instantly via VahanBridge — verified on Parivahan/VAHAN</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">🚗</div>
+    Vahan<span>Bridge</span>
+  </a>
+  <ul>
+    <li><a href="noc_transfer.html">NOC Transfer</a></li>
+    <li><a href="hsrp_portal.html">HSRP</a></li>
+    <li><a href="tax_refund.html">Road Tax</a></li>
+    <li><a href="bh_series_portal.html">BH Series</a></li>
+    <li><a href="#" class="active-link">PUC</a></li>
+  </ul>
+  <div class="nav-badge">🌿 PUC Portal</div>
+</nav>
+
+<!-- ════ HERO ════ -->
+<section class="hero" id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Pollution Under Control Certificate</div>
+    <h1>
+      Download Your<br>
+      <span class="accent">PUC Certificate</span><br>
+      <span class="accent2">Instantly.</span>
+    </h1>
+    <p class="hero-sub">
+      Retrieve, download, and verify your Pollution Under Control certificate from the VAHAN database in minutes. Digitally signed and valid across all states.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="startApp()">Download PUC →</button>
+      <button class="btn-outline" onclick="startAppTab('verify')">Verify Certificate</button>
+    </div>
+
+    <div class="puc-cert-hero">
+      <div class="puc-cert-hero-top"></div>
+      <div class="puc-cert-hero-label">🌿 PUC Certificate · VahanBridge</div>
+      <div class="puc-cert-hero-reg" id="heroRegTxt">MH 12 AB 1234</div>
+      <div class="puc-cert-hero-meta">
+        <span>Petrol (BS-VI)</span>
+        <span class="puc-valid-pill">✓ Valid</span>
+        <span>Valid upto: Oct 2026</span>
+      </div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-num">6<span class="unit">mo</span></div><div class="stat-label">Petrol / Diesel Validity</div></div>
+      <div class="stat"><div class="stat-num">1<span class="unit">yr</span></div><div class="stat-label">New Vehicle Validity</div></div>
+      <div class="stat"><div class="stat-num">₹10<span class="unit">K</span></div><div class="stat-label">Penalty for No PUC</div></div>
+      <div class="stat"><div class="stat-num">₹0<span class="unit"></span></div><div class="stat-label">Portal Fee</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ ABOUT ════ -->
+<section id="about">
+  <div class="section-inner">
+    <span class="section-tag">What is PUC?</span>
+    <h2 class="section-title">Pollution Under<br>Control Certificate</h2>
+    <p class="section-desc">A mandatory certificate under the Motor Vehicles Act confirming your vehicle's emissions are within permissible limits under India's BS-VI norms.</p>
+
+    <div class="about-grid">
+      <div class="about-features">
+        <div class="about-feat">
+          <div class="feat-icon">🌿</div>
+          <div class="feat-text"><h4>Mandatory by Law</h4><p>Every vehicle in India must have a valid PUC certificate under Section 190 of the MV Act. Driving without it is a cognizable offence.</p></div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon cyan">📱</div>
+          <div class="feat-text"><h4>Instant Digital Download</h4><p>Download your PUC certificate instantly via VahanBridge. Accepted by all traffic police as valid proof under CMV Rule 139.</p></div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon amber">⚠️</div>
+          <div class="feat-text"><h4>₹10,000 Penalty</h4><p>Driving without a valid PUC attracts a fine of ₹10,000 and/or imprisonment up to 6 months under Sec. 190(2) MV Act 2019.</p></div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon pink">🔍</div>
+          <div class="feat-text"><h4>Real-time Verification</h4><p>Traffic authorities, insurers and RTOs can instantly verify your PUC certificate via VahanBridge — linked to the national VAHAN database.</p></div>
+        </div>
+      </div>
+
+      <div class="validity-card">
+        <h3>PUC Validity (2026)</h3>
+        <div class="validity-row"><span class="validity-fuel">🆕 New Vehicle</span><span class="validity-months">12 months</span></div>
+        <div class="validity-row"><span class="validity-fuel">⛽ Petrol (BS-VI)</span><span class="validity-months">6 months</span></div>
+        <div class="validity-row"><span class="validity-fuel">🛢️ Diesel (BS-VI)</span><span class="validity-months">6 months</span></div>
+        <div class="validity-row"><span class="validity-fuel">🟢 CNG / LPG</span><span class="validity-months">6 months</span></div>
+        <div class="validity-row"><span class="validity-fuel">⛽ Petrol (BS-IV / older)</span><span class="validity-months amber">6 months</span></div>
+        <div class="validity-row"><span class="validity-fuel">⚡ Electric Vehicle</span><span class="validity-months">Exempt</span></div>
+        <div style="margin-top:1.2rem;padding:0.9rem;background:rgba(26,140,60,0.06);border:1px solid rgba(26,140,60,0.15);border-radius:10px;font-size:0.8rem;color:var(--muted);">
+          Test fee: ₹60–₹100 (varies by state). Digital certificate issued immediately. Linked to RC on VAHAN database.
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ APP ════ -->
+<div id="app">
+
+  <!-- TABS -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('download')" id="tbn-download">📄 Download PUC</button>
+    <button class="tab-btn" onclick="switchTab('verify')" id="tbn-verify">🔍 Verify Certificate</button>
+    <button class="tab-btn" onclick="switchTab('centres')" id="tbn-centres">📍 PUC Centres</button>
+    <button class="tab-btn" onclick="switchTab('norms')" id="tbn-norms">📋 Emission Norms</button>
+    <button class="tab-btn" onclick="switchTab('penalty')" id="tbn-penalty">⚖️ Penalty &amp; Rules</button>
+  </div>
+
+  <!-- ════ TAB: DOWNLOAD ════ -->
+  <div class="tab-panel active" id="panel-download">
+
+    <!-- Progress -->
+    <div class="wizard-progress">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.9rem;">Application Progress</div>
+      <div class="progress-inner">
+        <div class="progress-track"></div>
+        <div class="progress-fill-bar" id="puc-pfill" style="width:0%"></div>
+        <div class="p-step"><div class="p-dot active" id="psc1">1</div><div class="p-label">Vehicle</div></div>
+        <div class="p-step"><div class="p-dot" id="psc2">2</div><div class="p-label">Verify OTP</div></div>
+        <div class="p-step"><div class="p-dot" id="psc3">3</div><div class="p-label">Download</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="puc-step1">
+      <div class="form-card-white">
+        <h3>🚗 Step 1 — Enter Vehicle Details</h3>
+        <div class="info-box">
+          <strong>ℹ️ How it works:</strong> Enter your registration number and chassis details. VahanBridge fetches PUC records directly from the VAHAN / Parivahan database. Ensure your vehicle is registered on Parivahan.
+        </div>
+
+        <div class="form-grid" style="margin-bottom:1.2rem;">
+          <div class="form-group">
+            <label>Vehicle Registration Number <span class="req">*</span></label>
+            <input type="text" id="puc-reg" placeholder="e.g. MH12AB1234" style="text-transform:uppercase;font-family:'Space Mono',monospace;letter-spacing:2px;" oninput="this.value=this.value.toUpperCase()">
+            <div class="form-note">Enter without spaces (e.g. MH12AB1234)</div>
+          </div>
+          <div class="form-group">
+            <label>Chassis Number (Last 5 Digits) <span class="req">*</span></label>
+            <input type="text" id="puc-chassis" placeholder="e.g. A1234" style="text-transform:uppercase;" oninput="this.value=this.value.toUpperCase()" maxlength="5">
+            <div class="form-note">For identity verification against VAHAN</div>
+          </div>
+        </div>
+
+        <div style="margin-bottom:1.2rem;">
+          <label style="font-size:0.75rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:0.6rem;">Vehicle Fuel Type <span class="req">*</span></label>
+          <div class="radio-cards">
+            <label class="radio-card"><input type="radio" name="pucFuel" value="petrol" checked> ⛽ Petrol</label>
+            <label class="radio-card"><input type="radio" name="pucFuel" value="diesel"> 🛢️ Diesel</label>
+            <label class="radio-card"><input type="radio" name="pucFuel" value="cng"> 🟢 CNG</label>
+            <label class="radio-card"><input type="radio" name="pucFuel" value="ev"> ⚡ Electric</label>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Mobile Number (Registered with RC) <span class="req">*</span></label>
+            <input type="tel" id="puc-mobile" placeholder="10-digit mobile number" maxlength="10">
+          </div>
+          <div class="form-group">
+            <label>State of Registration <span class="req">*</span></label>
+            <select id="puc-state">
+              <option value="">-- Select State --</option>
+              <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option selected>Maharashtra</option><option>Manipur</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Delhi</option><option>Chandigarh</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn-green" onclick="fetchPUCRecord()">🔍 Fetch PUC Record</button>
+          <button class="btn-outline-sm" onclick="clearPUCForm()">✖ Clear</button>
+        </div>
+
+        <!-- Result -->
+        <div class="result-box" id="puc-result">
+          <div class="result-header">
+            <div>
+              <div style="font-size:0.68rem;color:var(--puc-green);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:0.3rem;">✅ Vehicle Found on VAHAN</div>
+              <div class="result-reg" id="res-reg">MH12AB1234</div>
+            </div>
+            <span class="pill-valid">✓ PUC Valid</span>
+          </div>
+          <div class="result-grid">
+            <div class="result-item"><div class="ri-label">Owner Name</div><div class="ri-val" id="res-owner">—</div></div>
+            <div class="result-item"><div class="ri-label">Vehicle Class</div><div class="ri-val" id="res-class">—</div></div>
+            <div class="result-item"><div class="ri-label">Fuel Type</div><div class="ri-val" id="res-fuel">—</div></div>
+            <div class="result-item"><div class="ri-label">PUC Issued On</div><div class="ri-val" id="res-issued">—</div></div>
+            <div class="result-item"><div class="ri-label">PUC Valid Upto</div><div class="ri-val" id="res-valid" style="color:var(--puc-green);font-weight:700;">—</div></div>
+            <div class="result-item"><div class="ri-label">Testing Centre</div><div class="ri-val" id="res-centre">—</div></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn-green" onclick="goToOTP()">📱 Send OTP &amp; Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="puc-step2" style="display:none;">
+      <div class="form-card-white">
+        <h3>📱 Step 2 — OTP Verification</h3>
+        <div class="success-box">
+          <strong>✅ OTP Sent!</strong> An OTP has been sent to your registered mobile number <strong id="otp-mobile-disp"></strong>. Enter it below to authenticate and download your PUC certificate.
+        </div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Enter OTP <span class="req">*</span></label>
+            <input type="text" id="puc-otp" placeholder="6-digit OTP" maxlength="6">
+            <div class="form-note">OTP valid for 10 minutes. <a href="#" style="color:var(--cyan);">Resend OTP</a></div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn-green" onclick="verifyOTP()">✅ Verify &amp; Download</button>
+          <button class="btn-back" onclick="backToStep1()">← Back</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3: CERTIFICATE -->
+    <div id="puc-step3" style="display:none;">
+      <div class="form-card-white">
+        <h3>📄 Step 3 — PUC Certificate</h3>
+        <div class="success-box">
+          <strong>🎉 Certificate Ready!</strong> Your Pollution Under Control Certificate has been retrieved and is ready to download. This is an officially valid digital certificate under MV Act 1988 and IT Act 2000.
+        </div>
+
+        <div class="cert-wrap">
+          <div class="cert-preview">
+            <div class="cert-top-bar"><span>GOVERNMENT OF INDIA — OFFICIAL PUC RECORD</span><span>vahanbridge.in</span></div>
+            <div class="cert-tricolor"></div>
+            <div class="cert-body">
+              <div class="cert-header-row">
+                <div class="cert-emblem">🦁</div>
+                <div class="cert-title-block">
+                  <div class="cert-hin">प्रदूषण नियंत्रण प्रमाणपत्र</div>
+                  <h3>POLLUTION UNDER CONTROL CERTIFICATE</h3>
+                  <p>Ministry of Road Transport &amp; Highways, Govt. of India</p>
+                </div>
+                <div class="cert-puc-badge">PUC<small>VALID</small></div>
+              </div>
+
+              <div class="cert-fields">
+                <div class="cert-field"><div class="cf-label">Registration No.</div><div class="cf-val" id="c-reg">—</div></div>
+                <div class="cert-field"><div class="cf-label">Vehicle Class</div><div class="cf-val" id="c-class">—</div></div>
+                <div class="cert-field"><div class="cf-label">Owner Name</div><div class="cf-val" id="c-owner">—</div></div>
+                <div class="cert-field"><div class="cf-label">Fuel Type</div><div class="cf-val" id="c-fuel">—</div></div>
+                <div class="cert-field"><div class="cf-label">Make / Model</div><div class="cf-val" id="c-model">—</div></div>
+                <div class="cert-field"><div class="cf-label">Certificate No.</div><div class="cf-val" id="c-certno" style="font-size:0.68rem;">—</div></div>
+              </div>
+
+              <div class="cert-validity-bar">
+                <div><div class="cv-label">📅 Date of Test</div><div class="cv-date" id="c-testdate">—</div></div>
+                <div style="text-align:center;"><div class="cv-label">⏱ Valid For</div><div class="cv-date" id="c-validity">6 Months</div></div>
+                <div style="text-align:right;"><div class="cv-label">📅 Valid Upto</div><div class="cv-date" id="c-validupto" style="color:var(--puc-green);">—</div></div>
+              </div>
+
+              <div class="cert-readings">
+                <h5>Emission Test Readings</h5>
+                <div class="readings-grid">
+                  <div class="reading-item"><div class="ri-param">CO Level</div><div class="ri-val" id="c-co">0.32</div><div class="ri-unit">% (Limit: 0.50%)</div></div>
+                  <div class="reading-item"><div class="ri-param">HC Level</div><div class="ri-val" id="c-hc">74</div><div class="ri-unit">ppm (Limit: 200 ppm)</div></div>
+                  <div class="reading-item"><div class="ri-param">CO₂ Level</div><div class="ri-val" id="c-co2">14.1</div><div class="ri-unit">% (Reference)</div></div>
+                </div>
+              </div>
+
+              <div class="cert-footer-row">
+                <svg class="cert-qr" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="56" height="56" fill="white"/>
+                  <rect x="4" y="4" width="20" height="20" fill="none" stroke="#111" stroke-width="2"/>
+                  <rect x="7" y="7" width="14" height="14" fill="#111"/>
+                  <rect x="32" y="4" width="20" height="20" fill="none" stroke="#111" stroke-width="2"/>
+                  <rect x="35" y="7" width="14" height="14" fill="#111"/>
+                  <rect x="4" y="32" width="20" height="20" fill="none" stroke="#111" stroke-width="2"/>
+                  <rect x="7" y="35" width="14" height="14" fill="#111"/>
+                  <rect x="32" y="32" width="5" height="5" fill="#111"/>
+                  <rect x="40" y="32" width="5" height="5" fill="#111"/>
+                  <rect x="32" y="40" width="5" height="5" fill="#111"/>
+                  <rect x="40" y="40" width="12" height="5" fill="#111"/>
+                </svg>
+                <div class="cert-sign">
+                  <strong>Digitally Verified by</strong>
+                  PUC INSPECTOR — DLTS<br>
+                  <span id="c-centre-sign">Green Auto PUC Centre, Pune</span><br>
+                  <span class="sig-green">✓ Digitally Signed under IT Act 2000</span>
+                </div>
+              </div>
+            </div>
+            <div class="cert-top-bar" style="background:#1a1a2e;padding:0.4rem 1.2rem;"><span style="font-size:0.62rem;">Verify at: vahanbridge.in/puc-verify</span><span style="font-size:0.62rem;">Helpline: 1800-VB-HELP</span></div>
+          </div>
+        </div>
+
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn-green" onclick="downloadCert()">⬇ Download PDF</button>
+          <button class="btn-outline-sm" onclick="alert('Opening DigiLocker...')">🔒 Save to DigiLocker</button>
+          <button class="btn-outline-sm" onclick="window.print()">🖨 Print</button>
+          <button class="btn-back" onclick="resetDownload()">↺ New Application</button>
+        </div>
+      </div>
+    </div>
+  </div><!-- /panel-download -->
+
+  <!-- ════ TAB: VERIFY ════ -->
+  <div class="tab-panel" id="panel-verify">
+    <div class="form-card-white">
+      <h3>🔍 Verify PUC Certificate Authenticity</h3>
+      <div class="info-box"><strong>ℹ️</strong> Enter the vehicle registration number or PUC certificate number to verify its authenticity. Traffic authorities, insurers and RTOs can use this portal for real-time verification.</div>
+      <div class="form-grid" style="margin-bottom:1.2rem;">
+        <div class="form-group">
+          <label>Registration No. OR Certificate No. <span class="req">*</span></label>
+          <input type="text" id="verify-input" placeholder="e.g. MH12AB1234 or PUC/MH/2026/00847392" oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="form-group">
+          <label>Captcha <span class="req">*</span></label>
+          <div style="display:flex;gap:0.5rem;align-items:center;">
+            <div style="background:var(--surface);border:1.5px solid var(--border);border-radius:10px;padding:0.6rem 1rem;font-family:'Space Mono',monospace;font-size:1.1rem;font-weight:700;letter-spacing:4px;color:var(--text);user-select:none;" id="captcha-val">X7K2P</div>
+            <button class="btn-outline-sm" style="padding:0.6rem 0.7rem;" onclick="refreshCaptcha()">🔄</button>
+          </div>
+          <input type="text" placeholder="Enter captcha above" style="margin-top:0.5rem;width:100%;background:var(--surface);border:1.5px solid var(--border);color:var(--text);padding:0.7rem 0.9rem;border-radius:10px;font-family:inherit;font-size:0.9rem;outline:none;">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:1.5rem;">
+        <button class="btn-green" onclick="verifyPUC()">🔍 Verify Now</button>
+        <button class="btn-outline-sm">✖ Clear</button>
+      </div>
+
+      <!-- Demo result -->
+      <div class="result-box show">
+        <div class="result-header">
+          <div>
+            <div style="font-size:0.68rem;color:var(--puc-green);font-weight:700;text-transform:uppercase;margin-bottom:0.3rem;">✅ Certificate Verified — Genuine &amp; Valid</div>
+            <div class="result-reg">MH12AB1234</div>
+          </div>
+          <span class="pill-valid">✓ VALID</span>
+        </div>
+        <div class="result-grid">
+          <div class="result-item"><div class="ri-label">Certificate No.</div><div class="ri-val">PUC/MH/2026/00847392</div></div>
+          <div class="result-item"><div class="ri-label">Issued Date</div><div class="ri-val">15 Apr 2026</div></div>
+          <div class="result-item"><div class="ri-label">Valid Upto</div><div class="ri-val" style="color:var(--puc-green);">14 Oct 2026</div></div>
+          <div class="result-item"><div class="ri-label">Testing Centre</div><div class="ri-val">Green Auto PUC Centre, Pune</div></div>
+          <div class="result-item"><div class="ri-label">Fuel Type</div><div class="ri-val">Petrol (BS-VI)</div></div>
+          <div class="result-item"><div class="ri-label">CO / HC Levels</div><div class="ri-val">0.32% / 74 ppm ✅</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-card-white">
+      <h3>📋 PUC History — MH12AB1234</h3>
+      <table class="std-table">
+        <thead><tr><th>Cert No.</th><th>Test Date</th><th>Valid Upto</th><th>Centre</th><th>CO (%)</th><th>HC (ppm)</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>PUC/MH/2026/00847392</td><td>15 Apr 2026</td><td>14 Oct 2026</td><td>Green Auto PUC, Pune</td><td>0.32</td><td>74</td><td><span class="pill-valid">✓ Valid</span></td></tr>
+          <tr><td>PUC/MH/2025/00612847</td><td>10 Oct 2025</td><td>09 Apr 2026</td><td>Sharma Motors, Pune</td><td>0.41</td><td>91</td><td><span class="pill-expired">✗ Expired</span></td></tr>
+          <tr><td>PUC/MH/2025/00388210</td><td>04 Apr 2025</td><td>03 Oct 2025</td><td>Patil Auto Works, Pune</td><td>0.38</td><td>85</td><td><span class="pill-expired">✗ Expired</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ════ TAB: CENTRES ════ -->
+  <div class="tab-panel" id="panel-centres">
+    <div class="form-card-white">
+      <h3>📍 Find Nearest PUC Testing Centre</h3>
+      <div class="form-grid-3" style="margin-bottom:1rem;">
+        <div class="form-group"><label>State <span class="req">*</span></label><select><option selected>Maharashtra</option><option>Delhi</option><option>Karnataka</option><option>Tamil Nadu</option><option>Gujarat</option></select></div>
+        <div class="form-group"><label>District</label><select><option selected>Pune</option><option>Mumbai</option><option>Nagpur</option><option>Nashik</option></select></div>
+        <div class="form-group"><label>Pincode</label><input type="text" placeholder="e.g. 411001" maxlength="6"></div>
+      </div>
+      <div class="btn-row" style="margin-bottom:1.5rem;">
+        <button class="btn-green">🔍 Search Centres</button>
+        <button class="btn-outline-sm">📍 Use My Location</button>
+      </div>
+      <table class="std-table">
+        <thead><tr><th>#</th><th>Centre Name</th><th>Address</th><th>Contact</th><th>Timing</th><th>Fuel Types</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td><strong>Green Auto PUC Centre</strong></td><td>Shop 14, Deccan Gymkhana Rd, Pune</td><td>020-2551-XXXX</td><td>8am – 8pm</td><td>Petrol / Diesel / CNG</td></tr>
+          <tr><td>2</td><td><strong>Sharma Motors PUC</strong></td><td>Near Shivaji Nagar, FC Road</td><td>020-2412-XXXX</td><td>9am – 7pm</td><td>Petrol / CNG</td></tr>
+          <tr><td>3</td><td><strong>City Auto Works PUC</strong></td><td>Kalyani Nagar, Nagar Road</td><td>020-2764-XXXX</td><td>8am – 6pm</td><td>Petrol / Diesel</td></tr>
+          <tr><td>4</td><td><strong>Patil Auto Service</strong></td><td>Hadapsar Industrial Estate</td><td>020-2683-XXXX</td><td>8am – 9pm</td><td>All Fuel Types</td></tr>
+          <tr><td>5</td><td><strong>RTO-Authorised PUC Hub</strong></td><td>Opposite RTO Office, Bund Garden</td><td>020-2612-XXXX</td><td>9am – 5pm</td><td>All Fuel Types</td></tr>
+        </tbody>
+      </table>
+      <div style="font-size:0.75rem;color:var(--muted);margin-top:0.75rem;">Showing 5 of 142 centres in Pune district. <a href="#" style="color:var(--cyan);">View all on map →</a></div>
+    </div>
+  </div>
+
+  <!-- ════ TAB: NORMS ════ -->
+  <div class="tab-panel" id="panel-norms">
+    <div class="form-card-white">
+      <h3>📋 Emission Norms &amp; Permissible Limits (2026)</h3>
+      <div class="success-box"><strong>🌿 BS-VI in Effect:</strong> India follows Bharat Stage VI (BS-VI) emission norms effective from 1 April 2020 — equivalent to Euro 6 standards. All new vehicles registered after this date must comply.</div>
+
+      <h4 style="font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;margin:1rem 0 0.6rem;">Petrol Vehicles (4-wheelers)</h4>
+      <table class="std-table" style="margin-bottom:1.2rem;">
+        <thead><tr><th>Vehicle Age</th><th>CO Limit</th><th>HC Limit</th><th>Idle Speed</th><th>Norm</th></tr></thead>
+        <tbody>
+          <tr><td>Mfg. after Apr 2020 (BS-VI)</td><td><strong>0.50%</strong></td><td><strong>200 ppm</strong></td><td>750–800 rpm</td><td><span class="pill-valid">BS-VI</span></td></tr>
+          <tr><td>Mfg. Apr 2010 – Mar 2020 (BS-IV)</td><td>0.50%</td><td>200 ppm</td><td>750–800 rpm</td><td><span style="background:rgba(217,122,0,0.1);border:1px solid rgba(217,122,0,0.2);color:var(--amber);border-radius:100px;padding:0.25rem 0.7rem;font-size:0.72rem;font-weight:700;">BS-IV</span></td></tr>
+          <tr><td>Mfg. before Apr 2010</td><td>3.00%</td><td>1500 ppm</td><td>700–900 rpm</td><td><span class="pill-expired">Older</span></td></tr>
+        </tbody>
+      </table>
+
+      <h4 style="font-family:'Syne',sans-serif;font-size:0.88rem;font-weight:700;margin:1rem 0 0.6rem;">Diesel Vehicles (4-wheelers)</h4>
+      <table class="std-table" style="margin-bottom:1.2rem;">
+        <thead><tr><th>Vehicle Age</th><th>Smoke Opacity Limit</th><th>Test Method</th><th>Norm</th></tr></thead>
+        <tbody>
+          <tr><td>Mfg. after Apr 2020 (BS-VI)</td><td><strong>25% (Free Accel.)</strong></td><td>Free Acceleration</td><td><span class="pill-valid">BS-VI</span></td></tr>
+          <tr><td>Mfg. Apr 2010 – Mar 2020 (BS-IV)</td><td>40%</td><td>Free Acceleration</td><td><span style="background:rgba(217,122,0,0.1);border:1px solid rgba(217,122,0,0.2);color:var(--amber);border-radius:100px;padding:0.25rem 0.7rem;font-size:0.72rem;font-weight:700;">BS-IV</span></td></tr>
+          <tr><td>Older models</td><td>65%</td><td>Free Acceleration</td><td><span class="pill-expired">Older</span></td></tr>
+        </tbody>
+      </table>
+
+      <div class="info-box"><strong>ℹ️ Electric Vehicles:</strong> EVs are exempt from PUC requirements. Hybrid vehicles must obtain PUC for their combustion engine component.</div>
+    </div>
+  </div>
+
+  <!-- ════ TAB: PENALTY ════ -->
+  <div class="tab-panel" id="panel-penalty">
+    <div class="form-card-white">
+      <h3>⚖️ Penalty &amp; Legal Provisions</h3>
+      <div class="warn-box"><strong>⚠️ Warning:</strong> Driving without a valid PUC certificate is a cognizable offence under the Motor Vehicles (Amendment) Act 2019. Traffic Police conduct regular PUC checking drives across India.</div>
+      <table class="std-table" style="margin-bottom:1.2rem;">
+        <thead><tr><th>Offence</th><th>Section</th><th>1st Offence</th><th>Repeat</th><th>Imprisonment</th></tr></thead>
+        <tbody>
+          <tr><td><strong>No PUC Certificate</strong></td><td>Sec. 190(2) MV Act</td><td class="penalty-cell">₹10,000</td><td class="penalty-cell">₹10,000</td><td>Up to 6 months</td></tr>
+          <tr><td><strong>Expired PUC Certificate</strong></td><td>Sec. 190(2) MV Act</td><td class="penalty-cell">₹10,000</td><td class="penalty-cell">₹10,000</td><td>Up to 6 months</td></tr>
+          <tr><td>Vehicle failing emission test</td><td>Sec. 115 MV Act</td><td>₹1,000</td><td>₹2,000</td><td>—</td></tr>
+          <tr><td>Tampering with emission controls</td><td>Sec. 191 MV Act</td><td colspan="2" class="penalty-cell">₹5,000 – ₹10,000</td><td>Up to 1 year</td></tr>
+          <tr><td>Using forged PUC certificate</td><td>Sec. 192 + IPC</td><td colspan="2" class="penalty-cell">₹10,000+</td><td>Up to 3 years</td></tr>
+        </tbody>
+      </table>
+      <div class="success-box"><strong>✅ Good News:</strong> Penalties can be paid online via the Virtual Court portal at <a href="#" style="color:var(--cyan);">echallan.parivahan.gov.in</a>. Digital PUC certificates on VahanBridge are accepted by all traffic police across India.</div>
+      <div class="info-box"><strong>📱 VahanBridge App:</strong> Carry your PUC certificate digitally on your smartphone. Accepted as valid proof under Rule 139 of CMV Rules 1989.</div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Vahan<span>Bridge</span></div>
+  <div style="font-size:0.8rem;margin-bottom:0.3rem;">A VahanBridge Service · Data sourced from VAHAN &amp; Parivahan APIs · Ministry of Road Transport &amp; Highways</div>
+  <div style="font-size:0.78rem;"><a href="#" style="color:rgba(255,255,255,0.5);">Privacy</a> &nbsp;·&nbsp; <a href="#" style="color:rgba(255,255,255,0.5);">Terms</a> &nbsp;·&nbsp; <a href="#" style="color:rgba(255,255,255,0.5);">Help</a> &nbsp;·&nbsp; Helpline: 1800-VB-HELP</div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+  // ── API BASE URL ─────────────────────────────────────────
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://vahanbridge-api.onrender.com'; // ← UPDATE after Render deploy
+
+  /* ── HERO ANIMATIONS ── */
+  const regs = ['MH 12 AB 1234','DL 9C ZX 4567','KA 03 MN 5678','TN 10 XY 9999','GJ 01 BB 1111'];
+  let ri = 0;
+  setInterval(() => {
+    ri = (ri + 1) % regs.length;
+    const el = document.getElementById('heroRegTxt');
+    el.style.opacity = 0;
+    setTimeout(() => { el.textContent = regs[ri]; el.style.opacity = 1; }, 300);
+  }, 2500);
+  document.getElementById('heroRegTxt').style.transition = 'opacity 0.3s';
+
+  /* ── NAV UTILS ── */
+  function scrollToAbout() { document.getElementById('about').scrollIntoView({ behavior:'smooth' }); }
+
+  function startApp() {
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('about').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    switchTab('download');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+  function startAppTab(tab) {
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('about').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    switchTab(tab);
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  /* ── TAB SWITCHING ── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.getElementById('tbn-' + name).classList.add('active');
+  }
+
+  /* ── STEP 1: FETCH PUC RECORD ─────────────────────────── */
+  async function fetchPUCRecord() {
+    const reg     = document.getElementById('puc-reg').value.trim();
+    const chassis = document.getElementById('puc-chassis').value.trim();
+    const mob     = document.getElementById('puc-mobile').value.trim();
+    const fuel    = document.querySelector('input[name=pucFuel]:checked').value;
+    const state   = document.getElementById('puc-state').value;
+
+    if (!reg || !chassis || !mob) { showToast('⚠️ Please fill all required fields.'); return; }
+    if (mob.length !== 10)        { showToast('⚠️ Enter a valid 10-digit mobile number.'); return; }
+
+    const btn = document.querySelector('#puc-step1 .btn-green');
+    btn.disabled = true; btn.textContent = '⏳ Fetching record…';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/puc/lookup`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ regNo: reg, chassisLast5: chassis, mobile: mob, fuelType: fuel, regState: state }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        showToast('⚠️ ' + (data.error || 'Lookup failed'));
+        return;
+      }
+
+      const v = data.vehicle, p = data.puc;
+      document.getElementById('res-reg').textContent    = v.regNo;
+      document.getElementById('res-owner').textContent  = v.ownerName.toUpperCase();
+      document.getElementById('res-class').textContent  = v.vehicleClass;
+      document.getElementById('res-fuel').textContent   = v.fuel;
+      document.getElementById('res-issued').textContent = formatDate(p.issuedDate);
+      document.getElementById('res-valid').textContent  = formatDate(p.expiryDate);
+      document.getElementById('res-centre').textContent = p.centreName;
+
+      // Store for next steps
+      window._pucLookup = data;
+
+      const resultBox = document.getElementById('puc-result');
+      resultBox.classList.add('show');
+      resultBox.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      document.getElementById('psc1').classList.add('done');
+      document.getElementById('psc1').textContent = '✓';
+      showToast('✅ PUC record found for ' + v.regNo);
+
+    } catch (err) {
+      showToast('⚠️ Network error — please check connection.');
+    } finally {
+      btn.disabled = false; btn.textContent = '🔍 Fetch PUC Record';
+    }
+  }
+
+  /* ── STEP 2a: SEND OTP ────────────────────────────────── */
+  async function goToOTP() {
+    const mob = document.getElementById('puc-mobile').value.trim();
+    const reg = document.getElementById('puc-reg').value.trim();
+
+    const btn = document.querySelector('#puc-result .btn-green');
+    btn.disabled = true; btn.textContent = '⏳ Sending OTP…';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/puc/send-otp`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ mobile: mob, regNo: reg }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        showToast('⚠️ ' + (data.error || 'OTP send failed'));
+        btn.disabled = false; btn.textContent = '📱 Send OTP & Continue';
+        return;
+      }
+
+      document.getElementById('otp-mobile-disp').textContent = mob.replace(/(\d{6})(\d{4})/, '******$2');
+      document.getElementById('puc-step1').style.display = 'none';
+      document.getElementById('puc-step2').style.display = '';
+      document.getElementById('psc2').classList.add('active');
+      document.getElementById('puc-pfill').style.width = '50%';
+      window.scrollTo({ top:0, behavior:'smooth' });
+
+      // Dev hint
+      if (data.devOtp) showToast('🔑 DEV OTP: ' + data.devOtp + ' (remove in production)');
+      else showToast('📱 OTP sent to your mobile.');
+
+    } catch (err) {
+      showToast('⚠️ Network error');
+      btn.disabled = false; btn.textContent = '📱 Send OTP & Continue';
+    }
+  }
+
+  function backToStep1() {
+    document.getElementById('puc-step2').style.display = 'none';
+    document.getElementById('puc-step1').style.display = '';
+    document.getElementById('psc2').classList.remove('active');
+    document.getElementById('puc-pfill').style.width = '0%';
+  }
+
+  /* ── STEP 2b: VERIFY OTP + GET CERTIFICATE ────────────── */
+  async function verifyOTP() {
+    const otp  = document.getElementById('puc-otp').value.trim();
+    const mob  = document.getElementById('puc-mobile').value.trim();
+    const reg  = document.getElementById('puc-reg').value.trim();
+    const fuel = document.querySelector('input[name=pucFuel]:checked').value;
+    const state = document.getElementById('puc-state').value;
+
+    if (!otp || otp.length < 4) { showToast('⚠️ Please enter the OTP.'); return; }
+
+    const btn = document.querySelector('#puc-step2 .btn-green');
+    btn.disabled = true; btn.textContent = '⏳ Verifying…';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/puc/verify-otp`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ mobile: mob, otp, regNo: reg, fuelType: fuel, regState: state }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        showToast('⚠️ ' + (data.error || 'OTP verification failed'));
+        btn.disabled = false; btn.textContent = '✅ Verify & Download';
+        return;
+      }
+
+      // Populate certificate preview
+      const c = data.certificate;
+      const fuelLabel = { petrol:'PETROL (BS-VI)', diesel:'DIESEL (BS-VI)', cng:'CNG (BS-VI)', ev:'ELECTRIC (EXEMPT)', hybrid:'HYBRID' }[c.fuelType] || c.fuelType.toUpperCase();
+
+      document.getElementById('c-reg').textContent       = c.regNo;
+      document.getElementById('c-owner').textContent     = (window._pucLookup?.vehicle?.ownerName || 'VEHICLE OWNER').toUpperCase();
+      document.getElementById('c-class').textContent     = window._pucLookup?.vehicle?.vehicleClass || 'LMV';
+      document.getElementById('c-fuel').textContent      = fuelLabel;
+      document.getElementById('c-model').textContent     = ((window._pucLookup?.vehicle?.make || '') + ' ' + (window._pucLookup?.vehicle?.model || '')).trim() || 'N/A';
+      document.getElementById('c-certno').textContent    = c.certNumber;
+      document.getElementById('c-testdate').textContent  = formatDate(c.issuedDate);
+      document.getElementById('c-validupto').textContent = formatDate(c.expiryDate);
+      document.getElementById('c-validity').textContent  = c.validity;
+      document.getElementById('c-co').textContent        = c.readings.co || '0';
+      document.getElementById('c-hc').textContent        = c.readings.hc || '0';
+      document.getElementById('c-co2').textContent       = c.readings.co2 || '0';
+      document.getElementById('c-centre-sign').textContent = c.centreName;
+
+      document.getElementById('puc-step2').style.display = 'none';
+      document.getElementById('puc-step3').style.display = '';
+      document.getElementById('psc2').classList.remove('active');
+      document.getElementById('psc2').classList.add('done');
+      document.getElementById('psc2').textContent = '✓';
+      document.getElementById('psc3').classList.add('active');
+      document.getElementById('puc-pfill').style.width = '100%';
+      window.scrollTo({ top:0, behavior:'smooth' });
+      showToast('🎉 PUC Certificate ready!');
+
+    } catch (err) {
+      showToast('⚠️ Network error');
+      btn.disabled = false; btn.textContent = '✅ Verify & Download';
+    }
+  }
+
+  /* ── VERIFY TAB ───────────────────────────────────────── */
+  async function verifyPUC() {
+    const v = document.getElementById('verify-input')?.value.trim();
+    if (!v) { showToast('⚠️ Please enter a vehicle or certificate number.'); return; }
+    try {
+      const res  = await fetch(`${API_BASE}/api/puc/verify/${encodeURIComponent(v)}`);
+      const data = await res.json();
+      if (data.verified && data.valid) {
+        showToast('✅ Certificate verified — Valid until ' + formatDate(data.certificate?.expiryDate));
+      } else if (data.verified && !data.valid) {
+        showToast('⚠️ Certificate found but EXPIRED.');
+      } else {
+        showToast('❌ Certificate not found in database.');
+      }
+    } catch (_) {
+      showToast('⚠️ Verification failed — network error.');
+    }
+  }
+
+  /* ── CENTRES TAB ──────────────────────────────────────── */
+  async function searchCentres() {
+    const state    = document.querySelector('#panel-centres select:nth-of-type(1)')?.value;
+    const district = document.querySelector('#panel-centres select:nth-of-type(2)')?.value;
+    try {
+      const params = new URLSearchParams();
+      if (state)    params.append('state', state);
+      if (district) params.append('district', district);
+      const res  = await fetch(`${API_BASE}/api/puc/centres?${params}`);
+      const data = await res.json();
+      if (data.success && data.centres.length) {
+        showToast(`📍 Found ${data.centres.length} PUC centre(s) in ${district || state}`);
+      } else {
+        showToast('No centres found for selected area.');
+      }
+    } catch (_) { showToast('⚠️ Could not load centres.'); }
+  }
+
+  /* ── HELPERS ──────────────────────────────────────────── */
+  function formatDate(iso) {
+    if (!iso || iso === 'N/A (EV Exempt)') return iso || 'N/A';
+    try {
+      return new Date(iso).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+    } catch (_) { return iso; }
+  }
+
+  function clearPUCForm() {
+    document.getElementById('puc-reg').value = '';
+    document.getElementById('puc-chassis').value = '';
+    document.getElementById('puc-mobile').value = '';
+    document.querySelector('input[name=pucFuel][value=petrol]').checked = true;
+    document.getElementById('puc-result').classList.remove('show');
+  }
+
+  function resetDownload() {
+    clearPUCForm();
+    window._pucLookup = null;
+    document.getElementById('puc-step1').style.display = '';
+    document.getElementById('puc-step2').style.display = 'none';
+    document.getElementById('puc-step3').style.display = 'none';
+    ['psc1','psc2','psc3'].forEach((id,i) => {
+      const el = document.getElementById(id);
+      el.classList.remove('active','done');
+      el.textContent = i + 1;
+    });
+    document.getElementById('puc-pfill').style.width = '0%';
+  }
+
+  function downloadCert() {
+    showToast('⬇ Downloading PUC Certificate PDF…');
+    // Production: call a /api/puc/download/:certNo endpoint that returns a signed PDF
+    setTimeout(() => window.print(), 800);
+  }
+
+  /* ── CAPTCHA ─────────────────────────────────────────── */
+  const CC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function refreshCaptcha() {
+    let c = '';
+    for (let i = 0; i < 5; i++) c += CC[Math.floor(Math.random() * CC.length)];
+    document.getElementById('captcha-val').textContent = c;
+  }
+
+  /* ── TOAST ──────────────────────────────────────────── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.opacity = '1';
+    setTimeout(() => { t.style.opacity = '0'; }, 4500);
+  }
+</script>
+</body>
+</html>
