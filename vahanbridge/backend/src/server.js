@@ -6,7 +6,7 @@ const morgan   = require('morgan');
 const path     = require('path');
 const fs       = require('fs');
 
-const { testConnection, initSchema } = require('./db');
+const { testConnection, initSchema } = require('./db/index');
 const hsrpRoutes = require('./routes/hsrp');
 const nocRoutes  = require('./routes/noc');
 const taxRoutes  = require('./routes/tax');
