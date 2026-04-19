@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VahanBridge — Road Tax Refund Portal</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+:root {
+  --bg: #f4f6fb; --surface: #eef1f8; --card: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --pink: #c8193a; --pink-light: #e8305a;
+  --cyan: #0077cc; --amber: #d97a00; --green: #00875a;
+  --text: #1a1a2e; --muted: #6b7080; --subtle: #b0b8cc; --gold: #d4a017;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+/* MARQUEE */
+.marquee-bar { background: var(--pink); color: #fff; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; padding: 0.4rem 0; overflow: hidden; white-space: nowrap; }
+.marquee-track { display: inline-block; animation: marquee 30s linear infinite; }
+.marquee-track span { margin: 0 2.5rem; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* NAV */
+nav { position: sticky; top: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 3rem; background: rgba(244,246,251,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+.logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--pink), #ff8c42); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+nav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+nav ul li a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s; }
+nav ul li a:hover { color: var(--text); }
+.nav-badge { background: rgba(200,25,58,0.1); color: var(--pink); border: 1px solid rgba(200,25,58,0.25); padding: 0.3rem 0.8rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+/* PAGE HERO */
+.page-hero { padding: 3.5rem 3rem 2.5rem; max-width: 1200px; margin: 0 auto; }
+.page-hero-badge { display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(232,25,90,0.08); border: 1px solid rgba(232,25,90,0.25); color: var(--pink-light); padding: 0.4rem 1.1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 1rem; }
+.page-hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--pink); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.page-hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 0.7rem; }
+.page-hero h1 .accent { color: var(--pink); }
+.page-hero p { color: var(--muted); font-size: 1rem; max-width: 560px; line-height: 1.75; }
+
+/* MAIN LAYOUT */
+.container { max-width: 960px; margin: 0 auto; padding: 0 2rem 5rem; }
+
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; position: relative; overflow: hidden; }
+.card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--pink), var(--cyan)); }
+.card h2 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 800; margin-bottom: 1.4rem; display: flex; align-items: center; gap: 0.6rem; }
+.card p { color: var(--muted); margin-bottom: 1rem; font-size: 0.92rem; line-height: 1.7; }
+
+/* FORMS */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1.4rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.4rem; }
+label { font-size: 0.75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+input, select { width: 100%; background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.7rem 0.9rem; border-radius: 10px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+input:focus, select:focus { border-color: var(--pink); }
+input::placeholder { color: var(--subtle); }
+.error-msg { color: var(--pink); font-size: 0.78rem; display: none; }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.8rem 2rem; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; font-size: 0.92rem; font-family: inherit; gap: 0.5rem; transition: transform 0.2s, box-shadow 0.2s; }
+.btn-primary { background: linear-gradient(135deg, var(--pink), #c0143f); color: #fff; box-shadow: 0 4px 20px rgba(200,25,58,0.3); }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(200,25,58,0.45); }
+.btn-success { background: linear-gradient(135deg, var(--green), #006040); color: #fff; box-shadow: 0 4px 16px rgba(0,135,90,0.3); }
+.btn-success:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,135,90,0.45); }
+.btn-block { width: 100%; }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none !important; }
+
+/* RESULTS */
+#results { display: none; animation: fadeUp 0.4s ease forwards; }
+.result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; margin-top: 0.5rem; }
+.result-item { background: var(--surface); padding: 1.2rem; border-radius: 12px; text-align: center; border: 1px solid var(--border); }
+.result-item .label { font-size: 0.72rem; color: var(--muted); margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; }
+.result-item .value { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: var(--text); }
+.result-item.highlight { background: rgba(0,135,90,0.06); border-color: rgba(0,135,90,0.2); }
+.result-item.highlight .value { color: var(--green); }
+.result-item.warning { background: rgba(217,122,0,0.06); border-color: rgba(217,122,0,0.2); }
+.result-item.warning .value { color: var(--amber); }
+
+/* FILE UPLOAD */
+.file-upload { cursor: pointer; position: relative; overflow: hidden; border-radius: 10px; }
+.file-upload input[type="file"] { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.upload-box { padding: 1rem; background: var(--surface); border: 1.5px dashed var(--subtle); border-radius: 10px; text-align: center; color: var(--muted); transition: border-color 0.2s, background 0.2s; font-size: 0.88rem; }
+.upload-box:hover { border-color: var(--pink); background: rgba(200,25,58,0.03); }
+.file-name { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; text-align: center; }
+
+/* FOOTER */
+footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 3rem; text-align: center; }
+.footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.4rem; }
+.footer-logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+footer a:hover { color: #fff; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 640px) {
+  nav { padding: 0.8rem 1.5rem; }
+  nav ul { display: none; }
+  .page-hero { padding: 2rem 1.5rem 1.5rem; }
+  .container { padding: 0 1rem 4rem; }
+  .form-grid { grid-template-columns: 1fr; }
+  .card { padding: 1.4rem; }
+}
+  </style>
+</head>
+<body>
+
+  <div class="marquee-bar">
+    <div class="marquee-track">
+      <span>🚗 VahanBridge — India's Digital Vehicle Services Platform</span>
+      <span>💰 File Road Tax Refund digitally via NPCI</span>
+      <span>📱 SMS & email confirmation on application filing</span>
+      <span>🔒 SSL Secured · ISO 27001 Compliant</span>
+      <span>📞 Helpline: 1800-200-3466 · Mon–Sat 9AM–6PM</span>
+      <span>🚗 VahanBridge — India's Digital Vehicle Services Platform</span>
+      <span>💰 File Road Tax Refund digitally via NPCI</span>
+      <span>📱 SMS & email confirmation on application filing</span>
+      <span>🔒 SSL Secured · ISO 27001 Compliant</span>
+      <span>📞 Helpline: 1800-200-3466 · Mon–Sat 9AM–6PM</span>
+    </div>
+  </div>
+  <nav>
+    <a href="index.html" class="logo">
+      <div class="logo-icon">🌉</div>
+      Vahan<span>Bridge</span>
+    </a>
+    <ul>
+      <li><a href="index.html">Home</a></li>
+      <li><a href="hsrp_portal.html">HSRP Booking</a></li>
+      <li><a href="noc_transfer.html">NOC Transfer</a></li>
+      <li><a href="bh_series_portal.html">BH Series</a></li>
+      <li><a href="puc_portal.html">PUC Portal</a></li>
+      <li><a class="nav-badge">Tax Refund</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-hero">
+    <div class="page-hero-badge">Road Tax Refund Portal</div>
+    <h1>Reclaim Your <span class="accent">Stranded</span> Road Tax</h1>
+    <p>Stop losing money on unused road tax. Calculate your pro-rata refund, adjust new state dues automatically, and file the transfer request digitally.</p>
+  </div>
+
+  <main class="container">
+
+    <!-- Calculator -->
+    <section class="card">
+      <h2><span>🧮</span> Road Tax Refund Calculator</h2>
+      <form id="taxForm" novalidate>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="regNo">Vehicle Registration Number</label>
+            <input type="text" id="regNo" placeholder="e.g., KA05MN1234" required pattern="^[A-Za-z]{2}[0-9]{1,2}[A-Za-z]{1,3}[0-9]{4}$" title="Format: XX00XX0000">
+            <span class="error-msg" id="regErr">Invalid Registration Format</span>
+          </div>
+          <div class="form-group">
+            <label for="prevState">Previous State / UT</label>
+            <select id="prevState" required>
+              <option value="">Select Previous State</option>
+              <optgroup label="States">
+                <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option>
+                <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option>
+                <option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+                <option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option>
+                <option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                <option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option>
+                <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+              </optgroup>
+              <optgroup label="Union Territories">
+                <option>Andaman & Nicobar Islands</option><option>Chandigarh</option>
+                <option>Dadra & Nagar Haveli and Daman & Diu</option><option>Delhi (NCT)</option>
+                <option>Jammu & Kashmir</option><option>Ladakh</option><option>Lakshadweep</option>
+                <option>Puducherry</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="newState">New State / UT</label>
+            <select id="newState" required>
+              <option value="">Select New State</option>
+              <optgroup label="States">
+                <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option>
+                <option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option>
+                <option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option>
+                <option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option>
+                <option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option>
+                <option>Mizoram</option><option>Nagaland</option><option>Odisha</option>
+                <option>Punjab</option><option>Rajasthan</option><option>Sikkim</option>
+                <option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option>
+                <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+              </optgroup>
+              <optgroup label="Union Territories">
+                <option>Andaman & Nicobar Islands</option><option>Chandigarh</option>
+                <option>Dadra & Nagar Haveli and Daman & Diu</option><option>Delhi (NCT)</option>
+                <option>Jammu & Kashmir</option><option>Ladakh</option><option>Lakshadweep</option>
+                <option>Puducherry</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="taxPaid">Road Tax Paid (₹)</label>
+            <input type="number" id="taxPaid" placeholder="e.g., 25000" min="500" required>
+          </div>
+          <div class="form-group">
+            <label for="years">Years Since Registration</label>
+            <input type="number" id="years" placeholder="e.g., 3" min="1" max="15" required>
+            <span class="error-msg" id="stateErr">New state cannot be same as previous state</span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Calculate Refund & New Tax →</button>
+      </form>
+    </section>
+
+    <!-- Results -->
+    <section class="card" id="results">
+      <h2><span>📊</span> Refund Breakdown</h2>
+      <div class="result-grid">
+        <div class="result-item"><div class="label">Tax Paid (Old State)</div><div class="value" id="resOld">₹0</div></div>
+        <div class="result-item"><div class="label">Used Duration (Pro-rata)</div><div class="value" id="resUsed">₹0</div></div>
+        <div class="result-item highlight"><div class="label">Estimated Refund</div><div class="value" id="resRefund">₹0</div></div>
+        <div class="result-item"><div class="label">New State Tax Payable</div><div class="value" id="resNewTax">₹0</div></div>
+        <div class="result-item warning"><div class="label">Net Savings / Adjustable</div><div class="value" id="resNet">₹0</div></div>
+      </div>
+    </section>
+
+    <!-- File Request -->
+    <section class="card" id="filingSection" style="display:none;">
+      <h2><span>📤</span> File Tax Transfer Request</h2>
+      <p>VahanBridge automatically initiates your refund and adjusts new state dues. Provide bank details for direct transfer via NPCI.</p>
+      <form id="filingForm">
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="filingName">Owner Name (as per RC)</label>
+            <input type="text" id="filingName" placeholder="Rajesh Kumar Sharma" required>
+          </div>
+          <div class="form-group">
+            <label for="filingMobile">Mobile Number</label>
+            <input type="tel" id="filingMobile" placeholder="98765 43210" maxlength="10" required>
+          </div>
+          <div class="form-group">
+            <label for="accNo">Bank Account for Refund</label>
+            <input type="text" id="accNo" placeholder="11-13 digit Account Number" required>
+          </div>
+          <div class="form-group">
+            <label for="ifsc">IFSC Code</label>
+            <input type="text" id="ifsc" placeholder="e.g., SBIN0001234" maxlength="11" required>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:24px;">
+          <label>Upload Form 16 / Tax Receipt</label>
+          <div class="file-upload">
+            <input type="file" id="taxDoc" accept=".pdf,.jpg,.jpeg,.png" onchange="updateFileName(this)">
+            <div class="upload-box">📄 Click or drag PDF/Image here</div>
+          </div>
+          <div class="file-name" id="fileName">Supported: PDF, JPG, PNG (Max 5MB)</div>
+        </div>
+        <button type="submit" class="btn btn-success btn-block">File Transfer Request →</button>
+      </form>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-logo">Vahan<span>Bridge</span></div>
+    <p style="font-size:0.8rem;">© 2026 VahanBridge · A Digital India Initiative · Interstate Vehicle Transfer, Reimagined</p>
+    <p style="font-size:0.78rem;margin-top:0.4rem;"><a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a> &nbsp;·&nbsp; <a href="#">Help</a></p>
+  </footer>
+
+  <script>
+    // ── API BASE URL ──────────────────────────────────────
+    const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+      ? 'http://localhost:5000'
+      : 'https://vahanbridge-api.onrender.com'; // ← UPDATE after Render deploy
+
+    // ── State/UT same-state validation ────────────────────
+    const prevStateEl = document.getElementById('prevState');
+    const newStateEl  = document.getElementById('newState');
+    const stateErr    = document.getElementById('stateErr');
+
+    function validateStates() {
+      if (prevStateEl.value && prevStateEl.value === newStateEl.value) {
+        stateErr.style.display = 'block';
+        return false;
+      }
+      stateErr.style.display = 'none';
+      return true;
+    }
+    prevStateEl.addEventListener('change', validateStates);
+    newStateEl.addEventListener('change', validateStates);
+
+    // ── CALCULATOR — calls /api/tax/calculate ────────────
+    document.getElementById('taxForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      if (!validateStates()) return;
+
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled = true;
+      btn.textContent = '⏳ Calculating…';
+
+      const payload = {
+        taxPaid:   parseFloat(document.getElementById('taxPaid').value) || 0,
+        yearsUsed: parseFloat(document.getElementById('years').value)   || 0,
+        prevState: prevStateEl.value,
+        newState:  newStateEl.value,
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/api/tax/calculate`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify(payload),
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          const msg = data.errors ? data.errors.map(e => e.msg).join(', ') : (data.error || 'Calculation failed');
+          showTaxError(msg);
+          return;
+        }
+
+        const b = data.breakdown;
+        const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+
+        document.getElementById('resOld').textContent     = fmt(b.taxPaid);
+        document.getElementById('resUsed').textContent    = fmt(b.usedAmount);
+        document.getElementById('resRefund').textContent  = fmt(b.refundAmt);
+        document.getElementById('resNewTax').textContent  = fmt(b.newStateTax);
+
+        const net   = b.netSavings;
+        const netEl = document.getElementById('resNet');
+        netEl.textContent = net >= 0
+          ? fmt(net) + ' Refundable'
+          : fmt(Math.abs(net)) + ' Payable';
+
+        document.getElementById('results').style.display      = 'block';
+        document.getElementById('filingSection').style.display = 'block';
+        document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Store for filing form
+        window._taxCalc = b;
+
+      } catch (err) {
+        showTaxError('Network error — please check your connection.');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Calculate Refund & New Tax →';
+      }
+    });
+
+    // ── FILING FORM — calls /api/tax/apply ───────────────
+    document.getElementById('filingForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const btn = this.querySelector('button[type="submit"]');
+      btn.disabled    = true;
+      btn.textContent = '⏳ Filing with RTO…';
+
+      const calc = window._taxCalc || {};
+
+      // Build FormData so the tax receipt file can be included
+      const formData = new FormData();
+      formData.append('ownerName',   document.getElementById('filingName').value.trim());
+      formData.append('mobile',      document.getElementById('filingMobile').value.trim());
+      formData.append('regNo',       document.getElementById('regNo').value.trim());
+      formData.append('prevState',   prevStateEl.value);
+      formData.append('newState',    newStateEl.value);
+      formData.append('taxPaid',     document.getElementById('taxPaid').value);
+      formData.append('yearsUsed',   document.getElementById('years').value);
+      formData.append('bankAccount', document.getElementById('accNo').value.trim());
+      formData.append('ifscCode',    document.getElementById('ifsc').value.trim().toUpperCase());
+
+      const fileInput = document.getElementById('taxDoc');
+      if (fileInput.files[0]) formData.append('taxDoc', fileInput.files[0]);
+
+      try {
+        const response = await fetch(`${API_BASE}/api/tax/apply`, {
+          method: 'POST',
+          body:   formData,  // no Content-Type header — browser sets it with boundary
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          const msg = data.errors ? data.errors.map(e => e.msg).join(', ') : (data.error || 'Filing failed');
+          showTaxError(msg);
+          btn.disabled    = false;
+          btn.textContent = 'File Transfer Request →';
+          return;
+        }
+
+        // ── SUCCESS ──────────────────────────────────────
+        btn.textContent  = '✅ Filed Successfully!';
+        btn.style.background = 'var(--green)';
+
+        setTimeout(() => {
+          showTaxSuccess(`🎉 Application filed! Ref: ${data.taxRef}
+Refund of ₹${data.breakdown.refundAmt.toLocaleString('en-IN')} will be processed in 15–21 working days.`);
+          this.reset();
+          updateFileName(null);
+          btn.textContent  = 'File Transfer Request →';
+          btn.style.background = '';
+          btn.disabled     = false;
+        }, 600);
+
+      } catch (err) {
+        showTaxError('Network error — please check your connection.');
+        btn.disabled    = false;
+        btn.textContent = 'File Transfer Request →';
+      }
+    });
+
+    // ── FILE UPLOAD UI ────────────────────────────────────
+    function updateFileName(input) {
+      const nameEl = document.getElementById('fileName');
+      if (input && input.files && input.files[0]) {
+        const file = input.files[0];
+        if (file.size > 5 * 1024 * 1024) {
+          showTaxError('File size exceeds 5MB limit.');
+          input.value = '';
+          nameEl.textContent = 'Supported: PDF, JPG, PNG (Max 5MB)';
+          return;
+        }
+        nameEl.textContent   = '✅ Selected: ' + file.name;
+        nameEl.style.color   = 'var(--green)';
+        nameEl.style.fontWeight = '500';
+      } else {
+        nameEl.textContent   = 'Supported: PDF, JPG, PNG (Max 5MB)';
+        nameEl.style.color   = '';
+        nameEl.style.fontWeight = '';
+      }
+    }
+
+    // ── TOAST HELPERS ─────────────────────────────────────
+    function showTaxError(msg) {
+      showToast(msg, '#c8193a');
+    }
+    function showTaxSuccess(msg) {
+      showToast(msg, 'var(--green)');
+    }
+    function showToast(msg, borderColor) {
+      let toast = document.getElementById('taxToast');
+      if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'taxToast';
+        toast.style.cssText = `
+          position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+          background:#fff;border-radius:12px;font-size:0.85rem;
+          z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.12);
+          max-width:440px;text-align:center;white-space:pre-line;
+          padding:1rem 1.4rem;opacity:0;transition:opacity 0.3s;
+        `;
+        document.body.appendChild(toast);
+      }
+      toast.style.border = '1px solid ' + borderColor;
+      toast.style.borderLeft = '3px solid ' + borderColor;
+      toast.textContent = msg;
+      toast.style.opacity = '1';
+      setTimeout(() => { toast.style.opacity = '0'; }, 5000);
+    }
+  </script>
+</body>
+</html>
+

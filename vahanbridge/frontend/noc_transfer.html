@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VahanBridge — NOC Inter-State Transfer Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb; --surface: #eef1f8; --card: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --pink: #c8193a; --pink-light: #e8305a;
+  --cyan: #0077cc; --amber: #d97a00; --green: #00875a;
+  --text: #1a1a2e; --muted: #6b7080; --subtle: #b0b8cc;
+  --success: #00875a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+/* MARQUEE */
+.marquee-bar { background: var(--pink); color: #fff; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; padding: 0.4rem 0; overflow: hidden; white-space: nowrap; }
+.marquee-track { display: inline-block; animation: marquee 30s linear infinite; }
+.marquee-track span { margin: 0 2.5rem; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* NAV */
+nav.topnav { position: sticky; top: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 3rem; background: rgba(244,246,251,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+.logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--pink), #ff8c42); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+nav.topnav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+nav.topnav ul li a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+nav.topnav ul li a:hover { color: var(--text); }
+.nav-badge { background: rgba(200,25,58,0.1); color: var(--pink); border: 1px solid rgba(200,25,58,0.25); padding: 0.3rem 0.8rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+/* HERO — replaced dark with HSRP light style */
+.hero { min-height: 72vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 5rem 2rem 4rem; position: relative; overflow: hidden; background: var(--bg); }
+.hero-bg { display: none; }
+.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(200,25,58,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(200,25,58,0.05) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 100%); }
+.hero-glow { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 700px; height: 400px; border-radius: 50%; background: radial-gradient(ellipse, rgba(200,25,58,0.07), rgba(0,119,204,0.04), transparent 70%); pointer-events: none; }
+.hero-content-wrap { position: relative; z-index: 2; max-width: 780px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(232,25,90,0.08); border: 1px solid rgba(232,25,90,0.25); color: var(--pink-light); padding: 0.4rem 1.1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 1.5rem; }
+.hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--pink); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero-emblem { font-size: 3.5rem; margin-bottom: 1rem; }
+h1.hero-title { font-family: 'Syne', sans-serif; font-size: clamp(2.4rem, 5.5vw, 4rem); font-weight: 800; line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 1.2rem; color: var(--text); }
+h1.hero-title span { color: var(--pink); }
+.hero p { font-size: 1.05rem; color: var(--muted); max-width: 540px; margin: 0 auto 2rem; line-height: 1.75; }
+.hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; margin-bottom: 2rem; }
+.btn-primary { background: linear-gradient(135deg, var(--pink), #c0143f); color: #fff; padding: 0.9rem 2.2rem; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 24px rgba(232,25,90,0.35); font-family: inherit; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,25,90,0.5); }
+.btn-ghost { background: transparent; color: var(--text); padding: 0.9rem 2.2rem; border-radius: 12px; font-weight: 500; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s; font-family: inherit; }
+.btn-ghost:hover { border-color: var(--subtle); background: rgba(255,255,255,0.6); }
+.scroll-hint { display: none; }
+.tag-row { display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1.5rem; }
+.tag { font-size: 0.72rem; padding: 0.3rem 0.8rem; border-radius: 100px; background: rgba(200,25,58,0.07); border: 1px solid rgba(200,25,58,0.2); color: var(--pink); text-transform: uppercase; letter-spacing: 0.08em; font-weight: 600; }
+
+/* APP AREA */
+#app { max-width: 920px; margin: 0 auto; padding: 1rem 2rem 6rem; }
+.app-header { display: flex; align-items: center; justify-content: space-between; padding: 1.5rem 0 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+.app-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.app-tag { font-size: 0.72rem; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); font-family: 'Space Mono', monospace; }
+
+/* PROGRESS */
+.progress-bar { background: rgba(244,246,251,0.95); backdrop-filter: blur(20px); padding: 1.2rem 2rem; border: 1px solid var(--border); border-radius: 14px; margin-bottom: 2.5rem; }
+.progress-steps { display: flex; align-items: center; justify-content: space-between; position: relative; }
+.progress-fill { position: absolute; top: 18px; left: 18px; height: 2px; background: linear-gradient(90deg, var(--pink), var(--cyan)); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); z-index: 0; }
+.step-node { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; position: relative; z-index: 1; }
+.step-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 800; color: var(--muted); transition: all 0.3s; }
+.step-dot.active { background: var(--pink); border-color: var(--pink); color: #fff; box-shadow: 0 4px 16px rgba(200,25,58,0.35); }
+.step-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
+.step-label { font-size: 0.68rem; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; white-space: nowrap; }
+.step-label.active { color: var(--pink); font-weight: 600; }
+
+/* SECTIONS */
+.section { display: none; animation: slideIn 0.4s ease; }
+.section.active { display: block; }
+@keyframes slideIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.section-header { margin-bottom: 2rem; }
+.section-eyebrow { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--pink); margin-bottom: 0.5rem; }
+.section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 0.8rem; color: var(--text); }
+.section-sub { color: var(--muted); font-size: 0.95rem; max-width: 520px; line-height: 1.7; }
+
+/* FORM */
+.form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.8rem; margin-bottom: 1.5rem; }
+.form-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.form-group { margin-bottom: 0; }
+.form-group label { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.7rem 0.9rem; border-radius: 10px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--pink); }
+.form-group input::placeholder { color: var(--subtle); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.input-mono input { font-family: 'Space Mono', monospace; letter-spacing: 2px; text-transform: uppercase; }
+
+/* VEHICLE TYPE TOGGLE */
+.vehicle-toggle { display: flex; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
+.vtype { flex: 1; min-width: 140px; background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.2rem; cursor: pointer; text-align: center; transition: all 0.2s; }
+.vtype:hover { border-color: rgba(200,25,58,0.3); background: var(--card); }
+.vtype.selected { border-color: var(--pink); background: rgba(200,25,58,0.05); box-shadow: 0 4px 16px rgba(200,25,58,0.12); }
+.vtype-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.vtype-label { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; color: var(--text); }
+
+/* DOCS */
+.doc-list { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; }
+.doc-item { display: flex; gap: 1rem; align-items: flex-start; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1rem; }
+.doc-num { width: 28px; height: 28px; border-radius: 50%; background: rgba(200,25,58,0.1); border: 1px solid rgba(200,25,58,0.25); color: var(--pink); font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.doc-info h4 { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
+.doc-info p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.doc-source { display: inline-flex; align-items: center; gap: 0.3rem; margin-top: 0.4rem; font-size: 0.75rem; color: var(--cyan); background: rgba(0,119,204,0.08); padding: 0.2rem 0.6rem; border-radius: 100px; border: 1px solid rgba(0,119,204,0.2); }
+
+/* UPLOAD */
+.upload-section { margin-top: 1.5rem; }
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.upload-card { background: var(--card); border: 1.5px dashed var(--subtle); border-radius: 12px; padding: 1.2rem; transition: all 0.2s; cursor: pointer; }
+.upload-card:hover, .upload-card.dragover { border-color: var(--pink); background: rgba(200,25,58,0.03); }
+.upload-card.uploaded { border-style: solid; border-color: var(--green); background: rgba(0,135,90,0.04); }
+.upload-card-title { font-size: 0.82rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--text); display: flex; align-items: center; gap: 0.4rem; }
+.upload-hint { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.8rem; }
+.upload-trigger { display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.4rem; padding: 1rem; border-radius: 8px; background: var(--surface); transition: background 0.2s; }
+.upload-icon { font-size: 1.5rem; }
+.upload-label { font-size: 0.78rem; color: var(--muted); text-align: center; }
+.file-name { display: none; font-size: 0.8rem; color: var(--green); margin-top: 0.5rem; font-weight: 600; word-break: break-all; }
+.file-name.show { display: block; }
+input[type="file"] { display: none; }
+
+/* DIVIDER */
+.divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--subtle); }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* INFO / WARN BOX */
+.info-box { background: rgba(0,119,204,0.06); border: 1px solid rgba(0,119,204,0.2); border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem; color: var(--text); line-height: 1.7; margin-bottom: 1.5rem; }
+.info-box strong { color: var(--cyan); }
+.warn-box { background: rgba(200,25,58,0.05); border: 1px solid rgba(200,25,58,0.2); border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem; color: var(--text); line-height: 1.7; margin-bottom: 1.5rem; }
+.warn-box strong { color: var(--pink); }
+
+/* NAV ROW */
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.btn-nav-back { background: transparent; color: var(--muted); border: 1.5px solid var(--border); padding: 0.75rem 1.6rem; border-radius: 10px; font-family: inherit; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+.btn-nav-back:hover { border-color: var(--subtle); color: var(--text); }
+.btn-nav-next { background: linear-gradient(135deg, var(--pink), #c0143f); color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(200,25,58,0.3); }
+.btn-nav-next:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,25,58,0.45); }
+
+/* SUMMARY */
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 2rem; }
+.summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; position: relative; overflow: hidden; }
+.summary-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--pink), transparent); }
+.summary-card h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; margin-bottom: 0.4rem; }
+.summary-card p { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+/* UPLOAD STATUS */
+.upload-status { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+.status-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 1rem; background: var(--card); border: 1px solid var(--border); border-radius: 10px; font-size: 0.85rem; }
+.status-badge { font-size: 0.72rem; padding: 0.25rem 0.7rem; border-radius: 100px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.status-badge.done { background: rgba(0,135,90,0.1); color: var(--green); }
+.status-badge.pending { background: rgba(217,122,0,0.1); color: var(--amber); }
+
+/* FINAL CTA */
+.final-cta { text-align: center; padding: 3rem 2rem; background: var(--card); border: 1px solid var(--border); border-radius: 20px; }
+.final-cta h2 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.8rem; color: var(--text); }
+.final-cta p { color: var(--muted); margin-bottom: 1.5rem; font-size: 0.95rem; max-width: 460px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+.checkmark { font-size: 4rem; margin-bottom: 1rem; }
+
+/* TIMELINE */
+.timeline { display: flex; flex-direction: column; gap: 0; margin-bottom: 2rem; position: relative; }
+.timeline::before { content:''; position:absolute; left:20px; top:0; bottom:0; width:1px; background: linear-gradient(to bottom, var(--pink), var(--cyan), transparent); }
+.tl-item { display: flex; gap: 1.5rem; padding-bottom: 1.5rem; }
+.tl-dot { width:40px; height:40px; flex-shrink:0; border-radius:50%; background: var(--card); border: 1px solid rgba(200,25,58,0.3); display: flex; align-items:center; justify-content:center; font-size: 1rem; position: relative; z-index:1; box-shadow: 0 0 16px rgba(200,25,58,0.15); }
+.tl-content h4 { font-family: 'Syne', sans-serif; font-size:0.95rem; font-weight: 700; margin-bottom:0.2rem; padding-top:0.5rem; color: var(--text); }
+.tl-content p { font-size:0.82rem; color:var(--muted); line-height:1.5; }
+
+/* STATS ROW */
+.stats-row { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 3rem; }
+.stat { text-align: center; }
+.stat-num { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, var(--text), var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: block; }
+.stat-label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.2rem; }
+
+/* FOOTER */
+footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 3rem; text-align: center; }
+.footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+.footer-logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+footer a { color: rgba(255,255,255,0.5); text-decoration: none; }
+footer a:hover { color: #fff; }
+footer .footer-sub { font-size: 0.8rem; }
+
+@media(max-width:768px) {
+  nav.topnav { padding: 0.8rem 1.5rem; }
+  nav.topnav ul { display: none; }
+  .form-grid { grid-template-columns: 1fr; }
+  .upload-grid { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr; }
+  .vehicle-toggle { flex-direction: column; }
+  #app { padding: 1rem 1rem 4rem; }
+}
+</style>
+<body>
+
+<div class="marquee-bar">
+  <div class="marquee-track">
+    <span>🚗 VahanBridge — India's Digital Vehicle Services Platform</span>
+    <span>📋 NOC Transfer · Step-by-step guided process</span>
+    <span>🏛️ Integrated with VAHAN & Parivahan databases</span>
+    <span>🔒 SSL Secured · ISO 27001 Compliant</span>
+    <span>📞 Helpline: 1800-200-3466 · Mon–Sat 9AM–6PM</span>
+    <span>🚗 VahanBridge — India's Digital Vehicle Services Platform</span>
+    <span>📋 NOC Transfer · Step-by-step guided process</span>
+    <span>🏛️ Integrated with VAHAN & Parivahan databases</span>
+    <span>🔒 SSL Secured · ISO 27001 Compliant</span>
+    <span>📞 Helpline: 1800-200-3466 · Mon–Sat 9AM–6PM</span>
+  </div>
+</div>
+<nav class="topnav">
+  <a href="index.html" class="logo">
+    <div class="logo-icon">🌉</div>
+    Vahan<span>Bridge</span>
+  </a>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="hsrp_portal.html">HSRP Booking</a></li>
+    <li><a class="nav-badge">NOC Transfer</a></li>
+    <li><a href="bh_series_portal.html">BH Series</a></li>
+    <li><a href="puc_portal.html">PUC Portal</a></li>
+    <li><a href="tax_refund.html">Tax Refund</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════ HERO ══════════════════════ -->
+<section class="hero" id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+
+  <div class="hero-content-wrap">
+    <div class="hero-badge">🇮🇳 Official Process Guide</div>
+    <div class="hero-emblem">🚗</div>
+
+    <h1 class="hero-title">Vehicle <span>NOC</span><br>Transfer Portal</h1>
+
+    <p>Moving your car or two-wheeler across state lines in India? Navigate the RTO process with our guided, step-by-step document system.</p>
+
+    <div class="tag-row" style="justify-content:center">
+      <span class="tag">Cars & SUVs</span>
+      <span class="tag">Two-Wheelers</span>
+      <span class="tag">Inter-State Transfer</span>
+      <span class="tag">NOC + Re-Registration</span>
+    </div>
+
+    <div class="hero-cta">
+      <button class="btn-primary" onclick="startProcess()">Begin Application →</button>
+      <button class="btn-ghost" onclick="scrollTo({top:document.getElementById('app').offsetTop,behavior:'smooth'})">Learn More</button>
+    </div>
+
+    <!-- Timeline preview -->
+    <div style="margin-top:3rem;display:grid;grid-template-columns:repeat(5,1fr);gap:1rem;text-align:center;max-width:600px">
+      <div><div style="font-size:1.5rem">📋</div><div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">Personal Info</div></div>
+      <div><div style="font-size:1.5rem">🏛️</div><div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">Home State<br>Docs</div></div>
+      <div><div style="font-size:1.5rem">📤</div><div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">Upload Home<br>Docs</div></div>
+      <div><div style="font-size:1.5rem">🏙️</div><div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">New State<br>Docs</div></div>
+      <div><div style="font-size:1.5rem">✅</div><div style="font-size:0.7rem;color:var(--muted);margin-top:0.3rem">Review &<br>Submit</div></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ══════════════════════ APP ══════════════════════ -->
+<div id="app">
+  <div class="app-header">
+    <div class="app-logo">VahanBridge</div>
+    <div class="app-tag">NOC · Inter-State Transfer Portal</div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-bar">
+    <div class="progress-steps" id="progressSteps">
+      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+      <div class="step-node">
+        <div class="step-dot active" id="dot-1">1</div>
+        <div class="step-label active">Personal</div>
+      </div>
+      <div class="step-node">
+        <div class="step-dot" id="dot-2">2</div>
+        <div class="step-label">Home RTO</div>
+      </div>
+      <div class="step-node">
+        <div class="step-dot" id="dot-3">3</div>
+        <div class="step-label">Upload</div>
+      </div>
+      <div class="step-node">
+        <div class="step-dot" id="dot-4">4</div>
+        <div class="step-label">New State</div>
+      </div>
+      <div class="step-node">
+        <div class="step-dot" id="dot-5">5</div>
+        <div class="step-label">Review</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ STEP 1 — PERSONAL INFO ════ -->
+  <div class="section active" id="step-1">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 01 / 05</div>
+      <h2 class="section-title">Personal &amp;<br>Vehicle Details</h2>
+      <p class="section-sub">Let's start with your details and vehicle information so we can prepare your NOC application correctly.</p>
+    </div>
+
+    <div class="vehicle-toggle">
+      <div class="vtype selected" id="vtype-car" onclick="selectVehicle('car')">
+        <div class="vtype-icon">🚗</div>
+        <div class="vtype-label">Car / Four-Wheeler</div>
+      </div>
+      <div class="vtype" id="vtype-2w" onclick="selectVehicle('2w')">
+        <div class="vtype-icon">🏍️</div>
+        <div class="vtype-label">Two-Wheeler</div>
+      </div>
+      <div class="vtype" id="vtype-com" onclick="selectVehicle('com')">
+        <div class="vtype-icon">🚛</div>
+        <div class="vtype-label">Commercial</div>
+      </div>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Full Name (as on RC)</label>
+        <input type="text" id="ownerName" placeholder="Rajesh Kumar Sharma">
+      </div>
+      <div class="form-group">
+        <label>Aadhaar Number</label>
+        <input type="text" id="aadhaar" placeholder="XXXX XXXX XXXX" maxlength="14">
+      </div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" id="mobile" placeholder="+91 98765 43210">
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="email" placeholder="rajesh@example.com">
+      </div>
+      <div class="form-group">
+        <label>Vehicle Registration No.</label>
+        <input type="text" id="regNo" placeholder="MH-12-AB-1234" style="text-transform:uppercase">
+      </div>
+      <div class="form-group">
+        <label>Engine Number</label>
+        <input type="text" id="engineNo" placeholder="ABC1234567">
+      </div>
+      <div class="form-group">
+        <label>Chassis Number</label>
+        <input type="text" id="chassisNo" placeholder="MA3FJEB1S00123456">
+      </div>
+      <div class="form-group">
+        <label>Vehicle Make & Model</label>
+        <input type="text" id="vehicleModel" placeholder="Maruti Suzuki Swift VXi">
+      </div>
+      <div class="form-group">
+        <label>Current State (Home State)</label>
+        <select id="homeState">
+          <option value="">— Select State —</option>
+          <option>Maharashtra</option><option>Delhi</option><option>Karnataka</option>
+          <option>Tamil Nadu</option><option>Uttar Pradesh</option><option>Gujarat</option>
+          <option>Rajasthan</option><option>Telangana</option><option>West Bengal</option>
+          <option>Madhya Pradesh</option><option>Andhra Pradesh</option><option>Kerala</option>
+          <option>Punjab</option><option>Haryana</option><option>Bihar</option>
+          <option>Odisha</option><option>Jharkhand</option><option>Chhattisgarh</option>
+          <option>Assam</option><option>Uttarakhand</option><option>Goa</option>
+          <option>Himachal Pradesh</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Destination State (New State)</label>
+        <select id="newState">
+          <option value="">— Select State —</option>
+          <option>Maharashtra</option><option>Delhi</option><option>Karnataka</option>
+          <option>Tamil Nadu</option><option>Uttar Pradesh</option><option>Gujarat</option>
+          <option>Rajasthan</option><option>Telangana</option><option>West Bengal</option>
+          <option>Madhya Pradesh</option><option>Andhra Pradesh</option><option>Kerala</option>
+          <option>Punjab</option><option>Haryana</option><option>Bihar</option>
+          <option>Odisha</option><option>Jharkhand</option><option>Chhattisgarh</option>
+          <option>Assam</option><option>Uttarakhand</option><option>Goa</option>
+          <option>Himachal Pradesh</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Reason for Transfer</label>
+        <select id="reason">
+          <option value="">— Select Reason —</option>
+          <option>Job Transfer / Employment</option>
+          <option>Higher Education</option>
+          <option>Marriage / Family Relocation</option>
+          <option>Business Relocation</option>
+          <option>Permanent Residence Change</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <span></span>
+      <button class="btn-nav-next" onclick="goToStep(2)">Next: Home State Docs →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 2 — HOME STATE DOCS LIST ════ -->
+  <div class="section" id="step-2">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 02 / 05</div>
+      <h2 class="section-title">Documents Required<br>at Home State RTO</h2>
+      <p class="section-sub">Visit your current state's RTO to obtain the NOC (Form 28). Here are all documents you must carry.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>📍 Where to go:</strong> Your nearest Regional Transport Office (RTO) in your current state. You can also apply online at <strong>parivahan.gov.in → Vehicle Related Services → NOC</strong>. Carry originals + 2 photocopies of each document.
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot">📄</div>
+        <div class="tl-content">
+          <h4>Form 28 — Application for NOC <span style="color:var(--pink);font-size:0.75rem">(In Triplicate)</span></h4>
+          <p>The official application form for grant of No Objection Certificate for inter-state transfer.</p>
+          <span class="doc-source">📥 Available at RTO counter or download from parivahan.gov.in</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">📘</div>
+        <div class="tl-content">
+          <h4>Original RC Book (Registration Certificate)</h4>
+          <p>The vehicle's registration book — original must be submitted. Keep a self-attested photocopy.</p>
+          <span class="doc-source">📂 Already with you (issued at time of vehicle purchase)</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🛡️</div>
+        <div class="tl-content">
+          <h4>Valid Insurance Certificate</h4>
+          <p>Must be currently active and valid. Comprehensive or third-party — both accepted.</p>
+          <span class="doc-source">🏢 From your insurance company or DigiLocker app</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🌿</div>
+        <div class="tl-content">
+          <h4>Valid PUC Certificate (Pollution Under Control)</h4>
+          <p>Must be valid at the time of application. Get a fresh one if expiring soon.</p>
+          <span class="doc-source">⛽ From any authorized PUC testing center / petrol station</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🪪</div>
+        <div class="tl-content">
+          <h4>ID Proof</h4>
+          <p>Aadhaar Card, PAN Card, Passport, Voter ID, or Driving License (any one).</p>
+          <span class="doc-source">📱 Available on DigiLocker or UIDAI website</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🏠</div>
+        <div class="tl-content">
+          <h4>Address Proof (Current State)</h4>
+          <p>Utility bill, Aadhaar, bank statement, or rent agreement showing current state address.</p>
+          <span class="doc-source">🏦 Bank statement, electricity bill, or Aadhaar</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">💰</div>
+        <div class="tl-content">
+          <h4>Tax Clearance Certificate</h4>
+          <p>Proof that all road taxes have been paid in the current state up to date.</p>
+          <span class="doc-source">🏛️ Obtained from the same RTO — submit before NOC application</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">📸</div>
+        <div class="tl-content">
+          <h4>Passport-size Photographs</h4>
+          <p>Recent, white-background passport photos of the vehicle owner (3–4 copies recommended).</p>
+          <span class="doc-source">📷 Any photo studio or instant print shop</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🏦</div>
+        <div class="tl-content">
+          <h4>Loan NOC / Form 35 <span style="color:var(--muted);font-size:0.78rem">(If Applicable)</span></h4>
+          <p>If vehicle has an active loan/hypothecation, a clearance letter from your bank or financer is mandatory.</p>
+          <span class="doc-source">🏦 From your bank/NBFC (HDFC, SBI, ICICI, etc.) — usually takes 3–7 days</span>
+        </div>
+      </div>
+      <div class="tl-item" id="commercial-doc" style="display:none">
+        <div class="tl-dot">🔧</div>
+        <div class="tl-content">
+          <h4>Fitness Certificate <span style="color:var(--pink);font-size:0.75rem">(Commercial Vehicles Only)</span></h4>
+          <p>Valid fitness certificate from an authorized inspection station.</p>
+          <span class="doc-source">🏛️ From authorized vehicle testing station / RTO</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      ⚠️ <strong>Important:</strong> The RTO officer will physically inspect your vehicle for Chassis & Engine Number verification. Ensure the vehicle is present at the RTO on the day of application. NOC is valid for <strong>6 months</strong> from date of issue.
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav-back" onclick="goToStep(1)">← Back</button>
+      <button class="btn-nav-next" onclick="goToStep(3)">Next: Upload Documents →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 3 — UPLOAD HOME STATE DOCS ════ -->
+  <div class="section" id="step-3">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 03 / 05</div>
+      <h2 class="section-title">Upload Home State<br>Documents</h2>
+      <p class="section-sub">Upload scanned copies or clear photos of your home-state documents. PDF, JPG or PNG — max 5MB each.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>💡 Tip:</strong> Use your phone camera to take a well-lit, flat photo of each document. Ensure all text is clearly readable. Accepted formats: <strong>PDF, JPG, PNG</strong> (max 5 MB each).
+    </div>
+
+    <div class="upload-grid" id="homeUploadGrid">
+      <!-- Generated by JS -->
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav-back" onclick="goToStep(2)">← Back</button>
+      <button class="btn-nav-next" onclick="goToStep(4)">Next: New State Docs →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 4 — NEW STATE DOCS ════ -->
+  <div class="section" id="step-4">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 04 / 05</div>
+      <h2 class="section-title">Documents Required<br>at New State RTO</h2>
+      <p class="section-sub">After receiving the NOC, you must visit the new state's RTO within 6 months to complete re-registration.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>📍 Where to go:</strong> The RTO office in your new state (based on your new residential address). Re-registration must be completed <strong>within 12 months</strong> of relocating.
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-dot">📄</div>
+        <div class="tl-content">
+          <h4>Original NOC — Form 28</h4>
+          <p>The NOC obtained from your home state RTO. Must be within its 6-month validity period.</p>
+          <span class="doc-source">📂 Issued by your previous state's RTO</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">📘</div>
+        <div class="tl-content">
+          <h4>Original RC Book</h4>
+          <p>Your existing registration book. This will be updated or a new one issued by the new state.</p>
+          <span class="doc-source">📂 Already with you</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">📝</div>
+        <div class="tl-content">
+          <h4>Form 20 — Application for New Registration</h4>
+          <p>Application for fresh registration in the new state with new registration number.</p>
+          <span class="doc-source">📥 Available at new state RTO or parivahan.gov.in</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🔖</div>
+        <div class="tl-content">
+          <h4>Form 27 — Assignment of New Registration Mark</h4>
+          <p>Application requesting the new state to assign a new registration number to your vehicle.</p>
+          <span class="doc-source">📥 Available at new state RTO</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🛡️</div>
+        <div class="tl-content">
+          <h4>Valid Insurance Certificate</h4>
+          <p>Must be active. Update the registered address on your policy to reflect the new state.</p>
+          <span class="doc-source">🏢 From your insurer / DigiLocker</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🌿</div>
+        <div class="tl-content">
+          <h4>Valid PUC Certificate</h4>
+          <p>A fresh PUC from any authorized center in your new state.</p>
+          <span class="doc-source">⛽ Any petrol station or authorized PUC center in new state</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">🏠</div>
+        <div class="tl-content">
+          <h4>ID &amp; Address Proof (New State Address)</h4>
+          <p>Updated Aadhaar, rent agreement, utility bill, or any official document with new state address.</p>
+          <span class="doc-source">🏦 Electricity board, local authority, or updated Aadhaar</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">💰</div>
+        <div class="tl-content">
+          <h4>Road Tax Payment Receipt (New State)</h4>
+          <p>You must pay road tax in the new state. After payment, you can claim a pro-rated refund from the old state.</p>
+          <span class="doc-source">🏛️ Pay at new state RTO or online via state transport portal</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">📋</div>
+        <div class="tl-content">
+          <h4>Form 29 &amp; 30 <span style="color:var(--muted);font-size:0.78rem">(If Ownership Transfer)</span></h4>
+          <p>If the vehicle ownership is also being transferred to a new person along with state transfer.</p>
+          <span class="doc-source">📥 Available at any RTO or parivahan.gov.in</span>
+        </div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot">📸</div>
+        <div class="tl-content">
+          <h4>Passport-size Photographs</h4>
+          <p>Fresh set of photographs — 3–4 copies recommended.</p>
+          <span class="doc-source">📷 Any photo studio</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="warn-box">
+      ⚠️ <strong>Road Tax Tip:</strong> You'll pay road tax twice initially (old + new state). Keep your old state road tax receipt to claim a <strong>pro-rated refund</strong> — many states offer this online via their transport portal.
+    </div>
+
+    <div class="divider">upload documents for new state</div>
+
+    <div class="upload-grid" id="newUploadGrid">
+      <!-- Generated by JS -->
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-nav-back" onclick="goToStep(3)">← Back</button>
+      <button class="btn-nav-next" onclick="goToStep(5)">Next: Review & Submit →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 5 — REVIEW & SUBMIT ════ -->
+  <div class="section" id="step-5">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 05 / 05</div>
+      <h2 class="section-title">Review &amp;<br>Submit Application</h2>
+      <p class="section-sub">Verify all your details before final submission. Once submitted, you will receive a reference number for tracking.</p>
+    </div>
+
+    <div class="summary-grid" id="summaryGrid">
+      <!-- Generated by JS -->
+    </div>
+
+    <div class="divider">document upload status</div>
+
+    <div class="upload-status" id="uploadStatus">
+      <!-- Generated by JS -->
+    </div>
+
+    <div class="info-box">
+      <strong>🕐 What happens next?</strong><br>
+      1. Visit your Home State RTO with originals for NOC issuance (3–15 working days).<br>
+      2. Receive NOC (Form 28) — valid for 6 months.<br>
+      3. Within 6 months, visit New State RTO with NOC + all documents.<br>
+      4. Pay new state road tax and get new registration number.<br>
+      5. Apply for old state road tax refund online.
+    </div>
+
+    <div class="final-cta" id="finalCta" style="display:none">
+      <div class="checkmark">✅</div>
+      <h2>Application Submitted!</h2>
+      <p>Your reference number is <strong style="color:var(--pink);font-family:'Space Mono',monospace" id="refNum"></strong>. Save this for tracking your NOC status on parivahan.gov.in.</p>
+      <button class="btn-primary" onclick="window.open('https://parivahan.gov.in','_blank')">Track on Parivahan →</button>
+    </div>
+
+    <div id="submitRow">
+      <div class="nav-row">
+        <button class="btn-nav-back" onclick="goToStep(4)">← Back</button>
+        <button class="btn-nav-next" onclick="submitApplication()" style="background:linear-gradient(135deg,#2ecc71,#27ae60)">🚀 Submit Application</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentStep = 0;
+  let vehicleType = 'car';
+
+  const homeDocLabels = [
+    { id:'form28', label:'Form 28 (NOC Application)', hint:'Download from parivahan.gov.in or get at RTO' },
+    { id:'rc', label:'Original RC Book', hint:'Vehicle Registration Certificate' },
+    { id:'insurance', label:'Insurance Certificate', hint:'Must be currently valid' },
+    { id:'puc', label:'PUC Certificate', hint:'Pollution Under Control certificate' },
+    { id:'idproof', label:'ID Proof', hint:'Aadhaar / PAN / Passport / Voter ID' },
+    { id:'addressproof', label:'Address Proof (Home State)', hint:'Utility bill, Aadhaar, or bank statement' },
+    { id:'taxclear', label:'Tax Clearance Certificate', hint:'From current RTO — all taxes paid' },
+    { id:'photos', label:'Passport-size Photos', hint:'Scan or photo of 3–4 copies' },
+    { id:'loannoc', label:'Loan NOC / Form 35', hint:'Only if vehicle has hypothecation/loan' },
+  ];
+
+  const newDocLabels = [
+    { id:'newnoc', label:'Original NOC (Form 28)', hint:'From home state RTO' },
+    { id:'newrc', label:'Original RC Book', hint:'Same RC from home state' },
+    { id:'form20', label:'Form 20 (New Registration)', hint:'Application for fresh registration' },
+    { id:'form27', label:'Form 27 (New Reg Mark)', hint:'Assignment of new registration number' },
+    { id:'newinsurance', label:'Insurance Certificate', hint:'Updated with new state address if possible' },
+    { id:'newpuc', label:'PUC Certificate', hint:'From new state authorized center' },
+    { id:'newaddress', label:'Address Proof (New State)', hint:'Rent agreement, utility bill, Aadhaar' },
+    { id:'roadtax', label:'Road Tax Receipt (New State)', hint:'Payment proof after paying new state tax' },
+    { id:'newphotos', label:'Passport-size Photos', hint:'Fresh set — 3 to 4 copies' },
+  ];
+
+  const uploadedFiles = {};
+
+  function buildUploadGrid(containerId, docs) {
+    const grid = document.getElementById(containerId);
+    grid.innerHTML = '';
+    docs.forEach(doc => {
+      const card = document.createElement('div');
+      card.className = 'upload-card';
+      card.id = 'card-' + doc.id;
+      const inputId = 'file-' + doc.id;
+      card.innerHTML = `
+        <div class="upload-card-title">
+          <span>${doc.label}</span>
+        </div>
+        <div class="upload-hint">${doc.hint}</div>
+        <label for="${inputId}">
+          <div class="upload-trigger">
+            <div class="upload-icon">📎</div>
+            <div class="upload-label">Click to upload or drag & drop<br>PDF · JPG · PNG</div>
+          </div>
+        </label>
+        <input type="file" id="${inputId}" accept=".pdf,.jpg,.jpeg,.png" onchange="handleUpload('${doc.id}','${inputId}')">
+        <div class="file-name" id="fname-${doc.id}"></div>
+      `;
+
+      // Drag/drop
+      card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('dragover'); });
+      card.addEventListener('dragleave', () => card.classList.remove('dragover'));
+      card.addEventListener('drop', e => {
+        e.preventDefault();
+        card.classList.remove('dragover');
+        const f = e.dataTransfer.files[0];
+        if (f) processFile(doc.id, f);
+      });
+
+      grid.appendChild(card);
+    });
+  }
+
+  function handleUpload(docId, inputId) {
+    const file = document.getElementById(inputId).files[0];
+    if (file) processFile(docId, file);
+  }
+
+  function processFile(docId, file) {
+    uploadedFiles[docId] = file.name;
+    const card = document.getElementById('card-' + docId);
+    const fname = document.getElementById('fname-' + docId);
+    card.classList.add('uploaded');
+    const trigger = card.querySelector('.upload-trigger');
+    trigger.innerHTML = `<div class="upload-icon">✅</div><div class="upload-label" style="color:var(--success)">${file.name}</div>`;
+    fname.textContent = file.name;
+    fname.classList.add('show');
+  }
+
+  function selectVehicle(type) {
+    vehicleType = type;
+    ['car','2w','com'].forEach(t => {
+      document.getElementById('vtype-' + t).classList.toggle('selected', t === type);
+    });
+    const comDoc = document.getElementById('commercial-doc');
+    if (comDoc) comDoc.style.display = type === 'com' ? 'flex' : 'none';
+  }
+
+  function updateProgress(step) {
+    const fills = [0, 0, 25, 50, 75, 100];
+    document.getElementById('progressFill').style.width = fills[step] + '%';
+    for (let i = 1; i <= 5; i++) {
+      const dot = document.getElementById('dot-' + i);
+      const label = dot.nextElementSibling;
+      dot.classList.remove('active','done');
+      if (label) label.classList.remove('active');
+      if (i < step) { dot.classList.add('done'); dot.innerHTML = '✓'; }
+      else if (i === step) {
+        dot.classList.add('active');
+        dot.innerHTML = i;
+        if (label) label.classList.add('active');
+      } else {
+        dot.innerHTML = i;
+      }
+    }
+  }
+
+  function goToStep(n) {
+    // Save and validate step 1
+    if (n > 1 && currentStep === 1) {
+      // light validation
+    }
+
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    currentStep = n;
+    updateProgress(n);
+
+    if (n === 3 && !document.getElementById('homeUploadGrid').children.length) {
+      buildUploadGrid('homeUploadGrid', homeDocLabels);
+    }
+    if (n === 4 && !document.getElementById('newUploadGrid').children.length) {
+      buildUploadGrid('newUploadGrid', newDocLabels);
+    }
+    if (n === 5) buildSummary();
+
+    window.scrollTo({ top: document.getElementById('app').offsetTop - 20, behavior: 'smooth' });
+  }
+
+  function buildSummary() {
+    const fields = [
+      ['Owner Name', document.getElementById('ownerName')?.value || '—'],
+      ['Vehicle Type', vehicleType === 'car' ? '🚗 Car / Four-Wheeler' : vehicleType === '2w' ? '🏍️ Two-Wheeler' : '🚛 Commercial'],
+      ['Registration No.', document.getElementById('regNo')?.value || '—'],
+      ['Vehicle Model', document.getElementById('vehicleModel')?.value || '—'],
+      ['Home State', document.getElementById('homeState')?.value || '—'],
+      ['New State', document.getElementById('newState')?.value || '—'],
+      ['Reason', document.getElementById('reason')?.value || '—'],
+      ['Mobile', document.getElementById('mobile')?.value || '—'],
+    ];
+    const grid = document.getElementById('summaryGrid');
+    grid.innerHTML = fields.map(([k,v]) => `
+      <div class="summary-card">
+        <h4>${k}</h4>
+        <p>${v}</p>
+      </div>
+    `).join('');
+
+    const allDocs = [...homeDocLabels, ...newDocLabels];
+    const status = document.getElementById('uploadStatus');
+    status.innerHTML = allDocs.map(d => `
+      <div class="status-row">
+        <span>${d.label}</span>
+        <span class="status-badge ${uploadedFiles[d.id] ? 'done' : 'pending'}">${uploadedFiles[d.id] ? '✅ Uploaded' : '⏳ Pending'}</span>
+      </div>
+    `).join('');
+  }
+
+  // ── API BASE URL ────────────────────────────────────────
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://vahanbridge-api.onrender.com'; // ← UPDATE after Render deploy
+
+  // ── SUBMIT APPLICATION ────────────────────────────────────
+  async function submitApplication() {
+    const btn = document.querySelector('#submitRow .btn-nav-next');
+    btn.disabled = true;
+    btn.textContent = '⏳ Submitting…';
+
+    const payload = {
+      ownerName:    document.getElementById('ownerName')?.value?.trim()    || '',
+      aadhaar:      document.getElementById('aadhaar')?.value?.trim()      || '',
+      mobile:       document.getElementById('mobile')?.value?.trim()       || '',
+      email:        document.getElementById('email')?.value?.trim()        || '',
+      regNo:        document.getElementById('regNo')?.value?.trim()        || '',
+      engineNo:     document.getElementById('engineNo')?.value?.trim()     || '',
+      chassisNo:    document.getElementById('chassisNo')?.value?.trim()    || '',
+      vehicleModel: document.getElementById('vehicleModel')?.value?.trim() || '',
+      homeState:    document.getElementById('homeState')?.value            || '',
+      newState:     document.getElementById('newState')?.value             || '',
+      reason:       document.getElementById('reason')?.value               || '',
+      vehicleType,
+    };
+
+    if (!payload.ownerName || !payload.mobile || !payload.regNo || !payload.homeState || !payload.newState) {
+      showNOCError('Please fill in Name, Mobile, Registration No., and both state fields in Step 1.');
+      btn.disabled = false;
+      btn.textContent = '🚀 Submit Application';
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/noc/apply`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        const msg = data.errors
+          ? data.errors.map(e => e.msg).join(', ')
+          : (data.error || 'Submission failed. Please try again.');
+        showNOCError(msg);
+        btn.disabled = false;
+        btn.textContent = '🚀 Submit Application';
+        return;
+      }
+
+      // SUCCESS
+      document.getElementById('refNum').textContent = data.nocRef;
+      document.getElementById('submitRow').style.display = 'none';
+      document.getElementById('finalCta').style.display = 'block';
+      document.getElementById('finalCta').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+    } catch (err) {
+      console.error('NOC submit error:', err);
+      showNOCError('Network error — please check your connection and try again.');
+      btn.disabled = false;
+      btn.textContent = '🚀 Submit Application';
+    }
+  }
+
+  // ── ERROR TOAST ────────────────────────────────────────────
+  function showNOCError(msg) {
+    let toast = document.getElementById('nocErrorToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'nocErrorToast';
+      toast.style.cssText = `
+        position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+        background:#fff;border:1px solid rgba(200,25,58,0.3);border-left:3px solid #c8193a;
+        color:#1a1a2e;padding:1rem 1.4rem;border-radius:12px;font-size:0.85rem;
+        z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-width:420px;text-align:center;
+        opacity:0;transition:opacity 0.3s;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = '⚠️ ' + msg;
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 4500);
+  }
+
+  // ── CHECK EXISTING NOC on reg blur ─────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    const regInput = document.getElementById('regNo');
+    if (regInput) {
+      regInput.addEventListener('blur', async () => {
+        const val = regInput.value.trim();
+        if (!val || val.length < 6) return;
+        try {
+          const res  = await fetch(`${API_BASE}/api/noc/check/${encodeURIComponent(val)}`);
+          const data = await res.json();
+          if (data.hasActiveApplication) {
+            showNOCError(`Active NOC application found: ${data.nocRef} (${data.status}) — ${data.homeState} → ${data.newState}`);
+          }
+        } catch (_) { /* silent */ }
+      });
+    }
+  });
+
+  function startProcess() {
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    currentStep = 1;
+    updateProgress(1);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+
+<footer>
+  <div class="footer-logo">Vahan<span>Bridge</span></div>
+  <p class="footer-sub">© 2026 VahanBridge · A Digital India Initiative · Interstate Vehicle Transfer, Reimagined</p>
+  <p style="font-size:0.78rem;margin-top:0.4rem;"><a href="#">Privacy</a> &nbsp;·&nbsp; <a href="#">Terms</a> &nbsp;·&nbsp; <a href="#">Help</a></p>
+</footer>
+
+</body>
+</html>

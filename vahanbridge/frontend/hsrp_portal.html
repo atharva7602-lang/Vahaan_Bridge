@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VahanBridge — HSRP Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb;
+  --surface: #eef1f8;
+  --card: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --pink: #c8193a;
+  --pink-light: #e8305a;
+  --cyan: #0077cc;
+  --amber: #d97a00;
+  --green: #00875a;
+  --text: #1a1a2e;
+  --muted: #6b7080;
+  --subtle: #b0b8cc;
+  --gold: #d4a017;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* ── MARQUEE ── */
+.marquee-bar {
+  background: var(--pink);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  padding: 0.4rem 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.marquee-track {
+  display: inline-block;
+  animation: marquee 30s linear infinite;
+}
+.marquee-track span { margin: 0 2.5rem; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ── NAV ── */
+nav {
+  position: sticky; top: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.9rem 3rem;
+  background: rgba(244,246,251,0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+.logo {
+  font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 1.35rem;
+  background: linear-gradient(135deg, #e8195a, #ff8c42);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  letter-spacing: -0.5px; text-decoration: none;
+  display: flex; align-items: center; gap: 0.5rem;
+}
+.logo-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--pink), #ff8c42);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; flex-shrink: 0;
+}
+.logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+nav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+nav ul li a {
+  color: var(--muted); text-decoration: none; font-size: 0.88rem;
+  font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s;
+}
+nav ul li a:hover, nav ul li a.active-link { color: var(--text); }
+.nav-hsrp-badge {
+  background: rgba(200,25,58,0.1); color: var(--pink);
+  border: 1px solid rgba(200,25,58,0.25);
+  padding: 0.3rem 0.8rem; border-radius: 100px;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* ── HERO ── */
+.hero {
+  min-height: 88vh;
+  display: flex; align-items: center; justify-content: center;
+  text-align: center;
+  padding: 5rem 2rem 4rem;
+  position: relative; overflow: hidden;
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(rgba(200,25,58,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,25,58,0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 100%);
+}
+.hero-glow {
+  position: absolute; top: 15%; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 400px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(200,25,58,0.07), rgba(0,119,204,0.04), transparent 70%);
+  pointer-events: none;
+}
+.hero-content { position: relative; z-index: 2; max-width: 840px; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 0.6rem;
+  background: rgba(232,25,90,0.08); border: 1px solid rgba(232,25,90,0.25);
+  color: var(--pink-light); padding: 0.4rem 1.1rem; border-radius: 100px;
+  font-size: 0.75rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+.hero-badge::before {
+  content: ''; width: 6px; height: 6px; background: var(--pink); border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+.hero h1 {
+  font-family: 'Syne', sans-serif; font-size: clamp(2.6rem, 6vw, 4.8rem);
+  font-weight: 800; line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 1.2rem;
+}
+.hero h1 .accent { color: var(--pink); }
+.hero h1 .accent2 { color: var(--cyan); }
+
+.hero-sub {
+  font-size: 1.05rem; color: var(--muted); max-width: 540px; margin: 0 auto 2.5rem;
+  line-height: 1.75;
+}
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--pink), #c0143f);
+  color: #fff; padding: 0.9rem 2.2rem; border-radius: 12px;
+  font-weight: 600; font-size: 0.95rem; cursor: pointer;
+  border: none; transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 24px rgba(232,25,90,0.35); font-family: inherit;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,25,90,0.5); }
+.btn-outline {
+  background: transparent; color: var(--text);
+  padding: 0.9rem 2.2rem; border-radius: 12px;
+  font-weight: 500; font-size: 0.95rem; cursor: pointer;
+  border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s;
+  font-family: inherit;
+}
+.btn-outline:hover { border-color: var(--subtle); background: rgba(255,255,255,0.6); }
+
+.plate-demo {
+  display: inline-flex; align-items: center; justify-content: center;
+  margin: 2.5rem auto 0;
+  background: #FFD700; border: 3px solid #222; border-radius: 8px;
+  padding: 0.7rem 2rem;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.15);
+  animation: floatPlate 4s ease-in-out infinite;
+  position: relative;
+}
+.plate-demo::before {
+  content: 'IND';
+  position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+  font-size: 0.45rem; font-weight: 700; color: #333;
+  writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 1px;
+}
+.plate-demo-text {
+  font-family: 'Space Mono', monospace;
+  font-size: 2rem; font-weight: 700; color: #111; letter-spacing: 5px;
+}
+.plate-demo-strip {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, #003893, #003893 33%, #fff 33%, #fff 66%, #138808 66%);
+  border-radius: 5px 5px 0 0;
+}
+@keyframes floatPlate { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+.hero-stats {
+  display: flex; gap: 3rem; justify-content: center; margin-top: 4rem;
+  padding-top: 2.5rem; border-top: 1px solid var(--border); flex-wrap: wrap;
+}
+.stat { text-align: center; }
+.stat-num {
+  font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800;
+  background: linear-gradient(135deg, var(--text), var(--muted));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.stat-num .unit { font-size: 1.1rem; color: var(--pink); -webkit-text-fill-color: var(--pink); }
+.stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.2rem; }
+
+/* ── WHAT IS HSRP ── */
+#about { background: var(--surface); padding: 5rem 3rem; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+.section-tag {
+  display: inline-block; font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 2px; color: var(--pink);
+  margin-bottom: 0.7rem;
+}
+.section-title {
+  font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+  font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1rem; line-height: 1.2;
+}
+.section-desc { color: var(--muted); max-width: 540px; font-size: 1rem; line-height: 1.7; }
+
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; margin-top: 3rem; }
+.about-features { display: flex; flex-direction: column; gap: 1rem; }
+.about-feat {
+  display: flex; gap: 1rem; align-items: flex-start;
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  padding: 1.2rem; transition: border-color 0.2s, transform 0.2s;
+}
+.about-feat:hover { border-color: rgba(232,25,90,0.3); transform: translateX(4px); }
+.feat-icon {
+  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+  background: rgba(232,25,90,0.1); display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem;
+}
+.feat-icon.cyan { background: rgba(0,119,204,0.1); }
+.feat-icon.green { background: rgba(0,135,90,0.1); }
+.feat-icon.amber { background: rgba(217,122,0,0.1); }
+.feat-text h4 { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700; margin-bottom: 0.2rem; }
+.feat-text p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+.plate-showcase {
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  padding: 2.5rem; text-align: center; position: relative; overflow: hidden;
+}
+.plate-showcase::before {
+  content: ''; position: absolute; top: -60px; right: -60px;
+  width: 200px; height: 200px; border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(200,25,58,0.06), transparent 70%);
+}
+.plate-showcase h3 {
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+  margin-bottom: 1.5rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px;
+}
+.plate-type { margin-bottom: 1.5rem; }
+.plate-label { font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.5rem; }
+.plate-visual {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 6px; padding: 0.5rem 1.4rem; border: 2.5px solid #222;
+  font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700;
+  letter-spacing: 4px; position: relative; overflow: hidden;
+}
+.plate-visual.white-plate { background: #fff; color: #111; }
+.plate-visual.yellow-plate { background: #FFD700; color: #111; }
+.plate-visual.green-plate { background: #228B22; color: #fff; border-color: #fff; }
+.plate-visual .ind-strip {
+  position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, #003893 33%, #fff 33%, #fff 66%, #138808 66%);
+}
+.plate-divider { height: 1px; background: var(--border); margin: 1.5rem 0; }
+.plate-sticker-row { display: flex; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+.sticker {
+  width: 50px; height: 50px; border-radius: 50%; border: 2.5px solid #333;
+  display: flex; align-items: center; justify-content: flex-start;
+  flex-direction: column; justify-content: center;
+  font-size: 0.45rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  color: #111; padding: 4px; text-align: center;
+}
+.sticker.blue { background: #4169E1; color: #fff; border-color: #fff; }
+.sticker.orange { background: #FF8C00; }
+.sticker.holo { background: linear-gradient(135deg, #ff0080, #ff8c00, #00e5ff, #ff0080); color: #fff; border-color: rgba(255,255,255,0.4); }
+.sticker-label { font-size: 0.7rem; color: var(--muted); margin-top: 0.4rem; text-align: center; }
+
+/* ── APP (WIZARD) ── */
+#app { display: none; max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+
+/* ── STICKY PROGRESS ── */
+.wizard-progress {
+  position: sticky; top: 57px; z-index: 100;
+  background: rgba(244,246,251,0.95); backdrop-filter: blur(20px);
+  padding: 1.2rem 2rem; border-bottom: 1px solid var(--border);
+  margin: 0 -1.5rem 2.5rem;
+}
+.progress-inner { display: flex; align-items: center; justify-content: space-between; max-width: 700px; margin: 0 auto; position: relative; }
+.progress-track {
+  position: absolute; top: 18px; left: 18px; right: 18px; height: 2px;
+  background: var(--border);
+}
+.progress-fill-bar {
+  position: absolute; top: 18px; left: 18px; height: 2px;
+  background: linear-gradient(90deg, var(--pink), var(--cyan));
+  transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.p-step { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; position: relative; z-index: 1; }
+.p-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--card); border: 2px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 800; color: var(--muted);
+  transition: all 0.3s;
+}
+.p-dot.active { background: var(--pink); border-color: var(--pink); color: #fff; box-shadow: 0 4px 16px rgba(200,25,58,0.35); }
+.p-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
+.p-label { font-size: 0.68rem; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; white-space: nowrap; }
+.p-label.active { color: var(--pink); font-weight: 600; }
+
+/* ── SECTION CARDS ── */
+.wizard-section { display: none; }
+.wizard-section.active { display: block; animation: slideIn 0.4s ease; }
+@keyframes slideIn { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+
+.section-header { margin-bottom: 2.5rem; }
+.section-eyebrow {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--pink); margin-bottom: 0.5rem;
+}
+.section-title-lg {
+  font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 0.8rem;
+}
+.section-sub { color: var(--muted); font-size: 0.95rem; max-width: 540px; line-height: 1.7; }
+
+/* ── FORM ELEMENTS ── */
+.form-card-white {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem;
+  margin-bottom: 1.5rem;
+}
+.form-card-white h3 {
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+  margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem;
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.form-group { margin-bottom: 0; }
+.form-group.full { grid-column: 1/-1; }
+.form-group label {
+  display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600;
+  margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+  color: var(--text); padding: 0.7rem 0.9rem; border-radius: 10px;
+  font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--pink); }
+.form-group input::placeholder { color: var(--subtle); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.input-mono input { font-family: 'Space Mono', monospace; letter-spacing: 2px; text-transform: uppercase; font-size: 1rem; }
+
+/* ── VEHICLE TYPE SELECTOR ── */
+.vtype-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 0; }
+.vtype-card {
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 1.2rem; text-align: center; cursor: pointer; transition: all 0.2s;
+}
+.vtype-card:hover { border-color: rgba(200,25,58,0.3); background: var(--card); }
+.vtype-card.selected {
+  border-color: var(--pink); background: rgba(200,25,58,0.05);
+  box-shadow: 0 4px 16px rgba(200,25,58,0.12);
+}
+.vtype-card.selected .vtype-icon { background: rgba(200,25,58,0.15); }
+.vtype-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+.vtype-name { font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; }
+.vtype-desc { font-size: 0.72rem; color: var(--muted); margin-top: 0.2rem; }
+
+/* ── PLATE PREVIEW LIVE ── */
+.plate-preview-live {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem;
+  margin-bottom: 1.5rem; text-align: center;
+}
+.plate-preview-live h3 {
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.5rem;
+  text-align: left;
+}
+.live-plate {
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 8px; padding: 0.7rem 2.2rem; border: 3px solid #222;
+  font-family: 'Space Mono', monospace; font-size: 2.2rem; font-weight: 700;
+  letter-spacing: 6px; position: relative; min-width: 280px;
+  transition: background 0.3s;
+}
+.live-plate .ind-strip {
+  position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 5px 5px 0 0;
+  background: linear-gradient(90deg, #003893 33%, #fff 33%, #fff 66%, #138808 66%);
+}
+.live-plate.white-v { background: #fff; color: #111; }
+.live-plate.yellow-v { background: #FFD700; color: #111; }
+.live-plate.green-v { background: #1a6b1a; color: #fff; border-color: #ccc; }
+.plate-placeholder-text { color: #ccc; letter-spacing: 2px; font-size: 1rem; }
+
+.plate-info-row {
+  display: flex; gap: 1rem; justify-content: center; margin-top: 1rem; flex-wrap: wrap;
+}
+.plate-info-pill {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 100px;
+  padding: 0.3rem 0.9rem; font-size: 0.75rem; color: var(--muted); font-weight: 500;
+}
+.plate-info-pill span { color: var(--pink); font-weight: 700; }
+
+/* ── APPOINTMENT CALENDAR ── */
+.rto-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+.rto-card {
+  background: var(--card); border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 1.2rem; cursor: pointer; transition: all 0.2s;
+}
+.rto-card:hover { border-color: rgba(0,119,204,0.3); }
+.rto-card.selected { border-color: var(--cyan); background: rgba(0,119,204,0.05); }
+.rto-name { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; margin-bottom: 0.2rem; }
+.rto-address { font-size: 0.78rem; color: var(--muted); margin-bottom: 0.7rem; }
+.rto-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.rto-tag {
+  background: var(--surface); border-radius: 100px; padding: 0.2rem 0.6rem;
+  font-size: 0.68rem; font-weight: 600; color: var(--muted);
+}
+.rto-tag.avail { background: rgba(0,135,90,0.1); color: var(--green); }
+
+.time-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
+.time-slot {
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px;
+  padding: 0.5rem; text-align: center; cursor: pointer;
+  font-size: 0.8rem; font-weight: 500; transition: all 0.2s;
+}
+.time-slot:hover { border-color: var(--cyan); color: var(--cyan); }
+.time-slot.selected { background: var(--cyan); border-color: var(--cyan); color: #fff; }
+.time-slot.full { opacity: 0.4; cursor: not-allowed; text-decoration: line-through; }
+
+/* ── DOCUMENT UPLOAD ── */
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.upload-card {
+  background: var(--card); border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 1.2rem; transition: all 0.2s;
+}
+.upload-card:hover { border-color: rgba(200,25,58,0.2); }
+.upload-card.uploaded { border-color: var(--green); background: rgba(0,135,90,0.03); }
+.upload-card.dragover { border-color: var(--pink); background: rgba(200,25,58,0.04); }
+.upload-doc-title {
+  font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem;
+}
+.upload-doc-hint { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.8rem; }
+.upload-required {
+  display: inline-block; font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  background: rgba(200,25,58,0.1); color: var(--pink);
+  border-radius: 100px; padding: 0.1rem 0.5rem; margin-left: 0.4rem;
+}
+.upload-optional {
+  display: inline-block; font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.5px;
+  background: rgba(0,119,204,0.1); color: var(--cyan);
+  border-radius: 100px; padding: 0.1rem 0.5rem; margin-left: 0.4rem;
+}
+.upload-trigger {
+  border: 1.5px dashed var(--subtle); border-radius: 10px;
+  padding: 1rem; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 0.3rem; cursor: pointer; transition: all 0.2s;
+}
+.upload-trigger:hover { border-color: var(--pink); background: rgba(200,25,58,0.03); }
+.upload-trigger-icon { font-size: 1.4rem; }
+.upload-trigger-text { font-size: 0.75rem; color: var(--muted); text-align: center; }
+.upload-card input[type="file"] { display: none; }
+
+/* ── REVIEW / SUMMARY ── */
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.summary-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem;
+  position: relative; overflow: hidden;
+}
+.summary-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--pink), transparent);
+}
+.summary-card h4 {
+  font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted);
+  font-weight: 700; margin-bottom: 0.4rem;
+}
+.summary-card p { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+.summary-card p.mono { font-family: 'Space Mono', monospace; font-size: 0.85rem; }
+
+.fee-breakdown {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+.fee-breakdown h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+.fee-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0.65rem 0; border-bottom: 1px solid var(--border); font-size: 0.88rem;
+}
+.fee-row:last-child { border-bottom: none; font-weight: 700; font-size: 0.95rem; }
+.fee-row .fee-label { color: var(--muted); }
+.fee-row .fee-value { font-weight: 600; }
+.fee-row.total .fee-value { color: var(--pink); font-family: 'Syne', sans-serif; font-size: 1.1rem; }
+
+.doc-status-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+.doc-status-row {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 0.7rem 1rem; font-size: 0.85rem;
+}
+.status-badge {
+  font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;
+  padding: 0.25rem 0.7rem; border-radius: 100px;
+}
+.status-badge.done { background: rgba(0,135,90,0.1); color: var(--green); }
+.status-badge.pending { background: rgba(217,122,0,0.1); color: var(--amber); }
+
+/* ── INFO BOX ── */
+.info-box {
+  background: rgba(0,119,204,0.06); border: 1px solid rgba(0,119,204,0.2);
+  border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem;
+  color: var(--text); line-height: 1.7; margin-bottom: 1.5rem;
+}
+.info-box strong { color: var(--cyan); }
+
+/* ── DIVIDER ── */
+.divider {
+  display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0;
+  font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--subtle);
+}
+.divider::before, .divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── NAV BUTTONS ── */
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.btn-back {
+  background: transparent; color: var(--muted); border: 1.5px solid var(--border);
+  padding: 0.75rem 1.6rem; border-radius: 10px; font-family: inherit;
+  font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s;
+}
+.btn-back:hover { border-color: var(--subtle); color: var(--text); }
+.btn-next {
+  background: linear-gradient(135deg, var(--pink), #c0143f);
+  color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 10px;
+  font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 16px rgba(200,25,58,0.3);
+}
+.btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(200,25,58,0.45); }
+.btn-next.green { background: linear-gradient(135deg, var(--green), #006040); box-shadow: 0 4px 16px rgba(0,135,90,0.3); }
+.btn-next.green:hover { box-shadow: 0 8px 24px rgba(0,135,90,0.45); }
+
+/* ── SUCCESS ── */
+.success-panel {
+  text-align: center; padding: 3rem 2rem;
+  background: var(--card); border: 1px solid var(--border); border-radius: 20px;
+  display: none;
+}
+.success-panel.show { display: block; animation: slideIn 0.5s ease; }
+.success-icon { font-size: 4rem; margin-bottom: 1rem; }
+.success-panel h2 {
+  font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.7rem;
+}
+.success-panel p { color: var(--muted); max-width: 480px; margin: 0 auto 1.5rem; line-height: 1.7; }
+.ref-box {
+  display: inline-block; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 0.8rem 2rem; margin-bottom: 1.5rem;
+}
+.ref-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
+.ref-number { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; color: var(--pink); letter-spacing: 3px; }
+.success-steps { text-align: left; max-width: 480px; margin: 0 auto 2rem; }
+.success-step-row {
+  display: flex; gap: 1rem; align-items: flex-start; padding: 0.7rem 0;
+  border-bottom: 1px solid var(--border); font-size: 0.85rem;
+}
+.success-step-row:last-child { border-bottom: none; }
+.success-step-num {
+  width: 24px; height: 24px; border-radius: 50%; background: rgba(200,25,58,0.1);
+  border: 1px solid rgba(200,25,58,0.3); color: var(--pink);
+  font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.success-step-text { color: var(--muted); line-height: 1.5; }
+.success-step-text strong { color: var(--text); }
+
+/* ── FOOTER ── */
+footer {
+  background: var(--text); color: rgba(255,255,255,0.6);
+  padding: 2.5rem 3rem; text-align: center;
+}
+.footer-logo {
+  font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem;
+  background: linear-gradient(135deg, #e8195a, #ff8c42);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 0.5rem;
+}
+.footer-logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+.footer-sub { font-size: 0.8rem; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 0.8rem 1.5rem; }
+  nav ul { display: none; }
+  .hero { padding: 4rem 1.5rem 3rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr; }
+  .vtype-grid { grid-template-columns: 1fr; }
+  .upload-grid { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .rto-grid { grid-template-columns: 1fr; }
+  .time-slots { grid-template-columns: repeat(3, 1fr); }
+  .wizard-progress { padding: 1rem; }
+  .p-label { display: none; }
+  #about { padding: 3rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- MARQUEE -->
+<div class="marquee-bar">
+  <div class="marquee-track">
+    <span>🛡️ HSRP Mandatory for all vehicles registered before April 2019</span>
+    <span>🔒 High Security Number Plates — Tamper Proof & GPS Ready</span>
+    <span>⚡ Book online in under 5 minutes — Doorstep delivery available</span>
+    <span>📋 Penalty up to ₹5,000 for non-compliance — Book Now</span>
+    <span>🇮🇳 Government of India — Ministry of Road Transport & Highways</span>
+    <span>🛡️ HSRP Mandatory for all vehicles registered before April 2019</span>
+    <span>🔒 High Security Number Plates — Tamper Proof & GPS Ready</span>
+    <span>⚡ Book online in under 5 minutes — Doorstep delivery available</span>
+    <span>📋 Penalty up to ₹5,000 for non-compliance — Book Now</span>
+    <span>🇮🇳 Government of India — Ministry of Road Transport & Highways</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-icon">🚗</div>
+    Vahan<span>Bridge</span>
+  </a>
+  <ul>
+    <li><a href="noc_transfer.html">NOC Transfer</a></li>
+    <li><a href="hsrp_portal.html" class="active-link">HSRP</a></li>
+    <li><a href="tax_refund.html">Road Tax</a></li>
+    <li><a href="bh_series_portal.html">BH Series</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <div class="nav-hsrp-badge">● HSRP Portal</div>
+</nav>
+
+<!-- ════ HERO ════ -->
+<section class="hero" id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">High Security Registration Plate</div>
+    <h1>
+      Secure Your Vehicle<br>
+      with <span class="accent">HSRP</span> &amp;<br>
+      <span class="accent2">Colour Sticker</span>
+    </h1>
+    <p class="hero-sub">
+      India's tamper-proof registration plate system. Mandatory for all vehicles. Book your HSRP online — get fitted at an authorised centre or opt for doorstep installation.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="startWizard()">Apply for HSRP →</button>
+      <button class="btn-outline" onclick="scrollToAbout()">Learn More</button>
+    </div>
+
+    <div class="plate-demo">
+      <div class="plate-demo-strip"></div>
+      <div class="plate-demo-text" id="heroPlateTxt">MH 12 AB 1234</div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">28<span class="unit">+</span></div>
+        <div class="stat-label">States Covered</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">4.2<span class="unit">Cr+</span></div>
+        <div class="stat-label">Plates Issued</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">48<span class="unit">hr</span></div>
+        <div class="stat-label">Avg Delivery</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">₹0<span class="unit"></span></div>
+        <div class="stat-label">Portal Fee</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ ABOUT ════ -->
+<section id="about">
+  <div class="section-inner">
+    <span class="section-tag">What is HSRP?</span>
+    <h2 class="section-title">India's High Security<br>Number Plate System</h2>
+    <p class="section-desc">Mandated by the Supreme Court & MoRTH, HSRP plates come with 7 layers of tamper-proof security — making vehicle identification fraud-proof and traceable.</p>
+
+    <div class="about-grid">
+      <div class="about-features">
+        <div class="about-feat">
+          <div class="feat-icon">🔒</div>
+          <div class="feat-text">
+            <h4>Chromium Hologram</h4>
+            <p>A unique hot-stamped chromium-based hologram makes the plate impossible to replicate or tamper with.</p>
+          </div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon cyan">🔢</div>
+          <div class="feat-text">
+            <h4>Laser-etched PIN</h4>
+            <p>Each plate has a 10-digit laser-engraved PIN linked to the vehicle's chassis number on the national database.</p>
+          </div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon green">🛰️</div>
+          <div class="feat-text">
+            <h4>IND Strip + Snap Lock</h4>
+            <p>Tricolour India strip and non-removable snap lock fasteners — once fitted, cannot be removed without destruction.</p>
+          </div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon amber">🎨</div>
+          <div class="feat-text">
+            <h4>Colour-Coded Fuel Sticker</h4>
+            <p>Mandatory colour sticker (blue/orange/green) on windscreen identifies fuel type at a glance for traffic enforcement.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="plate-showcase">
+        <h3>Plate Types</h3>
+        <div class="plate-type">
+          <div class="plate-label">Private / Personal Vehicle</div>
+          <div class="plate-visual white-plate">
+            <div class="ind-strip"></div>
+            MH 12 AB 1234
+          </div>
+        </div>
+        <div class="plate-type">
+          <div class="plate-label">Commercial Vehicle</div>
+          <div class="plate-visual yellow-plate">
+            <div class="ind-strip"></div>
+            MH 12 AB 1234
+          </div>
+        </div>
+        <div class="plate-type">
+          <div class="plate-label">Electric Vehicle</div>
+          <div class="plate-visual green-plate">
+            <div class="ind-strip"></div>
+            MH 12 AB 1234
+          </div>
+        </div>
+        <div class="plate-divider"></div>
+        <div class="plate-label" style="margin-bottom:0.7rem">Fuel Stickers</div>
+        <div class="plate-sticker-row">
+          <div style="text-align:center">
+            <div class="sticker blue">PETROL / CNG</div>
+            <div class="sticker-label">Blue</div>
+          </div>
+          <div style="text-align:center">
+            <div class="sticker orange">DIESEL</div>
+            <div class="sticker-label">Orange</div>
+          </div>
+          <div style="text-align:center">
+            <div class="sticker holo">EV / HYBRID</div>
+            <div class="sticker-label">Green</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ WIZARD APP ════ -->
+<div id="app">
+
+  <!-- PROGRESS BAR -->
+  <div class="wizard-progress">
+    <div class="progress-inner">
+      <div class="progress-track"></div>
+      <div class="progress-fill-bar" id="pfill"></div>
+      <div class="p-step">
+        <div class="p-dot active" id="pd1">1</div>
+        <div class="p-label active" id="pl1">Vehicle</div>
+      </div>
+      <div class="p-step">
+        <div class="p-dot" id="pd2">2</div>
+        <div class="p-label" id="pl2">Plate Details</div>
+      </div>
+      <div class="p-step">
+        <div class="p-dot" id="pd3">3</div>
+        <div class="p-label" id="pl3">Appointment</div>
+      </div>
+      <div class="p-step">
+        <div class="p-dot" id="pd4">4</div>
+        <div class="p-label" id="pl4">Documents</div>
+      </div>
+      <div class="p-step">
+        <div class="p-dot" id="pd5">5</div>
+        <div class="p-label" id="pl5">Review</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ STEP 1 — VEHICLE INFO ════ -->
+  <div class="wizard-section active" id="step-1">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 01 / 05</div>
+      <h2 class="section-title-lg">Vehicle<br>Information</h2>
+      <p class="section-sub">Enter your vehicle details as they appear on your Registration Certificate (RC). All fields are cross-checked with the Vahan database.</p>
+    </div>
+
+    <!-- Vehicle Type -->
+    <div class="form-card-white">
+      <h3>🚘 Select Vehicle Type</h3>
+      <div class="vtype-grid">
+        <div class="vtype-card selected" id="vt-private" onclick="selectVType('private')">
+          <div class="vtype-icon">🚗</div>
+          <div class="vtype-name">Private</div>
+          <div class="vtype-desc">Car, SUV, Jeep</div>
+        </div>
+        <div class="vtype-card" id="vt-2w" onclick="selectVType('2w')">
+          <div class="vtype-icon">🏍️</div>
+          <div class="vtype-name">Two-Wheeler</div>
+          <div class="vtype-desc">Bike, Scooter</div>
+        </div>
+        <div class="vtype-card" id="vt-commercial" onclick="selectVType('commercial')">
+          <div class="vtype-icon">🚛</div>
+          <div class="vtype-name">Commercial</div>
+          <div class="vtype-desc">Cab, Truck, Bus</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Owner & RC details -->
+    <div class="form-card-white">
+      <h3>👤 Owner & Registration Details</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Owner's Full Name (as on RC)</label>
+          <input type="text" id="ownerName" placeholder="Rajesh Kumar Sharma" oninput="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" id="mobile" placeholder="98765 43210" maxlength="10">
+        </div>
+        <div class="form-group input-mono">
+          <label>Registration Number</label>
+          <input type="text" id="regNo" placeholder="MH 12 AB 1234" oninput="updatePlatePreview(); updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Chassis Number (last 5 digits)</label>
+          <input type="text" id="chassisNo" placeholder="XXXXX" maxlength="5">
+        </div>
+        <div class="form-group">
+          <label>Engine Number (last 5 digits)</label>
+          <input type="text" id="engineNo" placeholder="XXXXX" maxlength="5">
+        </div>
+        <div class="form-group">
+          <label>Year of Registration</label>
+          <input type="number" id="regYear" placeholder="2018" min="1990" max="2024">
+        </div>
+        <div class="form-group">
+          <label>Vehicle Make</label>
+          <input type="text" id="vehicleMake" placeholder="Maruti Suzuki" oninput="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Vehicle Model</label>
+          <input type="text" id="vehicleModel" placeholder="Swift VXi" oninput="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>State of Registration</label>
+          <select id="regState" onchange="updateSummary()">
+            <option value="">— Select State —</option>
+            <option>Maharashtra</option><option>Delhi</option><option>Karnataka</option>
+            <option>Tamil Nadu</option><option>Uttar Pradesh</option><option>Rajasthan</option>
+            <option>Gujarat</option><option>West Bengal</option><option>Telangana</option>
+            <option>Madhya Pradesh</option><option>Kerala</option><option>Punjab</option>
+            <option>Haryana</option><option>Andhra Pradesh</option><option>Bihar</option>
+            <option>Odisha</option><option>Jharkhand</option><option>Assam</option>
+            <option>Uttarakhand</option><option>Himachal Pradesh</option>
+            <option>Chandigarh</option><option>Goa</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fuel Type</label>
+          <select id="fuelType" onchange="updatePlatePreview(); updateSummary()">
+            <option value="petrol">Petrol</option>
+            <option value="diesel">Diesel</option>
+            <option value="cng">CNG / Petrol-CNG</option>
+            <option value="ev">Electric (EV)</option>
+            <option value="hybrid">Hybrid</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <span></span>
+      <button class="btn-next" onclick="goToStep(2)">Next: Plate Details →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 2 — PLATE DETAILS ════ -->
+  <div class="wizard-section" id="step-2">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 02 / 05</div>
+      <h2 class="section-title-lg">Plate &amp;<br>Sticker Details</h2>
+      <p class="section-sub">Choose your plate type and confirm the colour-coded fuel sticker. Your plate configuration is auto-determined by vehicle category and fuel type.</p>
+    </div>
+
+    <!-- Live Plate Preview -->
+    <div class="plate-preview-live">
+      <h3>🖼️ Live Plate Preview</h3>
+      <div class="live-plate white-v" id="livePlate">
+        <div class="ind-strip"></div>
+        <span id="livePlateText" class="plate-placeholder-text">MH 12 AB 1234</span>
+      </div>
+      <div class="plate-info-row" id="plateInfoRow">
+        <div class="plate-info-pill">Type: <span id="pillType">White</span></div>
+        <div class="plate-info-pill">Fuel Sticker: <span id="pillSticker">Blue (Petrol)</span></div>
+        <div class="plate-info-pill">Size: <span id="pillSize">500×120 mm</span></div>
+      </div>
+    </div>
+
+    <div class="form-card-white">
+      <h3>🔧 Additional Requests</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Need Rear Plate Only?</label>
+          <select id="plateSet">
+            <option value="both">Both Front &amp; Rear (Default)</option>
+            <option value="front">Front Only</option>
+            <option value="rear">Rear Only</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Special Requests</label>
+          <select id="specialReq">
+            <option value="none">None</option>
+            <option value="speed">Speed Governor Sticker</option>
+            <option value="emergency">Emergency Vehicle Markings</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Additional Notes (Optional)</label>
+          <textarea id="notes" placeholder="Any specific instructions for installation or delivery..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <strong>ℹ️ Plate Configuration Rules:</strong><br>
+      Private vehicles get white plates · Commercial vehicles get yellow plates · EVs get green plates. Fuel sticker colour: Blue for Petrol/CNG, Orange for Diesel, Green for EV/Hybrid. Both are mandatory and non-negotiable under MoRTH rules.
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(1)">← Back</button>
+      <button class="btn-next" onclick="goToStep(3)">Next: Book Appointment →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 3 — APPOINTMENT ════ -->
+  <div class="wizard-section" id="step-3">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 03 / 05</div>
+      <h2 class="section-title-lg">Book Your<br>Appointment</h2>
+      <p class="section-sub">Select an authorised HSRP fitment centre near you and pick a convenient date &amp; time slot. Doorstep fitment is also available in select cities.</p>
+    </div>
+
+    <div class="form-card-white">
+      <h3>📍 Select Fitment Mode</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Fitment Preference</label>
+          <select id="fitmentMode" onchange="toggleDoorstep()">
+            <option value="centre">Visit Authorised Centre</option>
+            <option value="doorstep">Doorstep Fitment (+ ₹200)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preferred City / District</label>
+          <input type="text" id="citySearch" placeholder="e.g. Pune, Nagpur, Mumbai" oninput="updateRTOCards()">
+        </div>
+        <div class="form-group full" id="doorstepAddress" style="display:none">
+          <label>Full Address for Doorstep</label>
+          <input type="text" placeholder="Flat no., Building, Street, Landmark, Pincode">
+        </div>
+      </div>
+    </div>
+
+    <!-- RTO Cards -->
+    <div class="form-card-white">
+      <h3>🏢 Select Authorised Centre</h3>
+      <div class="rto-grid" id="rtoGrid">
+        <div class="rto-card selected" id="rto-1" onclick="selectRTO(1)">
+          <div class="rto-name">RTO Shivajinagar</div>
+          <div class="rto-address">Survey No. 19, Pune–411005</div>
+          <div class="rto-meta">
+            <span class="rto-tag avail">✅ Slots Available</span>
+            <span class="rto-tag">⭐ 4.3</span>
+            <span class="rto-tag">2.3 km</span>
+          </div>
+        </div>
+        <div class="rto-card" id="rto-2" onclick="selectRTO(2)">
+          <div class="rto-name">RTO Pimpri-Chinchwad</div>
+          <div class="rto-address">Sector 27, PCMC, Pune–411018</div>
+          <div class="rto-meta">
+            <span class="rto-tag avail">✅ Slots Available</span>
+            <span class="rto-tag">⭐ 4.1</span>
+            <span class="rto-tag">8.7 km</span>
+          </div>
+        </div>
+        <div class="rto-card" id="rto-3" onclick="selectRTO(3)">
+          <div class="rto-name">Minda HSRP Centre</div>
+          <div class="rto-address">Plot 14, Hadapsar Industrial Estate, Pune</div>
+          <div class="rto-meta">
+            <span class="rto-tag avail">✅ Slots Available</span>
+            <span class="rto-tag">⭐ 4.6</span>
+            <span class="rto-tag">5.1 km</span>
+          </div>
+        </div>
+        <div class="rto-card" id="rto-4" onclick="selectRTO(4)">
+          <div class="rto-name">Bundl Technologies (HSRP)</div>
+          <div class="rto-address">Baner Road, Near Symbiosis, Pune</div>
+          <div class="rto-meta">
+            <span class="rto-tag" style="color:var(--amber);background:rgba(217,122,0,0.1)">⏳ 2 days wait</span>
+            <span class="rto-tag">⭐ 4.4</span>
+            <span class="rto-tag">11.2 km</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date + Time -->
+    <div class="form-card-white">
+      <h3>📅 Date &amp; Time Slot</h3>
+      <div class="form-grid" style="margin-bottom:1.2rem">
+        <div class="form-group">
+          <label>Preferred Date</label>
+          <input type="date" id="apptDate" min="">
+        </div>
+        <div class="form-group">
+          <label>Preferred Session</label>
+          <select id="apptSession" onchange="refreshTimeSlots()">
+            <option value="morning">Morning (9AM – 1PM)</option>
+            <option value="afternoon">Afternoon (2PM – 5PM)</option>
+          </select>
+        </div>
+      </div>
+      <label style="font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted);display:block;margin-bottom:0.6rem">Available Slots</label>
+      <div class="time-slots" id="timeSlots">
+        <div class="time-slot selected" onclick="selectSlot(this)">9:00 AM</div>
+        <div class="time-slot" onclick="selectSlot(this)">9:30 AM</div>
+        <div class="time-slot" onclick="selectSlot(this)">10:00 AM</div>
+        <div class="time-slot full">10:30 AM</div>
+        <div class="time-slot" onclick="selectSlot(this)">11:00 AM</div>
+        <div class="time-slot full">11:30 AM</div>
+        <div class="time-slot" onclick="selectSlot(this)">12:00 PM</div>
+        <div class="time-slot" onclick="selectSlot(this)">12:30 PM</div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(2)">← Back</button>
+      <button class="btn-next" onclick="goToStep(4)">Next: Upload Documents →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 4 — DOCUMENTS ════ -->
+  <div class="wizard-section" id="step-4">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 04 / 05</div>
+      <h2 class="section-title-lg">Upload<br>Documents</h2>
+      <p class="section-sub">Upload scanned copies of the required documents. Originals must be carried to the fitment centre on the appointment day.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>📋 Documents Required:</strong> RC Book (mandatory), Owner's ID Proof, Proof of Insurance, and PUC Certificate. Commercial vehicles additionally require Permit and Fitness Certificate.
+    </div>
+
+    <div class="form-card-white">
+      <h3>📁 Required Documents</h3>
+      <div class="upload-grid" id="uploadGrid"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(3)">← Back</button>
+      <button class="btn-next" onclick="goToStep(5)">Next: Review &amp; Pay →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 5 — REVIEW ════ -->
+  <div class="wizard-section" id="step-5">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 05 / 05</div>
+      <h2 class="section-title-lg">Review &amp;<br>Submit</h2>
+      <p class="section-sub">Review your application, check the fee breakdown, and submit. You will receive an SMS &amp; email confirmation with your appointment details.</p>
+    </div>
+
+    <div class="summary-grid" id="summaryGrid"></div>
+
+    <div class="fee-breakdown">
+      <h3>💳 Fee Breakdown</h3>
+      <div class="fee-row"><span class="fee-label">HSRP Plate (Front + Rear)</span><span class="fee-value" id="platePrice">₹ 450</span></div>
+      <div class="fee-row"><span class="fee-label">Colour-Coded Fuel Sticker</span><span class="fee-value">₹ 100</span></div>
+      <div class="fee-row"><span class="fee-label">Fitment Charges</span><span class="fee-value" id="fitmentCharges">₹ 0</span></div>
+      <div class="fee-row"><span class="fee-label">Portal Processing Fee</span><span class="fee-value">₹ 0</span></div>
+      <div class="fee-row total"><span class="fee-label">Total Payable</span><span class="fee-value" id="totalFee">₹ 550</span></div>
+    </div>
+
+    <div class="divider">document upload status</div>
+
+    <div class="doc-status-list" id="docStatusList"></div>
+
+    <div class="info-box">
+      <strong>📌 What Happens Next?</strong><br>
+      1. You'll receive an SMS &amp; email with your booking ID and appointment details.<br>
+      2. Carry originals of all documents to the fitment centre on the appointment day.<br>
+      3. The fitment process takes approx. 15–30 minutes. Your old plate will be surrendered.<br>
+      4. HSRP details are updated on Vahan database within 24 hours of fitment.
+    </div>
+
+    <div id="submitRow">
+      <div class="nav-row">
+        <button class="btn-back" onclick="goToStep(4)">← Back</button>
+        <button class="btn-next green" onclick="submitApp()">🚀 Submit &amp; Proceed to Payment</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-panel" id="successPanel">
+      <div class="success-icon">✅</div>
+      <h2>Application Submitted!</h2>
+      <p>Your HSRP booking has been confirmed. Carry your documents to the fitment centre on the scheduled day.</p>
+      <div class="ref-box">
+        <div class="ref-label">Booking Reference</div>
+        <div class="ref-number" id="refNumber">—</div>
+      </div>
+      <div class="success-steps">
+        <div class="success-step-row">
+          <div class="success-step-num">1</div>
+          <div class="success-step-text"><strong>Check SMS/Email</strong> — Your booking ID and appointment slot are sent to your registered number.</div>
+        </div>
+        <div class="success-step-row">
+          <div class="success-step-num">2</div>
+          <div class="success-step-text"><strong>Carry Originals</strong> — RC Book, ID Proof, Insurance, and PUC. Photocopies are not accepted.</div>
+        </div>
+        <div class="success-step-row">
+          <div class="success-step-num">3</div>
+          <div class="success-step-text"><strong>Visit Centre</strong> — Reach 10 min early. Fitment takes 15–30 minutes. Old plate is surrendered.</div>
+        </div>
+        <div class="success-step-row">
+          <div class="success-step-num">4</div>
+          <div class="success-step-text"><strong>Vahan Update</strong> — HSRP details auto-updated in the national Vahan database within 24 hours.</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="window.open('https://parivahan.gov.in','_blank')">Track on Parivahan →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Vahan<span>Bridge</span></div>
+  <div class="footer-sub">A VahanBridge Service · Powered by MoRTH Data · Not affiliated with State Governments</div>
+</footer>
+
+<script>
+  let currentStep = 0;
+  let vehicleType = 'private';
+  let selectedRTO = 1;
+  let selectedSlot = '9:00 AM';
+  const uploadedFiles = {};
+
+  const docList = [
+    { id: 'rc',        label: 'RC Book',              hint: 'Registration Certificate — both sides',   required: true },
+    { id: 'idproof',   label: 'ID Proof',             hint: 'Aadhaar / PAN / Passport / Voter ID',    required: true },
+    { id: 'insurance', label: 'Insurance Certificate', hint: 'Must be currently valid',                required: true },
+    { id: 'puc',       label: 'PUC Certificate',      hint: 'Pollution Under Control certificate',    required: true },
+    { id: 'permit',    label: 'Permit',               hint: 'Commercial vehicles only',               required: false },
+    { id: 'fitness',   label: 'Fitness Certificate',  hint: 'Commercial vehicles only',               required: false },
+  ];
+
+  /* ── HERO PLATE ANIMATION ── */
+  const plates = ['MH 12 AB 1234','DL 9C AB 1234','KA 03 MN 5678','TN 10 XY 9999','UP 32 GH 4321'];
+  let pi = 0;
+  setInterval(() => {
+    pi = (pi + 1) % plates.length;
+    const el = document.getElementById('heroPlateTxt');
+    el.style.opacity = 0;
+    setTimeout(() => { el.textContent = plates[pi]; el.style.opacity = 1; }, 300);
+  }, 2500);
+  document.getElementById('heroPlateTxt').style.transition = 'opacity 0.3s';
+
+  /* ── NAV UTILS ── */
+  function scrollToAbout() { document.getElementById('about').scrollIntoView({ behavior:'smooth' }); }
+  function resetToHero(e) {
+    e.preventDefault();
+    document.getElementById('hero').style.display = '';
+    document.getElementById('about').style.display = '';
+    document.getElementById('app').style.display = 'none';
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  /* ── START WIZARD ── */
+  function startWizard() {
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('about').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    currentStep = 1;
+    updateProgress(1);
+    buildUploadGrid();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+
+  /* ── PROGRESS ── */
+  const FILLS = [0, 0, 25, 50, 75, 100];
+  function updateProgress(step) {
+    document.getElementById('pfill').style.width = FILLS[step] + '%';
+    for (let i = 1; i <= 5; i++) {
+      const dot = document.getElementById('pd' + i);
+      const lbl = document.getElementById('pl' + i);
+      dot.classList.remove('active', 'done');
+      lbl.classList.remove('active');
+      if (i < step)       { dot.classList.add('done'); dot.innerHTML = '✓'; }
+      else if (i === step) { dot.classList.add('active'); dot.innerHTML = i; lbl.classList.add('active'); }
+      else                 { dot.innerHTML = i; }
+    }
+  }
+
+  /* ── NAVIGATE ── */
+  function goToStep(n) {
+    document.querySelectorAll('.wizard-section').forEach(s => s.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    currentStep = n;
+    updateProgress(n);
+    if (n === 2) syncPlatePreview();
+    if (n === 5) buildReview();
+    document.getElementById('app').scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+
+  /* ── VEHICLE TYPE ── */
+  function selectVType(t) {
+    vehicleType = t;
+    ['private','2w','commercial'].forEach(v => {
+      document.getElementById('vt-' + v).classList.toggle('selected', v === t);
+    });
+    syncPlatePreview();
+    updateFeeBreakdown();
+  }
+
+  /* ── PLATE PREVIEW ── */
+  function updatePlatePreview() { /* triggers on input */ }
+
+  function syncPlatePreview() {
+    const regNo = document.getElementById('regNo')?.value?.toUpperCase() || 'MH 12 AB 1234';
+    const fuel = document.getElementById('fuelType')?.value || 'petrol';
+    const plate = document.getElementById('livePlate');
+    const txt = document.getElementById('livePlateText');
+    if (plate && txt) {
+      txt.textContent = regNo || 'MH 12 AB 1234';
+      txt.className = '';
+      plate.className = 'live-plate';
+      if (vehicleType === 'commercial') {
+        plate.classList.add('yellow-v');
+        document.getElementById('pillType').textContent = 'Yellow';
+      } else if (fuel === 'ev' || fuel === 'hybrid') {
+        plate.classList.add('green-v');
+        document.getElementById('pillType').textContent = 'Green';
+      } else {
+        plate.classList.add('white-v');
+        document.getElementById('pillType').textContent = 'White';
+      }
+      const stickerMap = { petrol:'Blue (Petrol)', diesel:'Orange (Diesel)', cng:'Blue (CNG)', ev:'Green (EV)', hybrid:'Green (Hybrid)' };
+      document.getElementById('pillSticker').textContent = stickerMap[fuel] || 'Blue';
+      document.getElementById('pillSize').textContent = vehicleType === '2w' ? '200×100 mm' : '500×120 mm';
+    }
+  }
+
+  /* ── RTO ── */
+  function selectRTO(n) {
+    selectedRTO = n;
+    [1,2,3,4].forEach(i => document.getElementById('rto-' + i)?.classList.toggle('selected', i === n));
+  }
+  function updateRTOCards() { /* city filter – placeholder */ }
+  function toggleDoorstep() {
+    const mode = document.getElementById('fitmentMode').value;
+    document.getElementById('doorstepAddress').style.display = mode === 'doorstep' ? '' : 'none';
+    updateFeeBreakdown();
+  }
+
+  /* ── TIME SLOTS ── */
+  function selectSlot(el) {
+    if (el.classList.contains('full')) return;
+    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSlot = el.textContent;
+  }
+  function refreshTimeSlots() { /* session toggle – cosmetic */ }
+
+  /* ── MIN DATE ── */
+  const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+  document.getElementById('apptDate').min = tomorrow.toISOString().split('T')[0];
+  document.getElementById('apptDate').value = tomorrow.toISOString().split('T')[0];
+
+  /* ── UPLOAD GRID ── */
+  function buildUploadGrid() {
+    const grid = document.getElementById('uploadGrid');
+    if (grid.children.length) return;
+    grid.innerHTML = '';
+    docList.forEach(doc => {
+      const card = document.createElement('div');
+      card.className = 'upload-card';
+      card.id = 'uc-' + doc.id;
+      card.innerHTML = `
+        <div class="upload-doc-title">${doc.label}
+          ${doc.required ? '<span class="upload-required">Required</span>' : '<span class="upload-optional">Optional</span>'}
+        </div>
+        <div class="upload-doc-hint">${doc.hint}</div>
+        <label for="uf-${doc.id}">
+          <div class="upload-trigger">
+            <div class="upload-trigger-icon">📎</div>
+            <div class="upload-trigger-text">Click to upload or drag &amp; drop<br>PDF · JPG · PNG</div>
+          </div>
+        </label>
+        <input type="file" id="uf-${doc.id}" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('${doc.id}','uf-${doc.id}')">
+      `;
+      card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('dragover'); });
+      card.addEventListener('dragleave', () => card.classList.remove('dragover'));
+      card.addEventListener('drop', e => { e.preventDefault(); card.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if(f) processFile(doc.id, f, card); });
+      grid.appendChild(card);
+    });
+  }
+
+  function handleFile(docId, inputId) {
+    const f = document.getElementById(inputId)?.files[0];
+    if (f) processFile(docId, f, document.getElementById('uc-' + docId));
+  }
+
+  function processFile(docId, file, card) {
+    uploadedFiles[docId] = file.name;
+    card.classList.add('uploaded');
+    const trigger = card.querySelector('.upload-trigger');
+    trigger.innerHTML = `<div class="upload-trigger-icon">✅</div><div class="upload-trigger-text" style="color:var(--green);font-weight:600">${file.name}</div>`;
+  }
+
+  /* ── FEE BREAKDOWN ── */
+  function updateFeeBreakdown() {
+    const mode = document.getElementById('fitmentMode')?.value;
+    const base = vehicleType === '2w' ? 350 : vehicleType === 'commercial' ? 600 : 450;
+    const fitment = mode === 'doorstep' ? 200 : 0;
+    document.getElementById('platePrice').textContent = '₹ ' + base;
+    document.getElementById('fitmentCharges').textContent = fitment ? '₹ ' + fitment : '₹ 0 (Free)';
+    document.getElementById('totalFee').textContent = '₹ ' + (base + 100 + fitment);
+  }
+
+  /* ── SUMMARY ── */
+  function updateSummary() { /* live update */ }
+
+  function buildReview() {
+    const g = document.getElementById('summaryGrid');
+    const apptDate = document.getElementById('apptDate')?.value || '—';
+    const rtoNames = ['RTO Shivajinagar','RTO Pimpri-Chinchwad','Minda HSRP Centre','Bundl Technologies'];
+    const fields = [
+      ['Owner', document.getElementById('ownerName')?.value || '—'],
+      ['Registration No.', (document.getElementById('regNo')?.value || '—').toUpperCase()],
+      ['Vehicle', (document.getElementById('vehicleMake')?.value || '') + ' ' + (document.getElementById('vehicleModel')?.value || '')],
+      ['State', document.getElementById('regState')?.value || '—'],
+      ['Fuel Type', document.getElementById('fuelType')?.value || '—'],
+      ['Fitment Centre', rtoNames[selectedRTO - 1]],
+      ['Appointment', apptDate + ', ' + selectedSlot],
+      ['Mobile', document.getElementById('mobile')?.value || '—'],
+      ['Plate Type', vehicleType === 'commercial' ? 'Yellow' : document.getElementById('fuelType')?.value === 'ev' ? 'Green' : 'White'],
+    ];
+    g.innerHTML = fields.map(([k,v]) => `
+      <div class="summary-card">
+        <h4>${k}</h4>
+        <p class="${k === 'Registration No.' ? 'mono' : ''}">${v || '—'}</p>
+      </div>
+    `).join('');
+
+    // Doc status
+    const dsl = document.getElementById('docStatusList');
+    dsl.innerHTML = docList.map(d => `
+      <div class="doc-status-row">
+        <span>${d.label} ${d.required ? '<span class="upload-required">req</span>' : ''}</span>
+        <span class="status-badge ${uploadedFiles[d.id] ? 'done' : 'pending'}">${uploadedFiles[d.id] ? '✅ Uploaded' : '⏳ Pending'}</span>
+      </div>
+    `).join('');
+
+    updateFeeBreakdown();
+  }
+
+  // ── API BASE URL ─────────────────────────────────────────
+  // In development: http://localhost:5000
+  // In production:  your Render URL e.g. https://vahanbridge-api.onrender.com
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://vahanbridge-api.onrender.com'; // ← UPDATE this after Render deploy
+
+  /* ── SUBMIT ── */
+  async function submitApp() {
+    const btn = document.querySelector('#submitRow .btn-next');
+    btn.disabled = true;
+    btn.textContent = '⏳ Submitting…';
+
+    // Collect all form values
+    const payload = {
+      // Step 1 — Vehicle & Owner
+      ownerName:    document.getElementById('ownerName')?.value?.trim()   || '',
+      mobile:       document.getElementById('mobile')?.value?.trim()      || '',
+      regNo:        document.getElementById('regNo')?.value?.trim()       || '',
+      chassisNo:    document.getElementById('chassisNo')?.value?.trim()   || '',
+      engineNo:     document.getElementById('engineNo')?.value?.trim()    || '',
+      regYear:      document.getElementById('regYear')?.value             || '',
+      vehicleMake:  document.getElementById('vehicleMake')?.value?.trim() || '',
+      vehicleModel: document.getElementById('vehicleModel')?.value?.trim()|| '',
+      regState:     document.getElementById('regState')?.value            || '',
+      fuelType:     document.getElementById('fuelType')?.value            || 'petrol',
+      vehicleType:  vehicleType || 'private',
+      // Step 2 — Plate details
+      plateSet:     document.getElementById('plateSet')?.value            || 'both',
+      specialReq:   document.getElementById('specialReq')?.value         || '',
+      notes:        document.getElementById('notes')?.value              || '',
+      // Step 3 — Appointment
+      fitmentMode:  document.getElementById('fitmentMode')?.value        || 'centre',
+      rtoCentre:    document.querySelector('.rto-card.selected .rto-name')?.textContent || '',
+      doorstepAddress: document.querySelector('#doorstepAddress input')?.value || '',
+      apptDate:     document.getElementById('apptDate')?.value           || '',
+      apptSlot:     selectedSlot || '',
+    };
+
+    // Basic front-end validation
+    if (!payload.ownerName || !payload.mobile || !payload.regNo) {
+      showError('Please fill in Owner Name, Mobile, and Registration Number in Step 1.');
+      btn.disabled = false;
+      btn.textContent = '🚀 Submit & Proceed to Payment';
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/hsrp/apply`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        const msg = data.errors
+          ? data.errors.map(e => e.msg).join(', ')
+          : (data.error || 'Submission failed. Please try again.');
+        showError(msg);
+        btn.disabled = false;
+        btn.textContent = '🚀 Submit & Proceed to Payment';
+        return;
+      }
+
+      // ── SUCCESS ──────────────────────────────────────────
+      document.getElementById('refNumber').textContent = data.bookingRef;
+      document.getElementById('submitRow').style.display = 'none';
+      const panel = document.getElementById('successPanel');
+      panel.classList.add('show');
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+      // Store bookingRef for potential document upload
+      window._bookingRef = data.bookingRef;
+
+    } catch (err) {
+      console.error('Submit error:', err);
+      showError('Network error — please check your connection and try again.');
+      btn.disabled = false;
+      btn.textContent = '🚀 Submit & Proceed to Payment';
+    }
+  }
+
+  /* ── ERROR TOAST ── */
+  function showError(msg) {
+    let toast = document.getElementById('errorToast');
+    if (!toast) {
+      toast = document.createElement('div');
+      toast.id = 'errorToast';
+      toast.style.cssText = `
+        position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+        background:#fff;border:1px solid rgba(200,25,58,0.3);border-left:3px solid #c8193a;
+        color:#1a1a2e;padding:1rem 1.4rem;border-radius:12px;font-size:0.85rem;
+        z-index:999;box-shadow:0 8px 24px rgba(0,0,0,0.12);max-width:400px;text-align:center;
+        opacity:0;transition:opacity 0.3s;
+      `;
+      document.body.appendChild(toast);
+    }
+    toast.textContent = '⚠️ ' + msg;
+    toast.style.opacity = '1';
+    setTimeout(() => { toast.style.opacity = '0'; }, 4000);
+  }
+
+  /* ── CHECK EXISTING HSRP on reg number blur ── */
+  document.addEventListener('DOMContentLoaded', () => {
+    const regInput = document.getElementById('regNo');
+    if (regInput) {
+      regInput.addEventListener('blur', async () => {
+        const val = regInput.value.trim();
+        if (!val || val.length < 6) return;
+        try {
+          const res  = await fetch(`${API_BASE}/api/hsrp/check-vehicle/${encodeURIComponent(val)}`);
+          const data = await res.json();
+          if (data.hasActiveApplication) {
+            showError(`Active HSRP application found for ${val.toUpperCase()} — Ref: ${data.bookingRef} (${data.status})`);
+          }
+        } catch (_) { /* silent fail */ }
+      });
+    }
+  });
+
+  /* ── INIT DATE ── */
+  window.addEventListener('DOMContentLoaded', () => {
+    syncPlatePreview();
+    buildUploadGrid();
+  });
+</script>
+</body>
+</html>

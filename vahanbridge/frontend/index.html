@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VahanBridge – Interstate Vehicle Transfer Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --surface: #eef1f8;
+    --card: #ffffff;
+    --border: rgba(0,0,0,0.08);
+    --pink: #c8193a;
+    --pink-light: #e8305a;
+    --cyan: #0077cc;
+    --amber: #d97a00;
+    --green: #00875a;
+    --text: #1a1a2e;
+    --muted: #6b7080;
+    --subtle: #b0b8cc;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-bar { background: var(--pink); color: #fff; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; padding: 0.4rem 0; overflow: hidden; white-space: nowrap; }
+  .marquee-track { display: inline-block; animation: marquee-scroll 40s linear infinite; }
+  .marquee-track span { margin: 0 2.5rem; }
+  @keyframes marquee-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+  /* ── NAV ─────────────────────────────────────────────── */
+  nav {
+    position: sticky; top: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.9rem 3rem;
+    background: rgba(244,246,251,0.95);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800; font-size: 1.35rem;
+    background: linear-gradient(135deg, #e8195a, #ff8c42);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    letter-spacing: -0.5px;
+  }
+  .logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--pink), #ff8c42); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  .logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+  nav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+  nav ul li a {
+    color: var(--muted); text-decoration: none; font-size: 0.88rem;
+    font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s;
+  }
+  nav ul li a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--pink); color: #fff !important;
+    padding: 0.5rem 1.2rem; border-radius: 8px; font-weight: 600 !important;
+    transition: background 0.2s, transform 0.15s !important;
+    box-shadow: 0 4px 14px rgba(200,25,58,0.3);
+  }
+  .nav-cta:hover { background: var(--pink-light) !important; transform: translateY(-1px); }
+
+  /* ── HERO ────────────────────────────────────────────── */
+  .hero {
+    min-height: 90vh;
+    display: flex; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 5rem 2rem 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(200,25,58,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200,25,58,0.05) 1px, transparent 1px);
+    background-size: 50px 50px;
+    mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 100%);
+  }
+  .hero-glow {
+    position: absolute; top: 20%; left: 50%; transform: translateX(-50%);
+    width: 600px; height: 400px; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(200,25,58,0.08), transparent 70%);
+    pointer-events: none;
+  }
+  .hero-content { position: relative; z-index: 2; max-width: 820px; }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    background: rgba(232,25,90,0.1); border: 1px solid rgba(232,25,90,0.3);
+    color: var(--pink-light); padding: 0.4rem 1rem; border-radius: 100px;
+    font-size: 0.78rem; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+  .hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--pink); border-radius: 50%; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+  h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800; line-height: 1.1; letter-spacing: -1.5px;
+    margin-bottom: 1.2rem;
+  }
+  h1 .accent { color: var(--pink); }
+  h1 .accent2 { color: var(--cyan); }
+  .hero-sub {
+    font-size: 1.1rem; color: var(--muted); max-width: 560px; margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+  .hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--pink), #c0143f);
+    color: #fff; padding: 0.85rem 2rem; border-radius: 12px;
+    font-weight: 600; font-size: 0.95rem; cursor: pointer;
+    border: none; transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 24px rgba(232,25,90,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(232,25,90,0.5); }
+  .btn-outline {
+    background: transparent; color: var(--text);
+    padding: 0.85rem 2rem; border-radius: 12px;
+    font-weight: 500; font-size: 0.95rem; cursor: pointer;
+    border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s;
+  }
+  .btn-outline:hover { border-color: var(--subtle); background: rgba(255,255,255,0.04); }
+  .hero-stats {
+    display: flex; gap: 3rem; justify-content: center;
+    margin-top: 4rem; padding-top: 2.5rem;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--text), var(--muted));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-num .unit { font-size: 1.1rem; color: var(--pink); -webkit-text-fill-color: var(--pink); }
+  .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  /* ── SECTIONS ────────────────────────────────────────── */
+  section { padding: 5rem 3rem; }
+  .section-inner { max-width: 1200px; margin: 0 auto; }
+  .section-tag {
+    display: inline-block; font-size: 0.72rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px; color: var(--pink);
+    margin-bottom: 0.7rem;
+  }
+  h2 {
+    font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+    font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1rem; line-height: 1.2;
+  }
+  .section-desc { color: var(--muted); max-width: 540px; font-size: 1rem; line-height: 1.7; }
+
+  /* ── PROBLEMS ────────────────────────────────────────── */
+  #problems { background: var(--surface); }
+  .problems-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.2rem; margin-top: 2.5rem;
+  }
+  .problem-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.5rem;
+    position: relative; overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .problem-card:hover { border-color: rgba(232,25,90,0.3); transform: translateY(-3px); }
+  .problem-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--pink), transparent);
+  }
+  .problem-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: rgba(232,25,90,0.12); display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; margin-bottom: 1rem;
+  }
+  .problem-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.5rem; }
+  .problem-card p { font-size: 0.875rem; color: var(--muted); line-height: 1.6; }
+
+  /* ── FEATURES ────────────────────────────────────────── */
+  .features-header { display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 1rem; margin-bottom: 3rem; }
+  .feature-tabs {
+    display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 2rem;
+  }
+  .tab {
+    padding: 0.5rem 1.1rem; border-radius: 100px; font-size: 0.82rem; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); color: var(--muted);
+    background: transparent; transition: all 0.2s;
+  }
+  .tab.active { background: var(--pink); color: #fff; border-color: var(--pink); }
+  .tab:hover:not(.active) { border-color: var(--subtle); color: var(--text); }
+  .feature-panel { display: none; }
+  .feature-panel.active { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+
+  /* NOC Panel */
+  .noc-steps { display: flex; flex-direction: column; gap: 1rem; }
+  .step {
+    display: flex; align-items: flex-start; gap: 1rem;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.2rem;
+    transition: border-color 0.2s;
+  }
+  .step:hover { border-color: rgba(232,25,90,0.3); }
+  .step-num {
+    width: 32px; height: 32px; border-radius: 50%; background: rgba(232,25,90,0.15);
+    border: 1px solid rgba(232,25,90,0.3); display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 800; color: var(--pink);
+    flex-shrink: 0;
+  }
+  .step-info h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.2rem; }
+  .step-info p { font-size: 0.8rem; color: var(--muted); }
+
+  .form-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem;
+  }
+  .form-card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; }
+  .form-group { margin-bottom: 1rem; }
+  .form-group label { display: block; font-size: 0.78rem; color: var(--muted); font-weight: 500; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+  .form-group input, .form-group select {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); padding: 0.65rem 0.9rem; border-radius: 10px;
+    font-family: inherit; font-size: 0.9rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--pink); }
+  .form-group input::placeholder { color: var(--subtle); }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .submit-btn {
+    width: 100%; background: linear-gradient(135deg, var(--pink), #c0143f);
+    color: #fff; padding: 0.8rem; border-radius: 10px; border: none;
+    font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+    margin-top: 0.5rem; transition: opacity 0.2s;
+  }
+  .submit-btn:hover { opacity: 0.9; }
+
+  /* BH Panel */
+  .bh-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem;
+  }
+  .bh-card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .bh-card .sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .eligibility-result {
+    margin-top: 1rem; padding: 1rem; border-radius: 10px;
+    background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.25);
+    display: none;
+  }
+  .eligibility-result.show { display: block; }
+  .eligibility-result h4 { color: var(--green); font-size: 0.9rem; margin-bottom: 0.3rem; }
+  .eligibility-result p { font-size: 0.82rem; color: var(--muted); }
+  .bh-info {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem;
+  }
+  .bh-info h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+  .bh-benefit {
+    display: flex; align-items: flex-start; gap: 0.8rem;
+    padding: 0.8rem 0; border-bottom: 1px solid var(--border);
+  }
+  .bh-benefit:last-child { border-bottom: none; }
+  .bh-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); margin-top: 0.4rem; flex-shrink: 0; }
+  .bh-benefit-text h4 { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.15rem; }
+  .bh-benefit-text p { font-size: 0.8rem; color: var(--muted); }
+
+  /* Tax Panel */
+  .tax-calc {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem;
+  }
+  .tax-calc h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.2rem; }
+  .tax-result {
+    margin-top: 1rem; display: none;
+    background: rgba(255,179,71,0.07); border: 1px solid rgba(255,179,71,0.2);
+    border-radius: 12px; padding: 1rem;
+  }
+  .tax-result.show { display: block; }
+  .tax-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.88rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+  .tax-row:last-child { border-bottom: none; font-weight: 700; color: var(--green); }
+  .tax-label { color: var(--muted); }
+
+  /* HSRP Panel */
+  .hsrp-form {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem;
+  }
+  .hsrp-form h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .hsrp-form .sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .plate-preview {
+    width: 100%; background: #FFD700; border-radius: 8px;
+    padding: 1rem; text-align: center; margin-bottom: 1rem;
+    border: 3px solid #333; position: relative;
+  }
+  .plate-text {
+    font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800;
+    color: #111; letter-spacing: 4px;
+  }
+  .plate-meta { font-size: 0.6rem; color: #333; margin-top: 0.2rem; }
+  .hsrp-info {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem;
+  }
+  .hsrp-info h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1rem; }
+  .hsrp-feature {
+    display: flex; gap: 0.8rem; padding: 0.8rem 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .hsrp-feature:last-child { border-bottom: none; }
+  .hsrp-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .hsrp-feature h4 { font-size: 0.88rem; font-weight: 600; margin-bottom: 0.15rem; }
+  .hsrp-feature p { font-size: 0.8rem; color: var(--muted); }
+
+  /* PUC Panel */
+  .puc-map-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem; height: 100%;
+  }
+  .puc-map-card h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .puc-map-card .sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .map-placeholder {
+    width: 100%; height: 220px; border-radius: 12px;
+    background: linear-gradient(135deg, #dde4f0 0%, #c8d4e8 50%, #b8c8e0 100%);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 0.5rem; cursor: pointer;
+    border: 1px solid var(--border); position: relative; overflow: hidden;
+    transition: all 0.3s;
+  }
+  .map-placeholder:hover { border-color: rgba(0,212,255,0.4); }
+  .map-placeholder::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0,212,255,0.08), transparent 60%);
+  }
+  .map-pin { font-size: 2.5rem; }
+  .map-label { font-size: 0.85rem; color: var(--cyan); font-weight: 500; }
+  .map-sublabel { font-size: 0.75rem; color: var(--muted); }
+  .puc-centers { margin-top: 1rem; }
+  .center-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem; background: var(--surface); border-radius: 10px;
+    margin-bottom: 0.5rem; border: 1px solid var(--border);
+  }
+  .center-name { font-size: 0.85rem; font-weight: 500; }
+  .center-dist { font-size: 0.75rem; color: var(--cyan); font-weight: 600; }
+  .directions-btn {
+    background: rgba(0,212,255,0.1); color: var(--cyan);
+    border: 1px solid rgba(0,212,255,0.2); padding: 0.3rem 0.7rem;
+    border-radius: 6px; font-size: 0.75rem; cursor: pointer;
+    font-family: inherit; font-weight: 500; transition: background 0.2s;
+  }
+  .directions-btn:hover { background: rgba(0,212,255,0.2); }
+
+  /* ALARM / NOTIFICATIONS ─── */
+  #alerts { background: var(--surface); }
+  .alerts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 2.5rem; }
+  .alert-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.5rem; position: relative; overflow: hidden;
+  }
+  .alert-card.urgent { border-color: rgba(232,25,90,0.35); }
+  .alert-card.warning { border-color: rgba(255,179,71,0.35); }
+  .alert-card.ok { border-color: rgba(0,229,160,0.35); }
+  .alert-bar {
+    position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+    border-radius: 16px 0 0 16px;
+  }
+  .urgent .alert-bar { background: var(--pink); }
+  .warning .alert-bar { background: var(--amber); }
+  .ok .alert-bar { background: var(--green); }
+  .alert-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.7rem; }
+  .alert-type { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+  .urgent .alert-type { color: var(--pink); }
+  .warning .alert-type { color: var(--amber); }
+  .ok .alert-type { color: var(--green); }
+  .days-badge {
+    padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700;
+  }
+  .urgent .days-badge { background: rgba(232,25,90,0.15); color: var(--pink); }
+  .warning .days-badge { background: rgba(255,179,71,0.15); color: var(--amber); }
+  .ok .days-badge { background: rgba(0,229,160,0.15); color: var(--green); }
+  .alert-card h4 { font-size: 1rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .alert-card p { font-size: 0.82rem; color: var(--muted); margin-bottom: 1rem; }
+  .alert-actions { display: flex; gap: 0.6rem; }
+  .renew-btn {
+    background: var(--pink); color: #fff; border: none; padding: 0.5rem 1rem;
+    border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer;
+    font-family: inherit; transition: opacity 0.2s;
+  }
+  .renew-btn:hover { opacity: 0.85; }
+  .remind-btn {
+    background: transparent; color: var(--muted); border: 1px solid var(--border);
+    padding: 0.5rem 0.8rem; border-radius: 8px; font-size: 0.8rem; cursor: pointer;
+    font-family: inherit; transition: border-color 0.2s;
+  }
+  .remind-btn:hover { border-color: var(--subtle); color: var(--text); }
+
+  /* NOTIFICATION SETUP ─── */
+  .notif-setup {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem; margin-top: 1.5rem;
+  }
+  .notif-setup h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; }
+  .notif-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.8rem 0; border-bottom: 1px solid var(--border);
+  }
+  .notif-row:last-child { border-bottom: none; }
+  .notif-label { font-size: 0.88rem; }
+  .notif-sub { font-size: 0.75rem; color: var(--muted); }
+  .toggle {
+    width: 44px; height: 24px; background: var(--subtle); border-radius: 100px;
+    position: relative; cursor: pointer; transition: background 0.2s;
+  }
+  .toggle.on { background: var(--pink); }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px; background: #fff; border-radius: 50%;
+    transition: transform 0.2s;
+  }
+  .toggle.on::after { transform: translateX(20px); }
+
+  /* DOCUMENTS ─── */
+  #documents { background: var(--bg); }
+  .docs-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-top: 2rem; }
+  .doc-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; padding: 1.3rem;
+    display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.8rem;
+    transition: border-color 0.2s, transform 0.2s; cursor: pointer;
+  }
+  .doc-card:hover { border-color: rgba(232,25,90,0.3); transform: translateY(-3px); }
+  .doc-icon {
+    width: 50px; height: 50px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center; font-size: 1.5rem;
+  }
+  .doc-card h4 { font-size: 0.88rem; font-weight: 600; }
+  .doc-card p { font-size: 0.75rem; color: var(--muted); }
+  .doc-status {
+    padding: 0.2rem 0.6rem; border-radius: 100px;
+    font-size: 0.7rem; font-weight: 700;
+  }
+  .status-required { background: rgba(232,25,90,0.12); color: var(--pink); }
+  .status-optional { background: rgba(0,229,160,0.12); color: var(--green); }
+  .status-pending { background: rgba(255,179,71,0.12); color: var(--amber); }
+
+  /* DASHBOARD PREVIEW ─── */
+  #dashboard { background: var(--surface); }
+  .dashboard-mock {
+    background: #eef1f8; border: 1px solid var(--border);
+    border-radius: 20px; overflow: hidden; margin-top: 2.5rem;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+  }
+  .mock-topbar {
+    background: #e4e9f4; padding: 0.8rem 1.5rem;
+    display: flex; align-items: center; gap: 0.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #ff5f56; }
+  .dot-y { background: #ffbd2e; }
+  .dot-g { background: #27c93f; }
+  .mock-inner { display: grid; grid-template-columns: 200px 1fr; min-height: 460px; }
+  .mock-sidebar {
+    background: #e8edf7; padding: 1.5rem 1rem;
+    border-right: 1px solid var(--border);
+  }
+  .mock-logo { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 800; color: var(--pink); margin-bottom: 2rem; }
+  .mock-nav-item {
+    padding: 0.6rem 0.8rem; border-radius: 8px; font-size: 0.78rem;
+    color: var(--muted); cursor: pointer; margin-bottom: 0.2rem;
+    transition: all 0.2s; display: flex; align-items: center; gap: 0.6rem;
+  }
+  .mock-nav-item.active { background: rgba(232,25,90,0.12); color: var(--pink); }
+  .mock-nav-item:hover:not(.active) { background: rgba(255,255,255,0.04); color: var(--text); }
+  .mock-main { padding: 1.5rem; }
+  .mock-greeting { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 0.2rem; }
+  .mock-sub { font-size: 0.75rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .mock-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.8rem; margin-bottom: 1.5rem; }
+  .mock-stat {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 12px; padding: 1rem;
+  }
+  .mock-stat-label { font-size: 0.7rem; color: var(--muted); margin-bottom: 0.3rem; }
+  .mock-stat-val { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; }
+  .mock-stat-val.pink { color: var(--pink); }
+  .mock-stat-val.cyan { color: var(--cyan); }
+  .mock-stat-val.green { color: var(--green); }
+  .mock-garage h4 { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 0.8rem; }
+  .mock-vehicles { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
+  .mock-vehicle {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 10px; padding: 0.9rem; display: flex; align-items: center; gap: 0.8rem;
+  }
+  .vehicle-icon { font-size: 1.5rem; }
+  .vehicle-reg { font-family: 'Syne', sans-serif; font-size: 0.78rem; font-weight: 700; }
+  .vehicle-model { font-size: 0.7rem; color: var(--muted); }
+  .vehicle-tag {
+    font-size: 0.62rem; padding: 0.15rem 0.4rem; border-radius: 4px; margin-top: 0.2rem;
+    display: inline-block;
+  }
+  .tag-ok { background: rgba(0,229,160,0.12); color: var(--green); }
+  .tag-warn { background: rgba(255,179,71,0.12); color: var(--amber); }
+
+  /* IMPACT ─── */
+  #impact { background: var(--bg); }
+  .impact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.2rem; margin-top: 2.5rem; }
+  .impact-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 16px; padding: 1.8rem; text-align: center;
+  }
+  .impact-num {
+    font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800;
+    margin-bottom: 0.3rem;
+  }
+  .impact-card h4 { font-size: 0.9rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .impact-card p { font-size: 0.8rem; color: var(--muted); }
+
+  /* FOOTER ─── */
+  footer {
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 3rem; text-align: center;
+  }
+  .footer-logo {
+    font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--pink), #ff8c42);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 0.8rem;
+  }
+  footer p { font-size: 0.82rem; color: var(--muted); }
+  .footer-links { display: flex; gap: 2rem; justify-content: center; margin: 1.5rem 0; flex-wrap: wrap; }
+  .footer-links a { font-size: 0.82rem; color: var(--muted); text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
+
+  /* MODAL ─── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px); z-index: 200;
+    display: none; align-items: center; justify-content: center; padding: 1rem;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 20px; padding: 2rem; max-width: 480px; width: 100%;
+    position: relative; animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn { from { opacity:0; transform: scale(0.9) translateY(20px); } to { opacity:1; transform: none; } }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--text); }
+  .modal h3 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 0.4rem; }
+  .modal .sub { font-size: 0.83rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .modal-success {
+    text-align: center; padding: 1rem;
+    display: none;
+  }
+  .modal-success.show { display: block; }
+  .success-icon { font-size: 3rem; margin-bottom: 0.8rem; }
+  .modal-success h4 { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; color: var(--green); margin-bottom: 0.4rem; }
+  .modal-success p { font-size: 0.85rem; color: var(--muted); }
+
+  /* SCROLL REVEAL ─── */
+  .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  /* ── CHATBOT ──────────────────────────────────────────── */
+  .chat-fab {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 250;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), #a01430);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 24px rgba(200,25,58,0.45);
+    transition: transform 0.25s, box-shadow 0.25s;
+    font-size: 1.5rem;
+  }
+  .chat-fab:hover { transform: scale(1.1); box-shadow: 0 10px 32px rgba(200,25,58,0.6); }
+  .chat-fab .chat-badge {
+    position: absolute; top: -2px; right: -2px;
+    width: 18px; height: 18px; border-radius: 50%;
+    background: #00875a; border: 2px solid #fff;
+    font-size: 0.55rem; color: #fff; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .chat-window {
+    position: fixed; bottom: 6.5rem; right: 2rem; z-index: 250;
+    width: 360px; max-height: 520px;
+    background: #fff; border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 4px 16px rgba(0,0,0,0.1);
+    display: flex; flex-direction: column; overflow: hidden;
+    border: 1px solid rgba(200,25,58,0.12);
+    transform: scale(0.8) translateY(20px); transform-origin: bottom right;
+    opacity: 0; pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .chat-window.open {
+    transform: scale(1) translateY(0);
+    opacity: 1; pointer-events: all;
+  }
+  .chat-header {
+    background: linear-gradient(135deg, #c8193a, #a01430);
+    padding: 1rem 1.2rem;
+    display: flex; align-items: center; gap: 0.8rem;
+    flex-shrink: 0;
+  }
+  .chat-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0; border: 2px solid rgba(255,255,255,0.4);
+  }
+  .chat-header-info h4 { color: #fff; font-size: 0.92rem; font-weight: 700; font-family: 'Syne', sans-serif; }
+  .chat-header-info p { color: rgba(255,255,255,0.75); font-size: 0.72rem; }
+  .chat-online { display: flex; align-items: center; gap: 0.3rem; margin-top: 0.1rem; }
+  .chat-online-dot { width: 7px; height: 7px; border-radius: 50%; background: #4ade80; animation: pulse 2s infinite; }
+  .chat-close {
+    margin-left: auto; background: rgba(255,255,255,0.15); border: none;
+    color: #fff; width: 28px; height: 28px; border-radius: 50%;
+    cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .chat-close:hover { background: rgba(255,255,255,0.3); }
+  .chat-quick-btns {
+    padding: 0.7rem 1rem; background: #fdf3f5; border-bottom: 1px solid rgba(200,25,58,0.08);
+    display: flex; flex-wrap: wrap; gap: 0.4rem; flex-shrink: 0;
+  }
+  .quick-btn {
+    background: #fff; border: 1px solid rgba(200,25,58,0.2);
+    color: var(--pink); font-size: 0.72rem; font-weight: 600;
+    padding: 0.3rem 0.7rem; border-radius: 100px; cursor: pointer;
+    font-family: inherit; transition: all 0.2s;
+  }
+  .quick-btn:hover { background: var(--pink); color: #fff; }
+  .chat-messages {
+    flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: 0.8rem;
+    background: #f8f9fc;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: rgba(200,25,58,0.2); border-radius: 2px; }
+  .chat-msg {
+    max-width: 80%; padding: 0.65rem 0.9rem;
+    border-radius: 14px; font-size: 0.83rem; line-height: 1.55; word-break: break-word;
+    animation: msgIn 0.25s ease;
+  }
+  @keyframes msgIn { from { opacity: 0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+  .chat-msg.bot {
+    background: #fff; color: var(--text);
+    border-radius: 4px 14px 14px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    align-self: flex-start;
+    border-left: 3px solid var(--pink);
+  }
+  .chat-msg.user {
+    background: linear-gradient(135deg, #c8193a, #a01430);
+    color: #fff; border-radius: 14px 14px 4px 14px;
+    align-self: flex-end;
+  }
+  .chat-typing {
+    display: flex; align-items: center; gap: 4px;
+    padding: 0.65rem 0.9rem; background: #fff;
+    border-radius: 4px 14px 14px 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    width: fit-content; align-self: flex-start;
+    border-left: 3px solid var(--pink);
+  }
+  .chat-typing span {
+    width: 7px; height: 7px; background: var(--pink);
+    border-radius: 50%; opacity: 0.4;
+    animation: typingBounce 1.2s infinite;
+  }
+  .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+  .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingBounce { 0%,80%,100%{transform:translateY(0);opacity:0.4;} 40%{transform:translateY(-6px);opacity:1;} }
+  .chat-input-row {
+    padding: 0.75rem; background: #fff; border-top: 1px solid var(--border);
+    display: flex; gap: 0.5rem; flex-shrink: 0; align-items: center;
+  }
+  .chat-input {
+    flex: 1; background: #f4f6fb; border: 1px solid var(--border);
+    color: var(--text); padding: 0.55rem 0.9rem; border-radius: 100px;
+    font-family: inherit; font-size: 0.85rem; outline: none;
+    transition: border-color 0.2s;
+  }
+  .chat-input:focus { border-color: var(--pink); }
+  .chat-input::placeholder { color: var(--subtle); }
+  .chat-send {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--pink), #a01430);
+    border: none; color: #fff; font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: transform 0.2s, opacity 0.2s; flex-shrink: 0;
+  }
+  .chat-send:hover { transform: scale(1.1); }
+
+  /* RESPONSIVE ─── */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.2rem; top: 42px; }
+    nav ul { display: none; }
+    section { padding: 3.5rem 1.2rem; }
+    .feature-panel.active { grid-template-columns: 1fr; }
+    .alerts-grid { grid-template-columns: 1fr; }
+    .mock-inner { grid-template-columns: 1fr; }
+    .mock-sidebar { display: none; }
+    .mock-stats { grid-template-columns: 1fr 1fr; }
+    .mock-vehicles { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+    h1 { font-size: 2.2rem; }
+    .chat-window { width: calc(100vw - 2rem); right: 1rem; }
+    .chat-fab { bottom: 1.5rem; right: 1.5rem; }
+    .rto-ticker-label { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="marquee-bar">
+  <div class="marquee-track">
+    <span>🚗 VahanBridge — India's Digital Vehicle Services Platform</span>
+    <span>🚨 HSRP mandatory for all pre-2019 vehicles — book your slot now!</span>
+    <span>📋 BH Series open to private sector employees with offices in 4+ states</span>
+    <span>💰 Road tax refund portal is LIVE — claim your pro-rata refund today!</span>
+    <span>🌿 PUC validity reduced to 6 months for BS-IV vehicles in 15 major cities</span>
+    <span>🔁 Interstate NOC issued within 72 hours for clean-record vehicles</span>
+    <span>📞 Helpline: 1800-200-3466 · Mon–Sat 9AM–6PM</span>
+    <span>🚗 VahanBridge — India's Digital Vehicle Services Platform</span>
+    <span>🚨 HSRP mandatory for all pre-2019 vehicles — book your slot now!</span>
+    <span>📋 BH Series open to private sector employees with offices in 4+ states</span>
+    <span>💰 Road tax refund portal is LIVE — claim your pro-rata refund today!</span>
+    <span>🌿 PUC validity reduced to 6 months for BS-IV vehicles in 15 major cities</span>
+    <span>🔁 Interstate NOC issued within 72 hours for clean-record vehicles</span>
+    <span>📞 Helpline: 1800-200-3466 · Mon–Sat 9AM–6PM</span>
+  </div>
+</div>
+<nav>
+  <a href="index.html" class="logo" style="text-decoration:none;display:flex;align-items:center;gap:0.5rem;">
+    <div class="logo-icon">🌉</div>
+    Vahan<span>Bridge</span>
+  </a>
+  <ul>
+    <li><a href="hsrp_portal.html">HSRP Booking</a></li>
+    <li><a href="noc_transfer.html">NOC Transfer</a></li>
+    <li><a href="bh_series_portal.html">BH Series</a></li>
+    <li><a href="puc_portal.html">PUC Portal</a></li>
+    <li><a href="tax_refund.html">Tax Refund</a></li>
+    <li><a href="#" onclick="openModal()" class="nav-cta">Get Started</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">🇮🇳 Digital India Initiative</div>
+    <h1>
+      Interstate Vehicle Transfer,<br>
+      <span class="accent">Reimagined</span> for<br>
+      <span class="accent2">Digital India</span>
+    </h1>
+    <p class="hero-sub">
+      No more travelling 500 km to get an NOC. VahanBridge handles your entire interstate vehicle transfer, RTO compliance, and document management — online, in minutes.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="openModal()">Start Your Transfer →</button>
+      <button class="btn-outline" onclick="scrollTo('#features')">Explore Features</button>
+    </div>
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">15<span class="unit">d→48h</span></div>
+        <div class="stat-label">Transfer Time Reduced</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">₹15k<span class="unit">+</span></div>
+        <div class="stat-label">Travel Cost Saved</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">70<span class="unit">%</span></div>
+        <div class="stat-label">RTO Workload Reduced</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">60<span class="unit">%</span></div>
+        <div class="stat-label">Better PUC Compliance</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEM -->
+<section id="problems">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">The Problem</div>
+      <h2>The RTO Nightmare, Solved</h2>
+      <p class="section-desc">Millions of Indians relocating across states face a broken vehicle transfer system. Here's what we're fixing.</p>
+    </div>
+    <div class="problems-grid">
+      <div class="problem-card reveal">
+        <div class="problem-icon">🗺️</div>
+        <h3>Physical NOC Nightmare</h3>
+        <p>Vehicle owners must physically return to their home state RTO for inspection — impossible for working professionals who've relocated.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">💸</div>
+        <h3>Stranded Road Tax</h3>
+        <p>Upfront road tax paid in the old state gets stuck. Refund processes involve heavy bureaucracy and months of waiting.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">📅</div>
+        <h3>Missing Deadlines</h3>
+        <p>PUC certificates and insurance expire silently. Fines hit hard. Vehicle owners have no proactive reminder system.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">🔢</div>
+        <h3>HSRP Confusion</h3>
+        <p>High Security Registration Plate procurement procedures are unclear, causing compliance delays and legal uncertainty.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">🅱️</div>
+        <h3>BH Series Mystery</h3>
+        <p>Most eligible central government employees and defence personnel don't even know they qualify for Bharat Series plates.</p>
+      </div>
+      <div class="problem-card reveal">
+        <div class="problem-icon">📍</div>
+        <h3>PUC Centre Hunting</h3>
+        <p>Finding the nearest authorised PUC testing centre means asking around or searching endlessly — no centralised directory.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Core Features</div>
+      <h2>Everything Under One Portal</h2>
+      <p class="section-desc">All your interstate vehicle transfer needs, compliance tools, and RTO services in one unified digital platform.</p>
+    </div>
+    <div class="feature-tabs" style="margin-top:2rem;">
+      <button class="tab active" onclick="switchTab('noc')">🔄 NOC Transfer</button>
+      <button class="tab" onclick="switchTab('bh')">🅱️ BH Series</button>
+      <button class="tab" onclick="switchTab('tax')">💰 Tax Refund</button>
+      <button class="tab" onclick="switchTab('hsrp')">🔢 HSRP Plates</button>
+      <button class="tab" onclick="switchTab('puc')">📍 PUC Finder</button>
+    </div>
+
+    <!-- NOC Panel -->
+    <div class="feature-panel active" id="panel-noc">
+      <div class="noc-steps">
+        <div style="margin-bottom:0.5rem;">
+          <h3 style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;margin-bottom:0.3rem;">Seamless NOC & Registration Transfer</h3>
+          <p style="font-size:0.85rem;color:var(--muted);">No more travelling back to your home state. Complete the entire process digitally.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">01</div>
+          <div class="step-info">
+            <h4>Online NOC Application</h4>
+            <p>Upload documents digitally with e-signature support. No physical RTO visit required.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <div class="step-info">
+            <h4>Interstate Auto-Verification</h4>
+            <p>System connects with previous state RTO database to verify vehicle details instantly.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <div class="step-info">
+            <h4>Tax Reconciliation</h4>
+            <p>Algorithm calculates remaining road tax from old state and adjusts new state fees automatically.</p>
+          </div>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <div class="step-info">
+            <h4>New Registration Issued</h4>
+            <p>Digital RC with new state registration. No paperwork backlog. Delivered in 48 hours.</p>
+          </div>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>Apply for Interstate NOC</h3>
+        <div class="form-group">
+          <label>Vehicle Registration Number</label>
+          <input type="text" placeholder="e.g. KA-05-MN-1234" id="nocVehicle">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Current State</label>
+            <select id="nocFromState">
+              <option value="">Select State</option>
+              <option>Karnataka</option><option>Maharashtra</option><option>Delhi</option>
+              <option>Tamil Nadu</option><option>Uttar Pradesh</option><option>Gujarat</option>
+              <option>Rajasthan</option><option>West Bengal</option><option>Telangana</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Transfer To State</label>
+            <select id="nocToState">
+              <option value="">Select State</option>
+              <option>Karnataka</option><option>Maharashtra</option><option>Delhi</option>
+              <option>Tamil Nadu</option><option>Uttar Pradesh</option><option>Gujarat</option>
+              <option>Rajasthan</option><option>West Bengal</option><option>Telangana</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Owner Name (as per RC)</label>
+          <input type="text" placeholder="Full name">
+        </div>
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <button class="submit-btn" onclick="submitNOC()">Apply for NOC →</button>
+      </div>
+    </div>
+
+    <!-- BH Panel -->
+    <div class="feature-panel" id="panel-bh">
+      <div class="bh-card">
+        <h3>BH Series Eligibility Checker</h3>
+        <p class="sub">Bharat Series registration — valid across all states. No re-registration ever.</p>
+        <div class="form-group">
+          <label>Employment Type</label>
+          <select id="bhEmployment">
+            <option value="">Select Type</option>
+            <option value="central">Central Government Employee</option>
+            <option value="defence">Defence Personnel</option>
+            <option value="psu">Public Sector Undertaking (PSU)</option>
+            <option value="mnc">MNC with offices in 4+ states</option>
+            <option value="private">Private (4+ states)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Number of Office Locations</label>
+          <select id="bhOffices">
+            <option value="">Select</option>
+            <option value="1">1 State</option>
+            <option value="2">2-3 States</option>
+            <option value="4">4+ States</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>How Many Times Relocated in 5 Years?</label>
+          <select id="bhReloc">
+            <option value="">Select</option>
+            <option value="0">Never</option>
+            <option value="1">Once</option>
+            <option value="2">2-3 Times</option>
+            <option value="3">4+ Times</option>
+          </select>
+        </div>
+        <button class="submit-btn" onclick="checkBHEligibility()">Check Eligibility →</button>
+        <div class="eligibility-result" id="bhResult">
+          <h4>✅ You are eligible for BH Series!</h4>
+          <p>Your vehicle can be registered under Bharat Series. You'll never need to re-register when transferring states. Proceed to BH Series application →</p>
+        </div>
+      </div>
+      <div class="bh-info">
+        <h3>Why BH Series?</h3>
+        <div class="bh-benefit">
+          <div class="bh-dot"></div>
+          <div class="bh-benefit-text">
+            <h4>No Re-Registration Ever</h4>
+            <p>Valid across all Indian states. Move freely without registration hassle.</p>
+          </div>
+        </div>
+        <div class="bh-benefit">
+          <div class="bh-dot"></div>
+          <div class="bh-benefit-text">
+            <h4>2-Year Tax Cycles</h4>
+            <p>Road tax paid in 2-year cycles instead of lump-sum lifetime payment.</p>
+          </div>
+        </div>
+        <div class="bh-benefit">
+          <div class="bh-dot"></div>
+          <div class="bh-benefit-text">
+            <h4>Ideal for Frequent Movers</h4>
+            <p>Defence personnel, central government officers, and MNC employees benefit most.</p>
+          </div>
+        </div>
+        <div class="bh-benefit">
+          <div class="bh-dot"></div>
+          <div class="bh-benefit-text">
+            <h4>24BH Format Number Plate</h4>
+            <p>Year of registration + BH + four digits + two letters. Nationally recognised.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tax Panel -->
+    <div class="feature-panel" id="panel-tax">
+      <div class="tax-calc">
+        <h3>Road Tax Refund Calculator</h3>
+        <div class="form-group">
+          <label>Vehicle Registration Number</label>
+          <input type="text" placeholder="e.g. KA-01-AB-1234" id="taxVehicle">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Previous State</label>
+            <select id="taxFromState">
+              <option value="">Select</option>
+              <option>Karnataka</option><option>Maharashtra</option><option>Delhi</option>
+              <option>Tamil Nadu</option><option>Gujarat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>New State</label>
+            <select id="taxToState">
+              <option value="">Select</option>
+              <option>Uttar Pradesh</option><option>Rajasthan</option><option>West Bengal</option>
+              <option>Punjab</option><option>Haryana</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Tax Paid (₹)</label>
+            <input type="number" placeholder="e.g. 45000" id="taxPaid">
+          </div>
+          <div class="form-group">
+            <label>Years Since Registration</label>
+            <input type="number" placeholder="e.g. 3" id="taxYears" min="0" max="15">
+          </div>
+        </div>
+        <button class="submit-btn" onclick="calcTax()">Calculate Refund & New Tax →</button>
+        <div class="tax-result" id="taxResult">
+          <div class="tax-row"><span class="tax-label">Tax Paid (Old State)</span><span id="tr1">—</span></div>
+          <div class="tax-row"><span class="tax-label">Used Duration (Pro-rata)</span><span id="tr2">—</span></div>
+          <div class="tax-row"><span class="tax-label">Estimated Refund from Old State</span><span id="tr3">—</span></div>
+          <div class="tax-row"><span class="tax-label">New State Tax Payable</span><span id="tr4">—</span></div>
+          <div class="tax-row"><span>Net Savings / Adjustable Amount</span><span id="tr5">—</span></div>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>File Tax Transfer Request</h3>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:1.2rem;">VahanBridge automatically initiates refund from your previous state and adjusts new state dues.</p>
+        <div class="form-group">
+          <label>Bank Account for Refund</label>
+          <input type="text" placeholder="Account Number">
+        </div>
+        <div class="form-group">
+          <label>IFSC Code</label>
+          <input type="text" placeholder="e.g. SBIN0001234">
+        </div>
+        <div class="form-group">
+          <label>Upload Form 16 / Tax Receipt</label>
+          <input type="file" accept=".pdf,.jpg,.png" style="font-size:0.8rem;">
+        </div>
+        <button class="submit-btn" onclick="showToast('Tax transfer request submitted! Refund in 15-21 working days.')">File Transfer Request →</button>
+      </div>
+    </div>
+
+    <!-- HSRP Panel -->
+    <div class="feature-panel" id="panel-hsrp">
+      <div class="hsrp-form">
+        <h3>HSRP Number Plate Order</h3>
+        <p class="sub">High Security Registration Plates — mandatory for all vehicles. Order yours in minutes.</p>
+        <div class="plate-preview">
+          <div class="plate-text" id="plateDisplay">MH·01·AB·1234</div>
+          <div class="plate-meta">IND · INDIA · HIGH SECURITY REGISTRATION PLATE</div>
+        </div>
+        <div class="form-group">
+          <label>Registration Number</label>
+          <input type="text" placeholder="e.g. MH01AB1234" id="hsrpReg" oninput="updatePlate(this.value)">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Vehicle Type</label>
+            <select>
+              <option>Two Wheeler</option>
+              <option>Four Wheeler</option>
+              <option>Commercial Vehicle</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Plate Color</label>
+            <select>
+              <option>White (Private)</option>
+              <option>Yellow (Commercial)</option>
+              <option>Blue (Diplomatic)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Preferred Installation Date</label>
+          <input type="date">
+        </div>
+        <button class="submit-btn" onclick="showToast('HSRP order placed! Estimated delivery: 5-7 working days.')">Order HSRP Plate →</button>
+      </div>
+      <div class="hsrp-info">
+        <h3>HSRP Features</h3>
+        <div class="hsrp-feature">
+          <div class="hsrp-icon">🔐</div>
+          <div>
+            <h4>Tamper-Proof Design</h4>
+            <p>Hot-stamped chromium hologram and laser-etched IND mark — impossible to replicate.</p>
+          </div>
+        </div>
+        <div class="hsrp-feature">
+          <div class="hsrp-icon">📡</div>
+          <div>
+            <h4>GPS Tracking Ready</h4>
+            <p>Embedded snap lock system with unique 10-digit PIN linked to vehicle owner's Aadhaar.</p>
+          </div>
+        </div>
+        <div class="hsrp-feature">
+          <div class="hsrp-icon">🏠</div>
+          <div>
+            <h4>Doorstep Installation</h4>
+            <p>Authorised technician visits your location. No RTO visit needed.</p>
+          </div>
+        </div>
+        <div class="hsrp-feature">
+          <div class="hsrp-icon">📦</div>
+          <div>
+            <h4>Order Tracking</h4>
+            <p>Real-time manufacturing and delivery updates via SMS and email notifications.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PUC Panel -->
+    <div class="feature-panel" id="panel-puc">
+      <div class="puc-map-card">
+        <h3>Find Nearest PUC Centre</h3>
+        <p class="sub">Locate authorised PUC testing centres near you using live GPS location.</p>
+        <div class="map-placeholder" onclick="openMaps()">
+          <div class="map-pin">📍</div>
+          <div class="map-label">Open Google Maps</div>
+          <div class="map-sublabel">Tap to find PUC centres near you</div>
+        </div>
+        <div class="puc-centers" id="pucCenters">
+          <div class="center-item">
+            <div><div class="center-name">Sharma Auto Emission Test</div><div style="font-size:0.72rem;color:var(--muted);">Near your location</div></div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <div class="center-dist">0.8 km</div>
+              <button class="directions-btn" onclick="openMaps()">Directions</button>
+            </div>
+          </div>
+          <div class="center-item">
+            <div><div class="center-name">RTO Authorised PUC Centre</div><div style="font-size:0.72rem;color:var(--muted);">Near your location</div></div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <div class="center-dist">1.4 km</div>
+              <button class="directions-btn" onclick="openMaps()">Directions</button>
+            </div>
+          </div>
+          <div class="center-item">
+            <div><div class="center-name">Green Lane Emissions Testing</div><div style="font-size:0.72rem;color:var(--muted);">Near your location</div></div>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <div class="center-dist">2.1 km</div>
+              <button class="directions-btn" onclick="openMaps()">Directions</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="form-card">
+        <h3>Book PUC Appointment</h3>
+        <div class="form-group">
+          <label>Vehicle Registration</label>
+          <input type="text" placeholder="e.g. MH12CD5678">
+        </div>
+        <div class="form-group">
+          <label>Centre</label>
+          <select>
+            <option>Sharma Auto Emission Test (0.8 km)</option>
+            <option>RTO Authorised PUC Centre (1.4 km)</option>
+            <option>Green Lane Emissions Testing (2.1 km)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Preferred Date</label>
+          <input type="date">
+        </div>
+        <div class="form-group">
+          <label>Time Slot</label>
+          <select>
+            <option>9:00 AM – 10:00 AM</option>
+            <option>10:00 AM – 11:00 AM</option>
+            <option>11:00 AM – 12:00 PM</option>
+            <option>2:00 PM – 3:00 PM</option>
+            <option>3:00 PM – 4:00 PM</option>
+          </select>
+        </div>
+        <button class="submit-btn" onclick="showToast('PUC appointment booked! Confirmation SMS sent.')">Book Appointment →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ALERTS / REMINDERS -->
+<section id="alerts">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Smart Alerts</div>
+      <h2>Never Miss a Deadline Again</h2>
+      <p class="section-desc">AI-powered compliance monitoring sends email and SMS reminders 30, 15, and 7 days before expiry. One-click renewal.</p>
+    </div>
+    <div class="alerts-grid reveal">
+      <div class="alert-card urgent">
+        <div class="alert-bar"></div>
+        <div class="alert-header">
+          <div class="alert-type">PUC Certificate</div>
+          <div class="days-badge">7 days left</div>
+        </div>
+        <h4>KA-05-MN-1234 · Honda City 2019</h4>
+        <p>Your Pollution Under Control certificate expires on 7 April 2026. Avoid ₹10,000 fine.</p>
+        <div class="alert-actions">
+          <button class="renew-btn" onclick="showToast('Redirecting to nearest PUC centre...')">Renew PUC →</button>
+          <button class="remind-btn">Remind Later</button>
+        </div>
+      </div>
+      <div class="alert-card warning">
+        <div class="alert-bar"></div>
+        <div class="alert-header">
+          <div class="alert-type">Vehicle Insurance</div>
+          <div class="days-badge">18 days left</div>
+        </div>
+        <h4>DL-03-AB-5678 · Maruti Swift 2021</h4>
+        <p>Comprehensive insurance expires on 18 April 2026. Drive legally with one-click renewal.</p>
+        <div class="alert-actions">
+          <button class="renew-btn" onclick="openInsuranceModal()">Renew Insurance →</button>
+          <button class="remind-btn">Remind Later</button>
+        </div>
+      </div>
+      <div class="alert-card ok">
+        <div class="alert-bar"></div>
+        <div class="alert-header">
+          <div class="alert-type">Road Tax</div>
+          <div class="days-badge">Active</div>
+        </div>
+        <h4>KA-05-MN-1234 · Honda City 2019</h4>
+        <p>Road tax is current and valid until March 2027. No action needed at this time.</p>
+        <div class="alert-actions">
+          <button class="remind-btn">View Details</button>
+        </div>
+      </div>
+      <div class="alert-card warning">
+        <div class="alert-bar"></div>
+        <div class="alert-header">
+          <div class="alert-type">Fitness Certificate</div>
+          <div class="days-badge">45 days left</div>
+        </div>
+        <h4>GJ-01-XY-9012 · Tata Nexon 2020</h4>
+        <p>Vehicle fitness certificate due for renewal. Schedule inspection at nearest authorised workshop.</p>
+        <div class="alert-actions">
+          <button class="renew-btn" onclick="showToast('Opening fitness inspection booking...')">Book Inspection →</button>
+          <button class="remind-btn">Remind Later</button>
+        </div>
+      </div>
+    </div>
+    <div class="notif-setup reveal">
+      <h3>Notification Preferences</h3>
+      <div class="notif-row">
+        <div><div class="notif-label">Email Alerts</div><div class="notif-sub">Get reminders at your registered email</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="notif-row">
+        <div><div class="notif-label">SMS Alerts</div><div class="notif-sub">Text reminders to registered mobile</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="notif-row">
+        <div><div class="notif-label">30-Day Advance Notice</div><div class="notif-sub">First reminder 30 days before expiry</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="notif-row">
+        <div><div class="notif-label">15-Day Reminder</div><div class="notif-sub">Second reminder 15 days before expiry</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+      <div class="notif-row">
+        <div><div class="notif-label">Urgent 7-Day Alert</div><div class="notif-sub">Final urgent reminder one week before</div></div>
+        <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOCUMENTS CHECKLIST -->
+<section id="documents">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Document Guide</div>
+      <h2>Know What You Need</h2>
+      <p class="section-desc">Complete document checklist for interstate vehicle transfer. Green = upload once and reuse across applications.</p>
+    </div>
+    <div class="docs-grid">
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(232,25,90,0.12);">📄</div>
+        <h4>Registration Certificate (RC)</h4>
+        <p>Original RC book from home state</p>
+        <div class="doc-status status-required">Required</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(0,212,255,0.12);">🪪</div>
+        <h4>Aadhaar Card</h4>
+        <p>Identity and address proof</p>
+        <div class="doc-status status-required">Required</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(232,25,90,0.12);">🛡️</div>
+        <h4>Insurance Certificate</h4>
+        <p>Valid comprehensive insurance</p>
+        <div class="doc-status status-required">Required</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(0,229,160,0.12);">💨</div>
+        <h4>PUC Certificate</h4>
+        <p>Valid pollution under control cert</p>
+        <div class="doc-status status-required">Required</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(255,179,71,0.12);">🚦</div>
+        <h4>Driving Licence</h4>
+        <p>Valid DL of vehicle owner</p>
+        <div class="doc-status status-required">Required</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(0,212,255,0.12);">📑</div>
+        <h4>Form 28 (NOC)</h4>
+        <p>No Objection Certificate application</p>
+        <div class="doc-status status-required">Required</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(0,229,160,0.12);">📝</div>
+        <h4>Form 29 & 30</h4>
+        <p>Transfer of ownership forms</p>
+        <div class="doc-status status-required">Required</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(255,179,71,0.12);">🏠</div>
+        <h4>Address Proof (New State)</h4>
+        <p>Utility bill or rent agreement</p>
+        <div class="doc-status status-pending">Upload Needed</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(0,229,160,0.12);">💼</div>
+        <h4>Employment Proof</h4>
+        <p>Required for BH Series only</p>
+        <div class="doc-status status-optional">BH Series Only</div>
+      </div>
+      <div class="doc-card reveal">
+        <div class="doc-icon" style="background:rgba(232,25,90,0.12);">🧾</div>
+        <h4>Road Tax Receipt</h4>
+        <p>For refund & transfer claim</p>
+        <div class="doc-status status-pending">Upload Needed</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD MOCKUP -->
+<section id="dashboard">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Your Portal</div>
+      <h2>Vehicle Garage Dashboard</h2>
+      <p class="section-desc">All your vehicles, compliance status, pending applications, and refunds — in one clean dashboard.</p>
+    </div>
+    <div class="dashboard-mock reveal">
+      <div class="mock-topbar">
+        <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+        <span style="font-size:0.75rem;color:var(--muted);margin-left:0.8rem;">vahanbridge.gov.in/dashboard</span>
+      </div>
+      <div class="mock-inner">
+        <div class="mock-sidebar">
+          <div class="mock-logo">VahanBridge</div>
+          <div class="mock-nav-item active">📊 Dashboard</div>
+          <div class="mock-nav-item">🔄 NOC Transfer</div>
+          <div class="mock-nav-item">🅱️ BH Series</div>
+          <div class="mock-nav-item">🔢 HSRP Order</div>
+          <div class="mock-nav-item">💰 Tax Refund</div>
+          <div class="mock-nav-item">🔔 Alerts</div>
+          <div class="mock-nav-item">📁 Documents</div>
+          <div class="mock-nav-item">⚙️ Settings</div>
+        </div>
+        <div class="mock-main">
+          <div class="mock-greeting">Welcome back, Rajesh Kumar 👋</div>
+          <div class="mock-sub">Manage your vehicles and RTO services</div>
+          <div class="mock-stats">
+            <div class="mock-stat">
+              <div class="mock-stat-label">Total Vehicles</div>
+              <div class="mock-stat-val">3</div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">Active NOC Applications</div>
+              <div class="mock-stat-val pink">1</div>
+            </div>
+            <div class="mock-stat">
+              <div class="mock-stat-label">Tax Refund Pending</div>
+              <div class="mock-stat-val green">₹12,450</div>
+            </div>
+          </div>
+          <div class="mock-garage">
+            <h4>Vehicle Garage</h4>
+            <div class="mock-vehicles">
+              <div class="mock-vehicle">
+                <div class="vehicle-icon">🚗</div>
+                <div>
+                  <div class="vehicle-reg">KA-05-MN-1234</div>
+                  <div class="vehicle-model">Honda City · 2019</div>
+                  <div class="vehicle-tag tag-warn">⚠ PUC Due</div>
+                </div>
+              </div>
+              <div class="mock-vehicle">
+                <div class="vehicle-icon">🚙</div>
+                <div>
+                  <div class="vehicle-reg">DL-03-AB-5678</div>
+                  <div class="vehicle-model">Maruti Swift · 2021</div>
+                  <div class="vehicle-tag tag-ok">✓ All Clear</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT -->
+<section id="impact">
+  <div class="section-inner">
+    <div class="reveal">
+      <div class="section-tag">Impact</div>
+      <h2>Transforming 280M Vehicle Owners</h2>
+    </div>
+    <div class="impact-grid">
+      <div class="impact-card reveal">
+        <div class="impact-num" style="color:var(--pink);">15d→48h</div>
+        <h4>Faster Transfer</h4>
+        <p>NOC and registration transfer compressed from 15+ days to under 48 hours</p>
+      </div>
+      <div class="impact-card reveal">
+        <div class="impact-num" style="color:var(--cyan);">₹15k</div>
+        <h4>Travel Cost Saved</h4>
+        <p>Eliminates need to travel to home state for NOC and paperwork</p>
+      </div>
+      <div class="impact-card reveal">
+        <div class="impact-num" style="color:var(--green);">60%</div>
+        <h4>Better Compliance</h4>
+        <p>PUC and insurance renewal rates improve with proactive reminders</p>
+      </div>
+      <div class="impact-card reveal">
+        <div class="impact-num" style="color:var(--amber);">70%</div>
+        <h4>RTO Efficiency</h4>
+        <p>Physical workload at RTO offices reduced with digital processing</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">VahanBridge</div>
+  <p>A Digital India Initiative · Unified Interstate Vehicle Transfer Portal</p>
+  <div class="footer-links">
+    <a href="#">About</a>
+    <a href="#">Services</a>
+    <a href="#">RTO Offices</a>
+    <a href="#">Help & Support</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Terms of Service</a>
+  </div>
+  <p style="margin-top:0.5rem;">© 2026 VahanBridge. Built to serve every Indian vehicle owner.</p>
+</footer>
+
+<!-- REGISTER MODAL -->
+<div class="modal-overlay" id="registerModal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeModal()">✕</div>
+    <div id="modalForm">
+      <h3>Get Started with VahanBridge</h3>
+      <p class="sub">Register your vehicle and begin your digital transfer journey.</p>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" placeholder="As per Aadhaar card">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Mobile Number</label>
+          <input type="tel" placeholder="+91 XXXXX XXXXX">
+        </div>
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" placeholder="your@email.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Vehicle Registration</label>
+        <input type="text" placeholder="e.g. KA-05-MN-1234">
+      </div>
+      <div class="form-group">
+        <label>I need to</label>
+        <select>
+          <option>Transfer registration to new state</option>
+          <option>Apply for BH Series plates</option>
+          <option>Order HSRP number plates</option>
+          <option>Apply for road tax refund</option>
+          <option>Renew PUC / Insurance</option>
+        </select>
+      </div>
+      <button class="submit-btn" onclick="submitRegister()">Create My Account →</button>
+    </div>
+    <div class="modal-success" id="modalSuccess">
+      <div class="success-icon">🎉</div>
+      <h4>Account Created!</h4>
+      <p>Welcome to VahanBridge. Check your email for login details and next steps for your vehicle transfer.</p>
+    </div>
+  </div>
+</div>
+
+<!-- INSURANCE MODAL -->
+<div class="modal-overlay" id="insuranceModal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeInsuranceModal()">✕</div>
+    <h3>One-Click Insurance Renewal</h3>
+    <p class="sub">DL-03-AB-5678 · Maruti Swift Dzire · 2021</p>
+    <div style="display:grid;gap:0.8rem;margin-bottom:1.5rem;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(200,25,58,0.4)'" onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-weight:600;font-size:0.9rem;">New India Assurance</div><div style="font-size:0.77rem;color:var(--muted);">Comprehensive · Cashless at 5000+ garages</div></div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;color:var(--green);">₹8,240</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid rgba(0,119,204,0.35);border-radius:12px;padding:1rem;cursor:pointer;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-weight:600;font-size:0.9rem;">HDFC Ergo ⭐ Recommended</div><div style="font-size:0.77rem;color:var(--muted);">Comprehensive + Zero Dep · Best Value</div></div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;color:var(--green);">₹9,650</div>
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='rgba(200,25,58,0.4)'" onmouseout="this.style.borderColor='rgba(0,0,0,0.08)'">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-weight:600;font-size:0.9rem;">Bajaj Allianz</div><div style="font-size:0.77rem;color:var(--muted);">Third Party · Mandatory minimum</div></div>
+          <div style="font-family:'Syne',sans-serif;font-weight:800;color:var(--green);">₹2,094</div>
+        </div>
+      </div>
+    </div>
+    <button class="submit-btn" onclick="showToast('Insurance renewed! Policy document will be emailed shortly.');closeInsuranceModal()">Pay & Renew Now →</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" style="position:fixed;bottom:2rem;right:2rem;background:#ffffff;border:1px solid var(--border);border-left:3px solid var(--green);color:var(--text);padding:1rem 1.3rem;border-radius:12px;font-size:0.85rem;z-index:300;opacity:0;transform:translateY(10px);transition:all 0.3s;max-width:320px;box-shadow:0 8px 24px rgba(0,0,0,0.12);"></div>
+
+<script>
+  // Tabs
+  function switchTab(id) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.feature-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    event.target.classList.add('active');
+  }
+
+  // NOC Submit
+  function submitNOC() {
+    const v = document.getElementById('nocVehicle').value;
+    const f = document.getElementById('nocFromState').value;
+    const t = document.getElementById('nocToState').value;
+    if (!v || !f || !t) { showToast('Please fill in all required fields.'); return; }
+    showToast('NOC application submitted! Track status in your dashboard. Processing: 24-48 hours.');
+  }
+
+  // BH Eligibility
+  function checkBHEligibility() {
+    const emp = document.getElementById('bhEmployment').value;
+    const offices = document.getElementById('bhOffices').value;
+    const res = document.getElementById('bhResult');
+    if (!emp) { showToast('Please select your employment type.'); return; }
+    if (emp === 'central' || emp === 'defence' || offices === '4' || emp === 'psu') {
+      res.classList.add('show');
+      res.innerHTML = '<h4>✅ You are eligible for BH Series!</h4><p>Great news! Based on your employment profile, your vehicle qualifies for Bharat Series registration. You\'ll never need to re-register when moving states.</p>';
+      res.style.background = 'rgba(0,229,160,0.08)';
+      res.style.borderColor = 'rgba(0,229,160,0.25)';
+    } else {
+      res.classList.add('show');
+      res.innerHTML = '<h4>❌ Not eligible currently</h4><p>BH Series requires central/state government employment or a company with offices in 4+ states. You may still use standard NOC transfer.</p>';
+      res.style.background = 'rgba(232,25,90,0.08)';
+      res.style.borderColor = 'rgba(232,25,90,0.25)';
+    }
+  }
+
+  // Tax Calc
+  function calcTax() {
+    const paid = parseFloat(document.getElementById('taxPaid').value);
+    const years = parseFloat(document.getElementById('taxYears').value);
+    if (!paid || isNaN(years)) { showToast('Please enter tax paid and years since registration.'); return; }
+    const totalLife = 15;
+    const remaining = Math.max(0, totalLife - years);
+    const refund = Math.round((remaining / totalLife) * paid * 0.7);
+    const newTax = Math.round(paid * 0.85);
+    const net = refund - newTax;
+    document.getElementById('tr1').textContent = '₹' + paid.toLocaleString();
+    document.getElementById('tr2').textContent = years + ' years used';
+    document.getElementById('tr3').textContent = '₹' + refund.toLocaleString();
+    document.getElementById('tr4').textContent = '₹' + newTax.toLocaleString();
+    document.getElementById('tr5').textContent = (net >= 0 ? '+ ' : '') + '₹' + Math.abs(net).toLocaleString();
+    document.getElementById('taxResult').classList.add('show');
+  }
+
+  // Plate preview
+  function updatePlate(val) {
+    const clean = val.toUpperCase().replace(/[^A-Z0-9]/g,'');
+    const formatted = clean.replace(/(.{2})(.{2})(.{2})(.+)/, '$1·$2·$3·$4') || 'MH·01·AB·1234';
+    document.getElementById('plateDisplay').textContent = formatted || 'MH·01·AB·1234';
+  }
+
+  // Maps
+  function openMaps() {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(pos => {
+        const url = `https://www.google.com/maps/search/PUC+centre+near+me/@${pos.coords.latitude},${pos.coords.longitude},14z`;
+        window.open(url, '_blank');
+      }, () => {
+        window.open('https://www.google.com/maps/search/PUC+emission+test+centre+near+me', '_blank');
+      });
+    } else {
+      window.open('https://www.google.com/maps/search/PUC+emission+test+centre+near+me', '_blank');
+    }
+  }
+
+  // Modals
+  function openModal() { document.getElementById('registerModal').classList.add('open'); }
+  function closeModal() {
+    document.getElementById('registerModal').classList.remove('open');
+    document.getElementById('modalForm').style.display = 'block';
+    document.getElementById('modalSuccess').classList.remove('show');
+  }
+  function submitRegister() {
+    document.getElementById('modalForm').style.display = 'none';
+    document.getElementById('modalSuccess').classList.add('show');
+  }
+  function openInsuranceModal() { document.getElementById('insuranceModal').classList.add('open'); }
+  function closeInsuranceModal() { document.getElementById('insuranceModal').classList.remove('open'); }
+
+  // Toast
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.opacity = '1'; t.style.transform = 'none';
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(10px)'; }, 3500);
+  }
+
+  // Scroll helper
+  function scrollTo(sel) { document.querySelector(sel)?.scrollIntoView({behavior:'smooth'}); }
+
+  // Close modals on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(el => {
+    el.addEventListener('click', e => { if (e.target === el) { el.classList.remove('open'); } });
+  });
+
+  // Scroll reveal
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+<!-- CHATBOT FAB -->
+<button class="chat-fab" onclick="toggleChat()" id="chatFab" aria-label="Open VahanBot">
+  <span>🤖</span>
+  <span class="chat-badge">1</span>
+</button>
+
+<!-- CHATBOT WINDOW -->
+<div class="chat-window" id="chatWindow">
+  <div class="chat-header">
+    <div class="chat-avatar">🤖</div>
+    <div class="chat-header-info">
+      <h4>VahanBot</h4>
+      <div class="chat-online">
+        <div class="chat-online-dot"></div>
+        <p>Online · RTO Assistant</p>
+      </div>
+    </div>
+    <button class="chat-close" onclick="toggleChat()">✕</button>
+  </div>
+  <div class="chat-quick-btns">
+    <button class="quick-btn" onclick="quickSend('noc')">🔄 NOC Transfer</button>
+    <button class="quick-btn" onclick="quickSend('bh')">🅱️ BH Series</button>
+    <button class="quick-btn" onclick="quickSend('tax')">💰 Tax Refund</button>
+    <button class="quick-btn" onclick="quickSend('hsrp')">🔢 HSRP Plates</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-msg bot">👋 Hello! I'm <strong>VahanBot</strong>, your RTO assistant. I can help you with NOC transfers, BH Series eligibility, road tax refunds, HSRP booking, and more. How can I assist you today?</div>
+  </div>
+  <div class="chat-input-row">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Ask me anything about vehicle transfers…" onkeydown="if(event.key==='Enter')sendChat()">
+    <button class="chat-send" onclick="sendChat()">➤</button>
+  </div>
+</div>
+
+<script>
+  // Duplicate ticker content for seamless scroll
+  window.addEventListener('DOMContentLoaded', () => {
+    const content = document.getElementById('tickerContent');
+    if (content) {
+      content.innerHTML += content.innerHTML;
+    }
+  });
+
+  // Chatbot logic
+  const botReplies = {
+    'noc': 'To apply for NOC: 1) Log in to your dashboard 2) Select "Apply NOC" 3) Fill in destination state 4) Upload required documents 5) Submit with e-sign. Processing takes 2–5 working days.',
+    'bh': 'BH Series eligibility: You qualify if your employer operates in 8+ states/UTs. This includes central government, PSUs, and now private sector employees. Click "Check Eligibility" to verify instantly.',
+    'tax': 'For road tax refund: The system auto-calculates the refund based on your vehicle age and paid amount. Refunds are processed within 30 days of successful NOC approval.',
+    'hsrp': 'HSRP booking: Go to Services → HSRP Booking. Select your vehicle type, choose a nearby fitment centre, pick a time slot, and pay the fee online. Confirmation sent via SMS.',
+    'puc': 'PUC (Pollution Under Control) certificates are valid for 6 months for BS-IV vehicles. Use the PUC Finder on our portal to locate the nearest authorised centre near your location.',
+    'insurance': 'Insurance renewal: Your current policy details are pre-loaded. Compare plans from New India Assurance, HDFC Ergo, and Bajaj Allianz. Renew in one click — policy document delivered by email.',
+    'transfer': 'Interstate vehicle transfer involves: 1) Applying NOC from source RTO 2) Claiming road tax refund 3) Re-registration in destination state 4) HSRP update if required. VahanBridge handles all this digitally!',
+    'fee': 'Registration fees vary by vehicle type and state. Typically ₹300–₹600 for two-wheelers and ₹600–₹1500 for cars. BH Series fees are standardised at ₹5,500 for 1500cc+ petrol vehicles.',
+    'document': 'Documents required: RC (Registration Certificate), Insurance, PUC Certificate, ID proof (Aadhaar/PAN), Address proof in new state, NOC from source RTO. All can be uploaded digitally via DigiLocker.',
+    'default': 'I understand your query. For detailed assistance, please use the specific service portal or contact our support team at 1800-XXX-XXXX (toll-free, 9AM–6PM).'
+  };
+
+  function getBotReply(msg) {
+    const m = msg.toLowerCase();
+    if (m.includes('noc') || m.includes('transfer') && m.includes('apply')) return botReplies['noc'];
+    if (m.includes('bh') || m.includes('bharat') || m.includes('eligib')) return botReplies['bh'];
+    if (m.includes('tax') || m.includes('refund')) return botReplies['tax'];
+    if (m.includes('hsrp') || m.includes('plate') || m.includes('number plate')) return botReplies['hsrp'];
+    if (m.includes('puc') || m.includes('pollution') || m.includes('emission')) return botReplies['puc'];
+    if (m.includes('insurance') || m.includes('renew')) return botReplies['insurance'];
+    if (m.includes('transfer') || m.includes('interstate') || m.includes('relocat')) return botReplies['transfer'];
+    if (m.includes('fee') || m.includes('cost') || m.includes('charge') || m.includes('price')) return botReplies['fee'];
+    if (m.includes('document') || m.includes('doc') || m.includes('required')) return botReplies['document'];
+    return botReplies['default'];
+  }
+
+  function toggleChat() {
+    const w = document.getElementById('chatWindow');
+    const fab = document.getElementById('chatFab');
+    w.classList.toggle('open');
+    const badge = fab.querySelector('.chat-badge');
+    if (badge) badge.style.display = 'none';
+  }
+
+  function addMsg(text, type) {
+    const msgs = document.getElementById('chatMessages');
+    const div = document.createElement('div');
+    div.className = 'chat-msg ' + type;
+    div.innerHTML = text;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function showTyping() {
+    const msgs = document.getElementById('chatMessages');
+    const typing = document.createElement('div');
+    typing.className = 'chat-typing';
+    typing.id = 'typingIndicator';
+    typing.innerHTML = '<span></span><span></span><span></span>';
+    msgs.appendChild(typing);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function removeTyping() {
+    const el = document.getElementById('typingIndicator');
+    if (el) el.remove();
+  }
+
+  function sendChat() {
+    const input = document.getElementById('chatInput');
+    const text = input.value.trim();
+    if (!text) return;
+    addMsg(text, 'user');
+    input.value = '';
+    showTyping();
+    setTimeout(() => {
+      removeTyping();
+      addMsg(getBotReply(text), 'bot');
+    }, 900 + Math.random() * 600);
+  }
+
+  function quickSend(key) {
+    const labels = { noc: 'How do I apply for NOC?', bh: 'Am I eligible for BH Series?', tax: 'How does road tax refund work?', hsrp: 'How do I book HSRP plates?' };
+    addMsg(labels[key], 'user');
+    showTyping();
+    setTimeout(() => {
+      removeTyping();
+      addMsg(botReplies[key], 'bot');
+    }, 900);
+  }
+</script>
+
+</body>
+</html>

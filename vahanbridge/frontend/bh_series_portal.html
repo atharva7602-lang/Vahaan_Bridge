@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VahanBridge — BH Series Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f6fb;
+  --surface: #eef1f8;
+  --card: #ffffff;
+  --border: rgba(0,0,0,0.08);
+  --pink: #c8193a;
+  --pink-light: #e8305a;
+  --cyan: #0077cc;
+  --amber: #d97a00;
+  --green: #00875a;
+  --text: #1a1a2e;
+  --muted: #6b7080;
+  --subtle: #b0b8cc;
+  --gold: #d4a017;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; line-height: 1.6; }
+
+/* ── MARQUEE ── */
+.marquee-bar { background: var(--pink); color: #fff; font-size: 0.72rem; font-weight: 600; letter-spacing: 0.5px; padding: 0.4rem 0; overflow: hidden; white-space: nowrap; }
+.marquee-track { display: inline-block; animation: marquee 32s linear infinite; }
+.marquee-track span { margin: 0 2.5rem; }
+@keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* ── NAV ── */
+nav { position: sticky; top: 0; z-index: 200; display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 3rem; background: rgba(244,246,251,0.95); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border); }
+.logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.35rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.5px; text-decoration: none; display: flex; align-items: center; gap: 0.5rem; }
+.logo-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--pink), #ff8c42); display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+nav ul { list-style: none; display: flex; gap: 2rem; align-items: center; }
+nav ul li a { color: var(--muted); text-decoration: none; font-size: 0.88rem; font-weight: 500; letter-spacing: 0.3px; transition: color 0.2s; }
+nav ul li a:hover, nav ul li a.active-link { color: var(--text); }
+.nav-badge { background: rgba(0,119,204,0.1); color: var(--cyan); border: 1px solid rgba(0,119,204,0.25); padding: 0.3rem 0.8rem; border-radius: 100px; font-size: 0.72rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+
+/* ── HERO ── */
+.hero { min-height: 88vh; display: flex; align-items: center; justify-content: center; text-align: center; padding: 5rem 2rem 4rem; position: relative; overflow: hidden; }
+.hero-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,119,204,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,119,204,0.05) 1px, transparent 1px); background-size: 50px 50px; mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, black 20%, transparent 100%); }
+.hero-glow { position: absolute; top: 15%; left: 50%; transform: translateX(-50%); width: 700px; height: 400px; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,119,204,0.07), rgba(200,25,58,0.04), transparent 70%); pointer-events: none; }
+.hero-content { position: relative; z-index: 2; max-width: 840px; }
+.hero-badge { display: inline-flex; align-items: center; gap: 0.6rem; background: rgba(0,119,204,0.08); border: 1px solid rgba(0,119,204,0.25); color: var(--cyan); padding: 0.4rem 1.1rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase; margin-bottom: 1.5rem; }
+.hero-badge::before { content: ''; width: 6px; height: 6px; background: var(--cyan); border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(2.6rem, 6vw, 4.8rem); font-weight: 800; line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 1.2rem; }
+.hero h1 .accent { color: var(--cyan); }
+.hero h1 .accent2 { color: var(--pink); }
+.hero-sub { font-size: 1.05rem; color: var(--muted); max-width: 540px; margin: 0 auto 2.5rem; line-height: 1.75; }
+.hero-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn-primary { background: linear-gradient(135deg, var(--cyan), #005fa3); color: #fff; padding: 0.9rem 2.2rem; border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; border: none; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 24px rgba(0,119,204,0.35); font-family: inherit; }
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,119,204,0.5); }
+.btn-outline { background: transparent; color: var(--text); padding: 0.9rem 2.2rem; border-radius: 12px; font-weight: 500; font-size: 0.95rem; cursor: pointer; border: 1px solid var(--border); transition: border-color 0.2s, background 0.2s; font-family: inherit; }
+.btn-outline:hover { border-color: var(--subtle); background: rgba(255,255,255,0.6); }
+
+.bh-plate-demo { display: inline-flex; align-items: center; justify-content: center; margin: 2.5rem auto 0; background: #fff; border: 3px solid #1a1a2e; border-radius: 8px; padding: 0.7rem 2.2rem; box-shadow: 0 8px 40px rgba(0,0,0,0.12); animation: floatPlate 4s ease-in-out infinite; position: relative; }
+.bh-plate-demo::before { content: 'IND'; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); font-size: 0.45rem; font-weight: 700; color: #333; writing-mode: vertical-rl; text-orientation: upright; letter-spacing: 1px; }
+.bh-plate-text { font-family: 'Space Mono', monospace; font-size: 2rem; font-weight: 700; color: #111; letter-spacing: 5px; }
+.bh-plate-strip { position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #003893, #003893 33%, #fff 33%, #fff 66%, #138808 66%); border-radius: 5px 5px 0 0; }
+.bh-series-tag { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); font-size: 0.38rem; font-weight: 800; color: #1a1a2e; letter-spacing: 0.3px; text-align: center; line-height: 1.2; }
+@keyframes floatPlate { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+.hero-stats { display: flex; gap: 3rem; justify-content: center; margin-top: 4rem; padding-top: 2.5rem; border-top: 1px solid var(--border); flex-wrap: wrap; }
+.stat { text-align: center; }
+.stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; background: linear-gradient(135deg, var(--text), var(--muted)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.stat-num .unit { font-size: 1.1rem; color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+.stat-label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0.2rem; }
+
+/* ── ABOUT ── */
+#about { background: var(--surface); padding: 5rem 3rem; }
+.section-inner { max-width: 1200px; margin: 0 auto; }
+.section-tag { display: inline-block; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--cyan); margin-bottom: 0.7rem; }
+.section-title { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 3.5vw, 2.8rem); font-weight: 800; letter-spacing: -0.5px; margin-bottom: 1rem; line-height: 1.2; }
+.section-desc { color: var(--muted); max-width: 540px; font-size: 1rem; line-height: 1.7; }
+.about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: start; margin-top: 3rem; }
+.about-features { display: flex; flex-direction: column; gap: 1rem; }
+.about-feat { display: flex; gap: 1rem; align-items: flex-start; background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 1.2rem; transition: border-color 0.2s, transform 0.2s; }
+.about-feat:hover { border-color: rgba(0,119,204,0.3); transform: translateX(4px); }
+.feat-icon { width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0; background: rgba(0,119,204,0.1); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.feat-icon.pink { background: rgba(200,25,58,0.1); }
+.feat-icon.green { background: rgba(0,135,90,0.1); }
+.feat-icon.amber { background: rgba(217,122,0,0.1); }
+.feat-text h4 { font-family: 'Syne', sans-serif; font-size: 0.92rem; font-weight: 700; margin-bottom: 0.2rem; }
+.feat-text p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+.bh-info-card { background: var(--card); border: 1px solid var(--border); border-radius: 20px; padding: 2rem; }
+.bh-info-card h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); }
+.elig-pill-list { display: flex; flex-direction: column; gap: 0.6rem; }
+.elig-pill { display: flex; align-items: center; gap: 0.8rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 0.7rem 1rem; font-size: 0.83rem; }
+.elig-pill .ep-icon { font-size: 1.2rem; flex-shrink: 0; }
+.elig-pill strong { font-weight: 700; font-size: 0.82rem; display: block; }
+.elig-pill span { font-size: 0.75rem; color: var(--muted); }
+.bh-format-demo { margin-top: 1.5rem; background: var(--surface); border-radius: 12px; padding: 1.2rem; text-align: center; }
+.bh-format-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 0.8rem; }
+.bh-plate-sm { display: inline-flex; align-items: center; justify-content: center; background: #fff; border: 2.5px solid #1a1a2e; border-radius: 6px; padding: 0.5rem 1.6rem; font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; letter-spacing: 4px; color: #111; position: relative; }
+.bh-plate-sm .ind-strip { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #003893 33%, #fff 33%, #fff 66%, #138808 66%); border-radius: 5px 5px 0 0; }
+.bh-format-note { font-size: 0.75rem; color: var(--muted); margin-top: 0.6rem; line-height: 1.5; }
+
+/* ── WIZARD APP ── */
+#app { display: none; max-width: 920px; margin: 0 auto; padding: 2rem 1.5rem 6rem; }
+
+/* ── STICKY PROGRESS ── */
+.wizard-progress { position: sticky; top: 57px; z-index: 100; background: rgba(244,246,251,0.95); backdrop-filter: blur(20px); padding: 1.2rem 2rem; border-bottom: 1px solid var(--border); margin: 0 -1.5rem 2.5rem; }
+.progress-inner { display: flex; align-items: center; justify-content: space-between; max-width: 760px; margin: 0 auto; position: relative; }
+.progress-track { position: absolute; top: 18px; left: 18px; right: 18px; height: 2px; background: var(--border); }
+.progress-fill-bar { position: absolute; top: 18px; left: 18px; height: 2px; background: linear-gradient(90deg, var(--cyan), var(--pink)); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.p-step { display: flex; flex-direction: column; align-items: center; gap: 0.4rem; position: relative; z-index: 1; }
+.p-dot { width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 0.8rem; font-weight: 800; color: var(--muted); transition: all 0.3s; }
+.p-dot.active { background: var(--cyan); border-color: var(--cyan); color: #fff; box-shadow: 0 4px 16px rgba(0,119,204,0.35); }
+.p-dot.done { background: var(--green); border-color: var(--green); color: #fff; }
+.p-label { font-size: 0.68rem; color: var(--muted); font-weight: 500; letter-spacing: 0.3px; white-space: nowrap; }
+
+/* ── WIZARD SECTION ── */
+.wizard-section { display: none; }
+.wizard-section.active { display: block; }
+.section-header { margin-bottom: 2.5rem; }
+.section-eyebrow { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--cyan); margin-bottom: 0.5rem; }
+.section-title-lg { font-family: 'Syne', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 0.8rem; }
+.section-sub { color: var(--muted); font-size: 0.95rem; max-width: 540px; line-height: 1.7; }
+
+/* ── FORM ELEMENTS ── */
+.form-card-white { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 2rem; margin-bottom: 1.5rem; }
+.form-card-white h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1.2rem; display: flex; align-items: center; gap: 0.5rem; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.form-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+.form-group { margin-bottom: 0; }
+.form-group.full { grid-column: 1/-1; }
+.form-group label { display: block; font-size: 0.75rem; color: var(--muted); font-weight: 600; margin-bottom: 0.4rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group input, .form-group select, .form-group textarea { width: 100%; background: var(--surface); border: 1.5px solid var(--border); color: var(--text); padding: 0.7rem 0.9rem; border-radius: 10px; font-family: inherit; font-size: 0.9rem; outline: none; transition: border-color 0.2s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--cyan); }
+.form-group input::placeholder { color: var(--subtle); }
+.form-group textarea { resize: vertical; min-height: 80px; }
+.req { color: var(--pink); }
+.form-hint { font-size: 0.72rem; color: var(--muted); margin-top: 0.3rem; display: block; }
+
+/* ── ELIGIBILITY GRID ── */
+.elig-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+.elig-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.2rem; cursor: pointer; transition: all 0.2s; display: flex; gap: 0.8rem; align-items: flex-start; }
+.elig-card:hover { border-color: rgba(0,119,204,0.3); background: var(--card); }
+.elig-card.selected { border-color: var(--cyan); background: rgba(0,119,204,0.05); box-shadow: 0 4px 16px rgba(0,119,204,0.1); }
+.elig-radio { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--subtle); flex-shrink: 0; margin-top: 2px; transition: all 0.2s; }
+.elig-card.selected .elig-radio { border-color: var(--cyan); background: var(--cyan); box-shadow: inset 0 0 0 3px white; }
+.elig-card h4 { font-family: 'Syne', sans-serif; font-size: 0.88rem; font-weight: 700; margin-bottom: 0.2rem; }
+.elig-card p { font-size: 0.78rem; color: var(--muted); line-height: 1.4; }
+
+/* ── UPLOAD ── */
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.upload-card { background: var(--card); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.2rem; transition: all 0.2s; }
+.upload-card:hover { border-color: rgba(0,119,204,0.2); }
+.upload-card.uploaded { border-color: var(--green); background: rgba(0,135,90,0.03); }
+.upload-card.dragover { border-color: var(--cyan); background: rgba(0,119,204,0.04); }
+.upload-doc-title { font-size: 0.85rem; font-weight: 600; margin-bottom: 0.2rem; }
+.upload-doc-hint { font-size: 0.75rem; color: var(--muted); margin-bottom: 0.8rem; }
+.upload-required { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(200,25,58,0.1); color: var(--pink); border-radius: 100px; padding: 0.1rem 0.5rem; margin-left: 0.4rem; }
+.upload-optional { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(0,119,204,0.1); color: var(--cyan); border-radius: 100px; padding: 0.1rem 0.5rem; margin-left: 0.4rem; }
+.upload-conditional { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(217,122,0,0.1); color: var(--amber); border-radius: 100px; padding: 0.1rem 0.5rem; margin-left: 0.4rem; }
+.upload-trigger { border: 1.5px dashed var(--subtle); border-radius: 10px; padding: 1rem; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 0.3rem; cursor: pointer; transition: all 0.2s; }
+.upload-trigger:hover { border-color: var(--cyan); background: rgba(0,119,204,0.03); }
+.upload-trigger-icon { font-size: 1.4rem; }
+.upload-trigger-text { font-size: 0.75rem; color: var(--muted); text-align: center; }
+.upload-card input[type="file"] { display: none; }
+
+/* ── FEE TABLE ── */
+.fee-breakdown { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.fee-breakdown h3 { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 1rem; }
+.fee-row { display: flex; justify-content: space-between; align-items: center; padding: 0.65rem 0; border-bottom: 1px solid var(--border); font-size: 0.88rem; }
+.fee-row:last-child { border-bottom: none; font-weight: 700; font-size: 0.95rem; }
+.fee-row .fee-label { color: var(--muted); }
+.fee-row .fee-value { font-weight: 600; }
+.fee-row.total .fee-value { color: var(--cyan); font-family: 'Syne', sans-serif; font-size: 1.1rem; }
+
+.fee-ref-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin-bottom: 1.2rem; }
+.fee-ref-table th { background: var(--surface); padding: 0.6rem 0.9rem; text-align: left; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); border-bottom: 1px solid var(--border); }
+.fee-ref-table td { padding: 0.6rem 0.9rem; border-bottom: 1px solid var(--border); }
+.fee-ref-table tr:last-child td { border-bottom: none; }
+.fee-green { color: var(--green); font-weight: 700; }
+
+/* ── SUMMARY ── */
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem; }
+.summary-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 1.1rem; position: relative; overflow: hidden; }
+.summary-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--cyan), transparent); }
+.summary-card h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; margin-bottom: 0.4rem; }
+.summary-card p { font-size: 0.9rem; font-weight: 600; color: var(--text); }
+
+/* ── INFO BOX ── */
+.info-box { background: rgba(0,119,204,0.06); border: 1px solid rgba(0,119,204,0.2); border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem; color: var(--text); line-height: 1.7; margin-bottom: 1.5rem; }
+.info-box strong { color: var(--cyan); }
+.warn-box { background: rgba(217,122,0,0.06); border: 1px solid rgba(217,122,0,0.2); border-radius: 12px; padding: 1.2rem 1.4rem; font-size: 0.85rem; color: var(--text); line-height: 1.7; margin-bottom: 1.5rem; }
+.warn-box strong { color: var(--amber); }
+
+/* ── CHECKLIST ── */
+.checklist { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1.5rem; }
+.check-item { display: flex; align-items: center; gap: 0.9rem; background: var(--card); border: 1.5px solid var(--border); border-radius: 10px; padding: 0.8rem 1rem; cursor: pointer; transition: all 0.2s; user-select: none; }
+.check-item:hover { border-color: rgba(0,119,204,0.3); }
+.check-item.checked { border-color: var(--green); background: rgba(0,135,90,0.03); }
+.check-item input { display: none; }
+.check-box { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--subtle); background: var(--surface); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: transparent; flex-shrink: 0; transition: all 0.2s; }
+.check-item.checked .check-box { background: var(--green); border-color: var(--green); color: white; }
+.check-label { font-size: 0.85rem; flex: 1; }
+
+/* ── DECLARATION ── */
+.declaration-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.4rem; font-size: 0.83rem; color: var(--muted); line-height: 1.8; margin-bottom: 1.5rem; }
+.declaration-box h4 { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 0.8rem; }
+.decl-check { display: flex; gap: 0.8rem; align-items: flex-start; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); font-size: 0.83rem; color: var(--text); }
+.decl-check input { margin-top: 2px; accent-color: var(--cyan); flex-shrink: 0; }
+
+/* ── NAV BUTTONS ── */
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+.btn-back { background: transparent; color: var(--muted); border: 1.5px solid var(--border); padding: 0.75rem 1.6rem; border-radius: 10px; font-family: inherit; font-weight: 500; font-size: 0.9rem; cursor: pointer; transition: all 0.2s; }
+.btn-back:hover { border-color: var(--subtle); color: var(--text); }
+.btn-next { background: linear-gradient(135deg, var(--cyan), #005fa3); color: #fff; border: none; padding: 0.75rem 2rem; border-radius: 10px; font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 16px rgba(0,119,204,0.3); }
+.btn-next:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,119,204,0.45); }
+.btn-next.green { background: linear-gradient(135deg, var(--green), #006040); box-shadow: 0 4px 16px rgba(0,135,90,0.3); }
+.btn-next.green:hover { box-shadow: 0 8px 24px rgba(0,135,90,0.45); }
+
+/* ── DIVIDER ── */
+.divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--subtle); }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── SUCCESS ── */
+.success-panel { text-align: center; padding: 3rem 2rem; background: var(--card); border: 1px solid var(--border); border-radius: 20px; display: none; }
+.success-panel.show { display: block; animation: slideIn 0.5s ease; }
+@keyframes slideIn { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+.success-icon { font-size: 4rem; margin-bottom: 1rem; }
+.success-panel h2 { font-family: 'Syne', sans-serif; font-size: 2rem; font-weight: 800; margin-bottom: 0.7rem; }
+.success-panel p { color: var(--muted); max-width: 480px; margin: 0 auto 1.5rem; line-height: 1.7; }
+.ref-box { display: inline-block; background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px; padding: 0.8rem 2rem; margin-bottom: 1.5rem; }
+.ref-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); font-weight: 700; }
+.ref-number { font-family: 'Space Mono', monospace; font-size: 1.4rem; font-weight: 700; color: var(--cyan); letter-spacing: 3px; }
+.success-steps { text-align: left; max-width: 480px; margin: 0 auto 2rem; }
+.success-step-row { display: flex; gap: 1rem; align-items: flex-start; padding: 0.7rem 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+.success-step-row:last-child { border-bottom: none; }
+.success-step-num { width: 24px; height: 24px; border-radius: 50%; background: rgba(0,119,204,0.1); border: 1px solid rgba(0,119,204,0.3); color: var(--cyan); font-family: 'Syne', sans-serif; font-size: 0.7rem; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+.success-step-text { color: var(--muted); line-height: 1.5; }
+.success-step-text strong { color: var(--text); }
+
+/* ── TOAST ── */
+#toast { position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%); background: var(--text); color: #fff; padding: 0.8rem 1.6rem; border-radius: 100px; font-size: 0.85rem; font-weight: 500; z-index: 9999; opacity: 0; transition: opacity 0.3s, transform 0.3s; pointer-events: none; max-width: 90vw; text-align: center; }
+
+/* ── FOOTER ── */
+footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 3rem; text-align: center; }
+.footer-logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.2rem; background: linear-gradient(135deg, #e8195a, #ff8c42); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 0.5rem; }
+.footer-logo span { color: var(--cyan); -webkit-text-fill-color: var(--cyan); }
+.footer-sub { font-size: 0.8rem; }
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+  nav { padding: 0.8rem 1.5rem; }
+  nav ul { display: none; }
+  .hero { padding: 4rem 1.5rem 3rem; }
+  .about-grid { grid-template-columns: 1fr; }
+  .form-grid { grid-template-columns: 1fr; }
+  .form-grid-3 { grid-template-columns: 1fr 1fr; }
+  .elig-grid { grid-template-columns: 1fr; }
+  .upload-grid { grid-template-columns: 1fr; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .wizard-progress { padding: 1rem; }
+  .p-label { display: none; }
+  #about { padding: 3rem 1.5rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- MARQUEE -->
+<div class="marquee-bar">
+  <div class="marquee-track">
+    <span>🇮🇳 BH Series — Bharat Series — Valid across all States &amp; UTs without re-registration</span>
+    <span>🏛️ Available for Central/State Govt, Defence, PSU &amp; Multi-State Private Employees</span>
+    <span>🚗 No need for NOC when relocating to a new state — BH plate travels with you</span>
+    <span>📋 Fees levied for 2 years, renewable — as per MoRTH notification Aug 2021</span>
+    <span>⚡ Apply online — appointment-free paperless process</span>
+    <span>🇮🇳 BH Series — Bharat Series — Valid across all States &amp; UTs without re-registration</span>
+    <span>🏛️ Available for Central/State Govt, Defence, PSU &amp; Multi-State Private Employees</span>
+    <span>🚗 No need for NOC when relocating to a new state — BH plate travels with you</span>
+    <span>📋 Fees levied for 2 years, renewable — as per MoRTH notification Aug 2021</span>
+    <span>⚡ Apply online — appointment-free paperless process</span>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo" onclick="resetToHero(event)">
+    <div class="logo-icon">🚗</div>
+    Vahan<span>Bridge</span>
+  </a>
+  <ul>
+    <li><a href="#">NOC Transfer</a></li>
+    <li><a href="#">HSRP</a></li>
+    <li><a href="#">Road Tax</a></li>
+    <li><a href="#" class="active-link">BH Series</a></li>
+    <li><a href="#about">About</a></li>
+  </ul>
+  <div class="nav-badge">● BH Portal</div>
+</nav>
+
+<!-- ════ HERO ════ -->
+<section class="hero" id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-badge">Bharat Series Registration</div>
+    <h1>
+      One Plate.<br>
+      <span class="accent">Every State.</span><br>
+      <span class="accent2">Zero Re-Registration.</span>
+    </h1>
+    <p class="hero-sub">
+      The BH Series allows eligible government, defence, PSU &amp; multi-state private employees to register their vehicle once — valid across all States &amp; UTs without periodic re-registration.
+    </p>
+    <div class="hero-actions">
+      <button class="btn-primary" onclick="startWizard()">Apply for BH Series →</button>
+      <button class="btn-outline" onclick="scrollToAbout()">Check Eligibility</button>
+    </div>
+
+    <div class="bh-plate-demo">
+      <div class="bh-plate-strip"></div>
+      <div class="bh-plate-text" id="heroPlateTxt">25 BH 1234 AA</div>
+      <div class="bh-series-tag">BH<br>SERIES</div>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-num">36<span class="unit">+</span></div>
+        <div class="stat-label">States &amp; UTs Covered</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">12<span class="unit">L+</span></div>
+        <div class="stat-label">BH Registrations</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">2<span class="unit">yr</span></div>
+        <div class="stat-label">Fee Cycle</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num">₹0<span class="unit"></span></div>
+        <div class="stat-label">Portal Fee</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ ABOUT ════ -->
+<section id="about">
+  <div class="section-inner">
+    <span class="section-tag">What is BH Series?</span>
+    <h2 class="section-title">India's Pan-National<br>Vehicle Registration</h2>
+    <p class="section-desc">Introduced by MoRTH in August 2021, BH Series lets eligible transferable employees register their vehicle once — no state-wise re-registration when they move.</p>
+
+    <div class="about-grid">
+      <div class="about-features">
+        <div class="about-feat">
+          <div class="feat-icon">🗺️</div>
+          <div class="feat-text">
+            <h4>Pan-India Validity</h4>
+            <p>BH registration is valid across all 36 States &amp; UTs. No need to apply for NOC or re-register when transferred to another state.</p>
+          </div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon pink">📅</div>
+          <div class="feat-text">
+            <h4>2-Year Renewable Fee</h4>
+            <p>Unlike traditional 15-year lifetime tax, BH Series levies fees for 2 years at a time — renewable in multiples of 2 years.</p>
+          </div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon green">🏛️</div>
+          <div class="feat-text">
+            <h4>Govt &amp; PSU Employees</h4>
+            <p>Central &amp; State Government, Defence Services, PSUs, Nationalised Banks &amp; Employees of multi-state private companies are eligible.</p>
+          </div>
+        </div>
+        <div class="about-feat">
+          <div class="feat-icon amber">⚡</div>
+          <div class="feat-text">
+            <h4>EV Concession</h4>
+            <p>Electric vehicles get a 50% concession on BH Series registration fees — in line with India's push for green mobility.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bh-info-card">
+        <h3>Who is Eligible?</h3>
+        <div class="elig-pill-list">
+          <div class="elig-pill"><span class="ep-icon">🏛️</span><div><strong>Central Government</strong><span>All Ministries, Departments, IAS/IPS/IFS officers</span></div></div>
+          <div class="elig-pill"><span class="ep-icon">🎖️</span><div><strong>Defence Services</strong><span>Army, Navy, Air Force, CAPF, Paramilitary</span></div></div>
+          <div class="elig-pill"><span class="ep-icon">🏢</span><div><strong>State Government</strong><span>State employees, State PSU &amp; Autonomous Bodies</span></div></div>
+          <div class="elig-pill"><span class="ep-icon">🏭</span><div><strong>PSU Employees</strong><span>Nationalised Banks, LIC, Cooperative Societies</span></div></div>
+          <div class="elig-pill"><span class="ep-icon">🌐</span><div><strong>Private / MNC (4+ States)</strong><span>Employees of companies with offices in 4+ States/UTs</span></div></div>
+        </div>
+        <div class="bh-format-demo">
+          <div class="bh-format-label">BH Plate Format</div>
+          <div class="bh-plate-sm"><div class="ind-strip"></div>25 BH 1234 AA</div>
+          <div class="bh-format-note">YY BH NNNN CC · Year of Reg · BH identifier · 4-digit number · 2-letter code</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════ WIZARD APP ════ -->
+<div id="app">
+
+  <!-- PROGRESS -->
+  <div class="wizard-progress">
+    <div class="progress-inner">
+      <div class="progress-track"></div>
+      <div class="progress-fill-bar" id="pfill"></div>
+      <div class="p-step"><div class="p-dot active" id="pd1">1</div><div class="p-label" id="pl1">Eligibility</div></div>
+      <div class="p-step"><div class="p-dot" id="pd2">2</div><div class="p-label" id="pl2">Personal</div></div>
+      <div class="p-step"><div class="p-dot" id="pd3">3</div><div class="p-label" id="pl3">Vehicle</div></div>
+      <div class="p-step"><div class="p-dot" id="pd4">4</div><div class="p-label" id="pl4">Employment</div></div>
+      <div class="p-step"><div class="p-dot" id="pd5">5</div><div class="p-label" id="pl5">Documents</div></div>
+      <div class="p-step"><div class="p-dot" id="pd6">6</div><div class="p-label" id="pl6">Fee &amp; Review</div></div>
+      <div class="p-step"><div class="p-dot" id="pd7">7</div><div class="p-label" id="pl7">Submit</div></div>
+    </div>
+  </div>
+
+  <!-- ════ STEP 1 — ELIGIBILITY ════ -->
+  <div class="wizard-section active" id="step-1">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 01 / 07</div>
+      <h2 class="section-title-lg">Eligibility<br>Check</h2>
+      <p class="section-sub">Select your employment category to verify eligibility for BH Series registration as per MoRTH notification dated 26 August 2021.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>ℹ️ BH Series Eligibility:</strong> Available to employees of Central/State Government, Defence Services, PSUs, and private organisations with offices in 4 or more States/UTs. This registration remains valid across India without periodic re-registration.
+    </div>
+
+    <div class="form-card-white">
+      <h3>🏛️ Select Employment Category</h3>
+      <div class="elig-grid" id="eligGrid">
+        <div class="elig-card" onclick="selectElig(this,'central')">
+          <div class="elig-radio"></div>
+          <div><h4>🏛️ Central Government</h4><p>IAS, IPS, IFS and all Central Govt. employees including Ministries and Departments</p></div>
+        </div>
+        <div class="elig-card" onclick="selectElig(this,'defence')">
+          <div class="elig-radio"></div>
+          <div><h4>🎖️ Defence Services</h4><p>Army, Navy, Air Force, CAPF, Paramilitary Forces and Civilian Defence employees</p></div>
+        </div>
+        <div class="elig-card" onclick="selectElig(this,'state')">
+          <div class="elig-radio"></div>
+          <div><h4>🏢 State Government</h4><p>State Government employees, State PSUs and State Autonomous Bodies</p></div>
+        </div>
+        <div class="elig-card" onclick="selectElig(this,'psu')">
+          <div class="elig-radio"></div>
+          <div><h4>🏭 PSU / Nationalised Bank</h4><p>Central/State PSUs, Nationalised Banks, LIC, Cooperative Societies</p></div>
+        </div>
+        <div class="elig-card" onclick="selectElig(this,'private')">
+          <div class="elig-radio"></div>
+          <div><h4>🏬 Private Sector (Multi-State)</h4><p>Employees of private companies with registered offices in 4 or more States/UTs</p></div>
+        </div>
+        <div class="elig-card" onclick="selectElig(this,'mnc')">
+          <div class="elig-radio"></div>
+          <div><h4>🌐 MNC / Foreign Company</h4><p>Employees of multinational corporations registered in India with 4+ state presence</p></div>
+        </div>
+      </div>
+      <div id="eligResult" style="display:none; margin-top:1rem;"></div>
+      <div style="margin-top:1rem;">
+        <button class="btn-next" onclick="checkEligibility()" style="width:auto;">✓ Verify Eligibility</button>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <span></span>
+      <button class="btn-next" onclick="goToStep(2)">Next: Personal Details →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 2 — PERSONAL DETAILS ════ -->
+  <div class="wizard-section" id="step-2">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 02 / 07</div>
+      <h2 class="section-title-lg">Personal<br>Details</h2>
+      <p class="section-sub">Enter your personal details exactly as they appear on your Aadhaar card and official records. All fields are mandatory.</p>
+    </div>
+
+    <div class="form-card-white">
+      <h3>👤 Applicant Identity</h3>
+      <div class="form-grid-3">
+        <div class="form-group"><label>First Name <span class="req">*</span></label><input type="text" id="fname" placeholder="As per Aadhaar"></div>
+        <div class="form-group"><label>Middle Name</label><input type="text" placeholder="Optional"></div>
+        <div class="form-group"><label>Last Name <span class="req">*</span></label><input type="text" id="lname" placeholder="As per Aadhaar"></div>
+      </div>
+      <div class="form-grid" style="margin-top:1rem;">
+        <div class="form-group"><label>Date of Birth <span class="req">*</span></label><input type="date"></div>
+        <div class="form-group"><label>Gender <span class="req">*</span></label><select><option value="">— Select —</option><option>Male</option><option>Female</option><option>Transgender / Others</option></select></div>
+        <div class="form-group"><label>Aadhaar Number <span class="req">*</span></label><input type="text" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
+        <div class="form-group"><label>PAN Number <span class="req">*</span></label><input type="text" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase"></div>
+        <div class="form-group"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="phone" placeholder="+91 XXXXXXXXXX"><span class="form-hint">OTP will be sent for verification</span></div>
+        <div class="form-group"><label>Email Address <span class="req">*</span></label><input type="email" placeholder="your@email.gov.in"></div>
+      </div>
+    </div>
+
+    <div class="form-card-white">
+      <h3>🏠 Current Residential Address</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>State of Residence <span class="req">*</span></label>
+          <select id="resState">
+            <option value="">— Select State —</option>
+            <option>Andhra Pradesh</option><option>Arunachal Pradesh</option><option>Assam</option><option>Bihar</option><option>Chhattisgarh</option><option>Goa</option><option>Gujarat</option><option>Haryana</option><option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option><option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option><option>Manipur</option><option>Meghalaya</option><option>Mizoram</option><option>Nagaland</option><option>Odisha</option><option>Punjab</option><option>Rajasthan</option><option>Sikkim</option><option>Tamil Nadu</option><option>Telangana</option><option>Tripura</option><option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option><option>Delhi (NCT)</option><option>Chandigarh</option><option>J&amp;K</option><option>Ladakh</option><option>Puducherry</option>
+          </select>
+        </div>
+        <div class="form-group"><label>District <span class="req">*</span></label><input type="text" placeholder="Current district"></div>
+        <div class="form-group"><label>PIN Code <span class="req">*</span></label><input type="text" placeholder="6-digit PIN" maxlength="6"></div>
+        <div class="form-group"><label>City / Town <span class="req">*</span></label><input type="text" placeholder="City name"></div>
+        <div class="form-group full"><label>Full Address <span class="req">*</span></label><input type="text" placeholder="House No., Street, Colony / Area, Landmark"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(1)">← Back</button>
+      <button class="btn-next" onclick="goToStep(3)">Next: Vehicle Details →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 3 — VEHICLE DETAILS ════ -->
+  <div class="wizard-section" id="step-3">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 03 / 07</div>
+      <h2 class="section-title-lg">Vehicle<br>Details</h2>
+      <p class="section-sub">BH Series applies only to non-transport private vehicles. Enter details exactly as on Form 21 (invoice) from the dealer.</p>
+    </div>
+
+    <div class="warn-box">
+      <strong>⚠️ Note:</strong> BH Series is applicable only for <strong>non-transport (private) vehicles</strong>. Commercial transport vehicles are not eligible. The vehicle must be newly purchased or undergoing conversion from existing state registration.
+    </div>
+
+    <div class="form-card-white">
+      <h3>🚗 Vehicle Specifications</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>Vehicle Type <span class="req">*</span></label>
+          <select id="vehType" onchange="calcFee()">
+            <option value="">— Select —</option>
+            <option value="2w">Two Wheeler (Motorcycle / Scooter)</option>
+            <option value="4w">Four Wheeler (Car / SUV / MUV)</option>
+            <option value="3w">Three Wheeler (Auto-Rickshaw)</option>
+            <option value="lmv">Light Motor Vehicle</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Fuel Type <span class="req">*</span></label>
+          <select id="vehFuel" onchange="calcFee()">
+            <option value="">— Select —</option>
+            <option value="petrol">Petrol</option>
+            <option value="diesel">Diesel</option>
+            <option value="cng">CNG</option>
+            <option value="lpg">LPG</option>
+            <option value="ev">Electric (Battery)</option>
+            <option value="hybrid">Petrol + Electric (Hybrid)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Manufacturer <span class="req">*</span></label>
+          <select id="vehMake">
+            <option value="">— Select Manufacturer —</option>
+            <option>Maruti Suzuki</option><option>Hyundai</option><option>Tata Motors</option><option>Mahindra</option><option>Honda</option><option>Toyota</option><option>Kia</option><option>Skoda</option><option>Volkswagen</option><option>MG Motor</option><option>Renault</option><option>Nissan</option><option>Hero MotoCorp</option><option>Bajaj Auto</option><option>TVS Motor</option><option>Royal Enfield</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Model Name <span class="req">*</span></label><input type="text" id="vehModel" placeholder="e.g. Swift Dzire, Creta, Nexon"></div>
+        <div class="form-group"><label>Engine Capacity (CC) <span class="req">*</span></label><input type="number" id="vehCC" placeholder="e.g. 1197" oninput="calcFee()"><span class="form-hint">Used for BH Series fee calculation</span></div>
+        <div class="form-group"><label>Year of Manufacture <span class="req">*</span></label>
+          <select id="vehYear"><option value="">— Year —</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2017</option></select>
+        </div>
+        <div class="form-group"><label>Chassis Number <span class="req">*</span></label><input type="text" placeholder="17-character VIN" maxlength="17" style="text-transform:uppercase"></div>
+        <div class="form-group"><label>Engine Number <span class="req">*</span></label><input type="text" placeholder="As per Form 21" style="text-transform:uppercase"></div>
+        <div class="form-group"><label>Vehicle Colour <span class="req">*</span></label><input type="text" placeholder="e.g. Pearl White, Magma Grey"></div>
+        <div class="form-group"><label>Invoice Date <span class="req">*</span></label><input type="date"></div>
+        <div class="form-group"><label>Invoice Amount (₹) <span class="req">*</span></label><input type="number" placeholder="Ex-showroom price"></div>
+        <div class="form-group"><label>Seating Capacity <span class="req">*</span></label><input type="number" placeholder="Including driver" min="1"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(2)">← Back</button>
+      <button class="btn-next" onclick="goToStep(4)">Next: Employment Details →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 4 — EMPLOYMENT ════ -->
+  <div class="wizard-section" id="step-4">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 04 / 07</div>
+      <h2 class="section-title-lg">Employment<br>Details</h2>
+      <p class="section-sub">Provide your employer information and designation. This establishes your eligibility for BH Series registration.</p>
+    </div>
+
+    <div class="form-card-white">
+      <h3>🏢 Employer Information</h3>
+      <div class="form-grid">
+        <div class="form-group"><label>Organisation Name <span class="req">*</span></label><input type="text" id="empOrg" placeholder="Full official name of organisation"></div>
+        <div class="form-group"><label>Employee ID / Service Number <span class="req">*</span></label><input type="text" placeholder="As per official ID card"></div>
+        <div class="form-group"><label>Designation <span class="req">*</span></label><input type="text" placeholder="Current designation"></div>
+        <div class="form-group"><label>Date of Joining <span class="req">*</span></label><input type="date"></div>
+        <div class="form-group"><label>Office City / Location <span class="req">*</span></label><input type="text" placeholder="Current posting city"></div>
+        <div class="form-group"><label>HR Contact / Signatory Mobile</label><input type="tel" placeholder="For employer certificate verification"></div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(3)">← Back</button>
+      <button class="btn-next" onclick="goToStep(5)">Next: Upload Documents →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 5 — DOCUMENTS ════ -->
+  <div class="wizard-section" id="step-5">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 05 / 07</div>
+      <h2 class="section-title-lg">Upload<br>Documents</h2>
+      <p class="section-sub">Upload scanned copies of all required documents. All files must be clear, legible and within the size limits.</p>
+    </div>
+
+    <div class="info-box">
+      <strong>📋 Documents Required:</strong> Employer Certificate (Form-60), Employee ID Card, Aadhaar, PAN, Passport-size Photo, Driving Licence, Form 21 (Invoice), Form 22 (Roadworthiness), Insurance Certificate, and PUC Certificate.
+    </div>
+
+    <div class="form-card-white">
+      <h3>📁 Required &amp; Conditional Documents</h3>
+      <div class="upload-grid" id="uploadGrid"></div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(4)">← Back</button>
+      <button class="btn-next" onclick="goToStep(6)">Next: Fee &amp; Review →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 6 — FEE & REVIEW ════ -->
+  <div class="wizard-section" id="step-6">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 06 / 07</div>
+      <h2 class="section-title-lg">Fee &amp;<br>Review</h2>
+      <p class="section-sub">BH Series registration fee is levied for 2 years and renewable. Review your application summary before final submission.</p>
+    </div>
+
+    <div class="form-card-white">
+      <h3>📊 BH Series Fee Schedule (MoRTH 2025–26)</h3>
+      <table class="fee-ref-table">
+        <thead><tr><th>Vehicle Category</th><th>Engine / Capacity</th><th>Fee (2 Years)</th></tr></thead>
+        <tbody>
+          <tr><td>Two Wheeler</td><td>Up to 40cc</td><td class="fee-green">₹600</td></tr>
+          <tr><td>Two Wheeler</td><td>40cc – 75cc</td><td class="fee-green">₹1,000</td></tr>
+          <tr><td>Two Wheeler</td><td>Above 75cc</td><td class="fee-green">₹1,500</td></tr>
+          <tr><td>Four Wheeler</td><td>Up to 1000cc</td><td class="fee-green">₹2,500</td></tr>
+          <tr><td>Four Wheeler</td><td>1000cc – 1500cc</td><td class="fee-green">₹3,500</td></tr>
+          <tr><td>Four Wheeler</td><td>Above 1500cc</td><td class="fee-green">₹5,500</td></tr>
+          <tr><td>Electric Vehicle</td><td>All categories</td><td class="fee-green">50% concession</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="fee-breakdown">
+      <h3>💳 Your Fee Estimate</h3>
+      <div class="fee-row"><span class="fee-label">Registration Fee (2 years)</span><span class="fee-value" id="feeBase">Fill vehicle details →</span></div>
+      <div class="fee-row"><span class="fee-label">HSRP Number Plates</span><span class="fee-value">₹ 400 – 700</span></div>
+      <div class="fee-row"><span class="fee-label">Smart Card Charges</span><span class="fee-value">₹ 200</span></div>
+      <div class="fee-row"><span class="fee-label">Handling / Service Fee</span><span class="fee-value">₹ 50</span></div>
+      <div class="fee-row"><span class="fee-label">Road Tax (State)</span><span class="fee-value">As applicable</span></div>
+      <div class="fee-row total"><span class="fee-label">Estimated Total</span><span class="fee-value" id="feeTotal">—</span></div>
+    </div>
+
+    <div class="summary-grid" id="summaryGrid"></div>
+
+    <div class="info-box">
+      <strong>💳 Payment Methods:</strong> Net Banking, UPI, Debit Card, Credit Card, NEFT / RTGS, SBI Collect
+    </div>
+
+    <div class="nav-row">
+      <button class="btn-back" onclick="goToStep(5)">← Back</button>
+      <button class="btn-next" onclick="goToStep(7)">Next: Declaration &amp; Submit →</button>
+    </div>
+  </div>
+
+  <!-- ════ STEP 7 — SUBMIT ════ -->
+  <div class="wizard-section" id="step-7">
+    <div class="section-header">
+      <div class="section-eyebrow">Step 07 / 07</div>
+      <h2 class="section-title-lg">Declaration &amp;<br>Submit</h2>
+      <p class="section-sub">Complete the pre-submission checklist, accept the declaration, and submit your application.</p>
+    </div>
+
+    <div class="form-card-white">
+      <h3>✅ Pre-Submission Checklist</h3>
+      <div class="checklist" id="checklist">
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Employment category selected and eligibility verified</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Personal details filled as per Aadhaar — name, DOB, mobile confirmed</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Vehicle details (chassis, engine, invoice, insurance) entered correctly</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Employer Certificate / Form-60 uploaded (attested, on letterhead)</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Address proof uploaded and matches address entered in Section 2</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Aadhaar, PAN, passport-size photo and driving licence uploaded</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Form 21 (invoice), Form 22, insurance and PUC certificate uploaded</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><input type="checkbox"><div class="check-box">✓</div><div class="check-label">Fee amount reviewed and preferred payment method identified</div></div>
+      </div>
+    </div>
+
+    <div class="declaration-box">
+      <h4>Declaration by Applicant</h4>
+      I hereby solemnly affirm and declare that I am an eligible employee as per the criteria laid down under Rule 47(1)(n) of the Central Motor Vehicles Rules, 1989 and MoRTH notification dated 26 August 2021 as amended. All information furnished and all documents uploaded are true, correct, complete and genuine to the best of my knowledge. I am aware that submission of false information or forged documents is a punishable offence under the Motor Vehicles Act, 1988. I undertake to notify the concerned RTO within 30 days of any change in employment that affects my eligibility.
+      <div class="decl-check">
+        <input type="checkbox" id="declCheck">
+        <label for="declCheck">I have read, understood and agree to the above declaration. I consent to the verification of my documents through UIDAI, NSDL, and DigiLocker.</label>
+      </div>
+    </div>
+
+    <div class="form-card-white">
+      <h3>🔐 OTP Verification</h3>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>OTP (sent to registered mobile) <span class="req">*</span></label>
+          <div style="display:flex;gap:0.5rem;">
+            <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" style="flex:1">
+            <button onclick="showToast('OTP sent to your registered mobile number.')" style="background:var(--text);color:#fff;border:none;padding:0 1rem;border-radius:10px;font-size:0.8rem;cursor:pointer;font-family:inherit;white-space:nowrap;">Send OTP</button>
+          </div>
+        </div>
+        <div class="form-group"><label>Place of Submission <span class="req">*</span></label><input type="text" placeholder="City / District"></div>
+      </div>
+    </div>
+
+    <div id="submitRow">
+      <div class="nav-row">
+        <button class="btn-back" onclick="goToStep(6)">← Back</button>
+        <button class="btn-next green" onclick="submitApp()">🚀 Submit Application &amp; Proceed to Payment</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-panel" id="successPanel">
+      <div class="success-icon">🎉</div>
+      <h2>Application Submitted!</h2>
+      <p>Your BH Series application has been received. You will receive a confirmation SMS and email. The RTO will process your application within 7–10 working days.</p>
+      <div class="ref-box">
+        <div class="ref-label">Application Reference</div>
+        <div class="ref-number" id="refNumber">—</div>
+      </div>
+      <div class="success-steps">
+        <div class="success-step-row"><div class="success-step-num">1</div><div class="success-step-text"><strong>SMS &amp; Email Confirmation</strong> — Your application ID and next steps are sent to your registered contacts.</div></div>
+        <div class="success-step-row"><div class="success-step-num">2</div><div class="success-step-text"><strong>Document Verification</strong> — RTO verifies employer certificate and all documents via UIDAI/NSDL. Takes 3–5 working days.</div></div>
+        <div class="success-step-row"><div class="success-step-num">3</div><div class="success-step-text"><strong>Fee Payment</strong> — Pay the registration fee online via your state's Vahan portal using your application ID.</div></div>
+        <div class="success-step-row"><div class="success-step-num">4</div><div class="success-step-text"><strong>BH Plate &amp; RC Issued</strong> — Visit the designated RTO to collect HSRP plates and Registration Certificate with BH number.</div></div>
+      </div>
+      <button class="btn-primary" onclick="window.open('https://parivahan.gov.in','_blank')">Track on Parivahan →</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Vahan<span>Bridge</span></div>
+  <div class="footer-sub">A VahanBridge Service · Powered by MoRTH Data · Not affiliated with State Governments</div>
+</footer>
+
+<div id="toast"></div>
+
+<script>
+let currentStep = 0;
+let selectedEligType = null;
+const uploadedFiles = {};
+
+const bhDocList = [
+  { id: 'emp_cert',    label: 'Employer Certificate / Form-60', hint: 'On letterhead, with seal & HR signature', required: true },
+  { id: 'emp_id',      label: 'Employee ID Card',               hint: 'Front & back — currently valid',          required: true },
+  { id: 'aadhaar',     label: 'Aadhaar Card',                   hint: 'Front & back — clear scan',               required: true },
+  { id: 'pan',         label: 'PAN Card',                       hint: 'Clear scan of PAN',                       required: true },
+  { id: 'photo',       label: 'Passport-size Photograph',       hint: 'Recent, white background, within 6 months', required: true },
+  { id: 'dl',          label: 'Driving Licence',                hint: 'Front & back — valid for vehicle class',  required: true },
+  { id: 'form21',      label: 'Form 21 — Sale Invoice',         hint: 'Dealer invoice with chassis & engine no.', required: true },
+  { id: 'form22',      label: 'Form 22 — Roadworthiness',       hint: 'Manufacturer certificate of compliance',  required: true },
+  { id: 'insurance',   label: 'Insurance Certificate',          hint: 'Valid comprehensive / 3rd party policy',  required: true },
+  { id: 'puc',         label: 'PUC Certificate',                hint: 'Valid emission test certificate',         required: true },
+  { id: 'salary_slip', label: 'Salary Slip (Last 3 months)',    hint: 'Private sector employees only',           required: false, conditional: true },
+  { id: 'noc',         label: 'NOC from Previous State RTO',    hint: 'Only for conversion from existing registration', required: false, conditional: true },
+];
+
+/* ── HERO PLATE ANIMATION ── */
+const bhPlates = ['25 BH 1234 AA','25 BH 5678 BC','25 BH 9012 DE','25 BH 3456 FG'];
+let pi = 0;
+setInterval(() => {
+  pi = (pi + 1) % bhPlates.length;
+  const el = document.getElementById('heroPlateTxt');
+  el.style.opacity = 0;
+  setTimeout(() => { el.textContent = bhPlates[pi]; el.style.opacity = 1; }, 300);
+}, 2500);
+document.getElementById('heroPlateTxt').style.transition = 'opacity 0.3s';
+
+/* ── NAV UTILS ── */
+function scrollToAbout() { document.getElementById('about').scrollIntoView({ behavior:'smooth' }); }
+function resetToHero(e) {
+  e.preventDefault();
+  document.getElementById('hero').style.display = '';
+  document.getElementById('about').style.display = '';
+  document.getElementById('app').style.display = 'none';
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ── START WIZARD ── */
+function startWizard() {
+  document.getElementById('hero').style.display = 'none';
+  document.getElementById('about').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  currentStep = 1;
+  updateProgress(1);
+  buildUploadGrid();
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+/* ── PROGRESS ── */
+const FILLS7 = [0, 0, 16.7, 33.3, 50, 66.7, 83.3, 100];
+function updateProgress(step) {
+  document.getElementById('pfill').style.width = FILLS7[step] + '%';
+  for (let i = 1; i <= 7; i++) {
+    const dot = document.getElementById('pd' + i);
+    const lbl = document.getElementById('pl' + i);
+    dot.classList.remove('active', 'done');
+    lbl.classList.remove('active');
+    if (i < step)        { dot.classList.add('done'); dot.innerHTML = '✓'; }
+    else if (i === step) { dot.classList.add('active'); dot.innerHTML = i; lbl.classList.add('active'); }
+    else                 { dot.innerHTML = i; }
+  }
+}
+
+/* ── NAVIGATE ── */
+function goToStep(n) {
+  document.querySelectorAll('.wizard-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  currentStep = n;
+  updateProgress(n);
+  if (n === 6) buildReview();
+  document.getElementById('app').scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+/* ── ELIGIBILITY ── */
+function selectElig(el, type) {
+  document.querySelectorAll('.elig-card').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedEligType = type;
+}
+
+function checkEligibility() {
+  const res = document.getElementById('eligResult');
+  if (!selectedEligType) {
+    res.style.display = 'block';
+    res.innerHTML = '<div class="warn-box"><strong>⚠️</strong> Please select your employment category first.</div>';
+    return;
+  }
+  res.style.display = 'block';
+  res.innerHTML = '<div class="info-box"><strong>✅ You are eligible for BH Series registration!</strong> Proceed to fill in your personal, vehicle, and employment details. Ensure all documents are ready before submission.</div>';
+}
+
+/* ── FEE CALC ── */
+function calcFee() {
+  const type = document.getElementById('vehType')?.value;
+  const cc = parseInt(document.getElementById('vehCC')?.value) || 0;
+  const fuel = document.getElementById('vehFuel')?.value;
+  let base = 0;
+  if (type === '2w') {
+    base = cc <= 40 ? 600 : cc <= 75 ? 1000 : 1500;
+  } else if (type === '4w' || type === 'lmv') {
+    base = cc <= 1000 ? 2500 : cc <= 1500 ? 3500 : 5500;
+  }
+  if (fuel === 'ev' || fuel === 'hybrid') base = Math.round(base * 0.5);
+  const feeBaseEl = document.getElementById('feeBase');
+  const feeTotalEl = document.getElementById('feeTotal');
+  if (feeBaseEl && base > 0) {
+    feeBaseEl.textContent = '₹ ' + base.toLocaleString('en-IN');
+    feeTotalEl.textContent = '₹ ' + (base + 550 + 200 + 50).toLocaleString('en-IN') + ' (est.)';
+  }
+}
+
+/* ── UPLOAD GRID ── */
+function buildUploadGrid() {
+  const grid = document.getElementById('uploadGrid');
+  if (grid.children.length) return;
+  grid.innerHTML = '';
+  bhDocList.forEach(doc => {
+    const card = document.createElement('div');
+    card.className = 'upload-card';
+    card.id = 'uc-' + doc.id;
+    const badge = doc.required ? '<span class="upload-required">Required</span>' : doc.conditional ? '<span class="upload-conditional">If Applicable</span>' : '<span class="upload-optional">Optional</span>';
+    card.innerHTML = `
+      <div class="upload-doc-title">${doc.label}${badge}</div>
+      <div class="upload-doc-hint">${doc.hint}</div>
+      <label for="uf-${doc.id}">
+        <div class="upload-trigger">
+          <div class="upload-trigger-icon">📎</div>
+          <div class="upload-trigger-text">Click to upload or drag &amp; drop<br>PDF · JPG · PNG · Max 2 MB</div>
+        </div>
+      </label>
+      <input type="file" id="uf-${doc.id}" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('${doc.id}','uf-${doc.id}')">
+    `;
+    card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('dragover'); });
+    card.addEventListener('dragleave', () => card.classList.remove('dragover'));
+    card.addEventListener('drop', e => { e.preventDefault(); card.classList.remove('dragover'); const f = e.dataTransfer.files[0]; if(f) processFile(doc.id, f, card); });
+    grid.appendChild(card);
+  });
+}
+
+function handleFile(docId, inputId) {
+  const f = document.getElementById(inputId)?.files[0];
+  if (f) processFile(docId, f, document.getElementById('uc-' + docId));
+}
+
+function processFile(docId, file, card) {
+  uploadedFiles[docId] = file.name;
+  card.classList.add('uploaded');
+  const trigger = card.querySelector('.upload-trigger');
+  trigger.innerHTML = `<div class="upload-trigger-icon">✅</div><div class="upload-trigger-text" style="color:var(--green);font-weight:600">${file.name}</div>`;
+  showToast('✅ ' + file.name + ' uploaded.');
+}
+
+/* ── REVIEW ── */
+function buildReview() {
+  calcFee();
+  const g = document.getElementById('summaryGrid');
+  const fname = document.getElementById('fname')?.value || '—';
+  const lname = document.getElementById('lname')?.value || '—';
+  const state = document.getElementById('resState')?.value || '—';
+  const org = document.getElementById('empOrg')?.value || '—';
+  const make = document.getElementById('vehMake')?.value || '—';
+  const model = document.getElementById('vehModel')?.value || '—';
+  const type = document.getElementById('vehType')?.value || '—';
+  const fuel = document.getElementById('vehFuel')?.value || '—';
+  const cc = document.getElementById('vehCC')?.value || '—';
+  const fields = [
+    ['Applicant', fname + ' ' + lname],
+    ['State of Residence', state],
+    ['Organisation', org],
+    ['Vehicle', make + ' ' + model],
+    ['Vehicle Type', type.toUpperCase()],
+    ['Fuel Type', fuel.charAt(0).toUpperCase() + fuel.slice(1)],
+    ['Engine Capacity', cc + ' CC'],
+    ['Employment Category', selectedEligType ? selectedEligType.toUpperCase() : '—'],
+    ['Documents Uploaded', Object.keys(uploadedFiles).length + ' / ' + bhDocList.length],
+  ];
+  g.innerHTML = fields.map(([k,v]) => `<div class="summary-card"><h4>${k}</h4><p>${v || '—'}</p></div>`).join('');
+}
+
+/* ── CHECKLIST ── */
+function toggleCheck(el) { el.classList.toggle('checked'); }
+
+/* ── SUBMIT ── */
+function submitApp() {
+  const decl = document.getElementById('declCheck');
+  if (!decl.checked) { showToast('⚠️ Please accept the declaration before submitting.'); return; }
+  const ref = 'BH/2025/MH/' + (70000 + Math.floor(Math.random()*29999));
+  document.getElementById('refNumber').textContent = ref;
+  document.getElementById('submitRow').style.display = 'none';
+  const panel = document.getElementById('successPanel');
+  panel.classList.add('show');
+  panel.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+
+/* ── TOAST ── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1'; t.style.transform = 'translateX(-50%)';
+  setTimeout(() => { t.style.opacity = '0'; }, 4000);
+}
+
+window.addEventListener('DOMContentLoaded', () => { buildUploadGrid(); });
+</script>
+</body>
+</html>
