@@ -160,6 +160,40 @@ Railway gives you a free MySQL database that works great with Render.
 
 ---
 
+## API Endpoints (BH Series)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/bh/calculate-fee` | Calculate registration fee by vehicle type/CC/fuel |
+| `POST` | `/api/bh/apply` | Submit 7-step BH Series application |
+| `GET`  | `/api/bh/status/:bhRef` | Track application status |
+| `POST` | `/api/bh/upload-docs/:applicationId` | Upload all 12 required documents |
+
+---
+
+## API Endpoints (PUC)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/puc/lookup` | Step 1 — fetch vehicle PUC record from DB |
+| `POST` | `/api/puc/send-otp` | Step 2a — send OTP to registered mobile |
+| `POST` | `/api/puc/verify-otp` | Step 2b — verify OTP and issue certificate record |
+| `GET`  | `/api/puc/history/:regNo` | PUC history for a vehicle |
+| `GET`  | `/api/puc/centres?state=&district=` | List PUC testing centres |
+| `GET`  | `/api/puc/verify/:certOrReg` | Verify certificate authenticity |
+
+---
+
+## Complete Database Schema (8 tables, all auto-created on first boot)
+
+`users` · `vehicles` · `hsrp_applications` · `application_documents`
+`noc_applications` · `noc_documents` · `tax_refund_applications`
+`bh_applications` · `bh_documents` · `puc_records` · `puc_centres`
+
+PUC centres are seeded on first boot with 7 real centres across Pune, Delhi, and Bangalore.
+
+---
+
 ## Database Tables Created Automatically
 
 - `users` — vehicle owners
@@ -175,5 +209,5 @@ Tables are created automatically on first server start via `initSchema()`.
 
 - [x] NOC Transfer — `noc_transfer.html` + `/api/noc`
 - [x] Tax Refund — `tax_refund.html` + `/api/tax`
-- [ ] BH Series — `bh_series_portal.html` + `/api/bh`
-- [ ] PUC Portal — `puc_portal.html` + `/api/puc`
+- [x] BH Series — `bh_series_portal.html` + `/api/bh`
+- [x] PUC Portal — `puc_portal.html` + `/api/puc`

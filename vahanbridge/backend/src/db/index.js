@@ -185,6 +185,115 @@ async function initSchema() {
       )
     \`);
 
+
+    // ── BH APPLICATIONS TABLE ─────────────────────────────
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS bh_applications (
+        id                    INT AUTO_INCREMENT PRIMARY KEY,
+        bh_ref                VARCHAR(40) NOT NULL UNIQUE,
+        vehicle_id            INT,
+        user_id               INT,
+        eligibility_type      ENUM('central','defence','state','psu','private','mnc'),
+        res_state             VARCHAR(80),
+        district              VARCHAR(80),
+        pincode               VARCHAR(10),
+        city                  VARCHAR(80),
+        address               TEXT,
+        org_name              VARCHAR(150),
+        employee_id           VARCHAR(50),
+        designation           VARCHAR(100),
+        office_city           VARCHAR(80),
+        vehicle_type          ENUM('2w','4w','3w','lmv') DEFAULT '4w',
+        fuel_type             ENUM('petrol','diesel','cng','lpg','ev','hybrid') DEFAULT 'petrol',
+        engine_cc             INT,
+        invoice_amount_paise  BIGINT,
+        base_fee_paise        INT,
+        hsrp_fee_paise        INT DEFAULT 55000,
+        smart_card_paise      INT DEFAULT 20000,
+        total_fee_paise       INT,
+        submission_place      VARCHAR(100),
+        status                ENUM('pending','documents_uploaded','rto_processing',
+                                   'approved','bh_issued','rejected','cancelled')
+                              DEFAULT 'pending',
+        created_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at            TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE SET NULL,
+        FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE SET NULL,
+        INDEX idx_bh_ref (bh_ref),
+        INDEX idx_bh_status (status)
+      )
+    \`);
+
+    // ── BH DOCUMENTS TABLE ────────────────────────────────
+    await conn.execute(\`
+      CREATE TABLE IF NOT EXISTS bh_documents (
+        id              INT AUTO_INCREMENT PRIMARY KEY,
+        application_id  INT NOT NULL,
+        doc_type        VARCHAR(40) NOT NULL,
+        file_name       VARCHAR(255),
+        file_path       VARCHAR(500),
+        uploaded_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE KEY uq_bh_doc (application_id, doc_type),
+        FOREIGN KEY (application_id) REFERENCES bh_applications(id) ON DELETE CASCADE
+      )
+    \`);
+
+
+    // ── PUC RECORDS TABLE ─────────────────────────────────
+    await conn.execute(`
+      CREATE TABLE IF NOT EXISTS puc_records (
+        id              INT AUTO_INCREMENT PRIMARY KEY,
+        vehicle_id      INT NOT NULL,
+        cert_number     VARCHAR(40) NOT NULL UNIQUE,
+        issued_date     DATE NOT NULL,
+        expiry_date     DATE,
+        fuel_type       ENUM('petrol','diesel','cng','lpg','ev','hybrid') DEFAULT 'petrol',
+        co_level        DECIMAL(5,2) DEFAULT 0,
+        hc_level        INT DEFAULT 0,
+        co2_level       DECIMAL(5,2) DEFAULT 0,
+        opacity_level   DECIMAL(5,2) DEFAULT 0,
+        centre_name     VARCHAR(150),
+        status          ENUM('valid','expired','exempt','revoked') DEFAULT 'valid',
+        created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
+        INDEX idx_cert (cert_number),
+        INDEX idx_vehicle_puc (vehicle_id, status)
+      )
+    \`);
+
+    // ── PUC CENTRES TABLE ─────────────────────────────────
+    await conn.execute(\`
+      CREATE TABLE IF NOT EXISTS puc_centres (
+        id        INT AUTO_INCREMENT PRIMARY KEY,
+        name      VARCHAR(150) NOT NULL,
+        address   TEXT,
+        state     VARCHAR(80),
+        district  VARCHAR(80),
+        pincode   VARCHAR(10),
+        contact   VARCHAR(20),
+        timing    VARCHAR(60),
+        fuel_types VARCHAR(100),
+        lat       DECIMAL(10,7),
+        lng       DECIMAL(10,7)
+      )
+    \`);
+
+    // Seed a few PUC centres if table is empty
+    const [[centreCount]] = await conn.execute('SELECT COUNT(*) as cnt FROM puc_centres');
+    if (centreCount.cnt === 0) {
+      await conn.execute(\`
+        INSERT INTO puc_centres (name, address, state, district, pincode, contact, timing, fuel_types, lat, lng) VALUES
+        ('Green Auto PUC Centre', 'Shop 14, Deccan Gymkhana Rd, Pune', 'Maharashtra', 'Pune', '411004', '020-2551-0001', '8am-8pm', 'Petrol/Diesel/CNG', 18.5195, 73.8553),
+        ('Sharma Motors PUC', 'Near Shivaji Nagar, FC Road, Pune', 'Maharashtra', 'Pune', '411005', '020-2412-0002', '9am-7pm', 'Petrol/CNG', 18.5308, 73.8474),
+        ('City Auto Works PUC', 'Kalyani Nagar, Nagar Road, Pune', 'Maharashtra', 'Pune', '411014', '020-2764-0003', '8am-6pm', 'Petrol/Diesel', 18.5460, 73.9012),
+        ('Patil Auto Service', 'Hadapsar Industrial Estate, Pune', 'Maharashtra', 'Pune', '411028', '020-2683-0004', '8am-9pm', 'All Fuel Types', 18.4957, 73.9318),
+        ('RTO-Authorised PUC Hub', 'Opposite RTO Office, Bund Garden, Pune', 'Maharashtra', 'Pune', '411001', '020-2612-0005', '9am-5pm', 'All Fuel Types', 18.5290, 73.8733),
+        ('Delhi Green PUC', 'Nehru Place, New Delhi', 'Delhi', 'South Delhi', '110019', '011-4000-0006', '8am-8pm', 'Petrol/Diesel/CNG', 28.5485, 77.2520),
+        ('Bangalore Auto Emission', 'Koramangala, Bangalore', 'Karnataka', 'Bangalore Urban', '560034', '080-4100-0007', '9am-7pm', 'Petrol/Diesel', 12.9352, 77.6245)
+      \`);
+      console.log('✅ PUC centres seeded');
+    }
+
     console.log('✅ Database schema ready');
   } catch (err) {
     console.error('❌ Schema init failed:', err.message);

@@ -6,10 +6,12 @@ const morgan   = require('morgan');
 const path     = require('path');
 const fs       = require('fs');
 
-const { testConnection, initSchema } = require('./db/index');
+const { testConnection, initSchema } = require('./db');
 const hsrpRoutes = require('./routes/hsrp');
 const nocRoutes  = require('./routes/noc');
 const taxRoutes  = require('./routes/tax');
+const bhRoutes   = require('./routes/bh');
+const pucRoutes  = require('./routes/puc');
 // Future: import more route files here
 // const taxRoutes  = require('./routes/tax');
 // const bhRoutes   = require('./routes/bh');
@@ -65,6 +67,8 @@ app.get('/health', (req, res) => {
 app.use('/api/hsrp', hsrpRoutes);
 app.use('/api/noc',  nocRoutes);
 app.use('/api/tax',  taxRoutes);
+app.use('/api/bh',   bhRoutes);
+app.use('/api/puc',  pucRoutes);
 // Future routes:
 // app.use('/api/tax',  taxRoutes);
 // app.use('/api/bh',   bhRoutes);

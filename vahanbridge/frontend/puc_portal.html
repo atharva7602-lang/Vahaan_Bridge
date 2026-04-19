@@ -255,15 +255,15 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="logo" onclick="resetToHero(event)">
+  <a href="index.html" class="logo">
     <div class="logo-icon">🚗</div>
     Vahan<span>Bridge</span>
   </a>
   <ul>
-    <li><a href="#">NOC Transfer</a></li>
-    <li><a href="#">HSRP</a></li>
-    <li><a href="#">Road Tax</a></li>
-    <li><a href="#">BH Series</a></li>
+    <li><a href="noc_transfer.html">NOC Transfer</a></li>
+    <li><a href="hsrp_portal.html">HSRP</a></li>
+    <li><a href="tax_refund.html">Road Tax</a></li>
+    <li><a href="bh_series_portal.html">BH Series</a></li>
     <li><a href="#" class="active-link">PUC</a></li>
   </ul>
   <div class="nav-badge">🌿 PUC Portal</div>
@@ -702,177 +702,295 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
 <div id="toast"></div>
 
 <script>
-/* ── HERO ANIMATIONS ── */
-const regs = ['MH 12 AB 1234','DL 9C ZX 4567','KA 03 MN 5678','TN 10 XY 9999','GJ 01 BB 1111'];
-let ri = 0;
-setInterval(() => {
-  ri = (ri + 1) % regs.length;
-  const el = document.getElementById('heroRegTxt');
-  el.style.opacity = 0;
-  setTimeout(() => { el.textContent = regs[ri]; el.style.opacity = 1; }, 300);
-}, 2500);
-document.getElementById('heroRegTxt').style.transition = 'opacity 0.3s';
+  // ── API BASE URL ─────────────────────────────────────────
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://vahanbridge-api.onrender.com'; // ← UPDATE after Render deploy
 
-/* ── NAV UTILS ── */
-function resetToHero(e) {
-  e.preventDefault();
-  document.getElementById('hero').style.display = '';
-  document.getElementById('about').style.display = '';
-  document.getElementById('app').style.display = 'none';
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
-function scrollToAbout() { document.getElementById('about').scrollIntoView({ behavior:'smooth' }); }
+  /* ── HERO ANIMATIONS ── */
+  const regs = ['MH 12 AB 1234','DL 9C ZX 4567','KA 03 MN 5678','TN 10 XY 9999','GJ 01 BB 1111'];
+  let ri = 0;
+  setInterval(() => {
+    ri = (ri + 1) % regs.length;
+    const el = document.getElementById('heroRegTxt');
+    el.style.opacity = 0;
+    setTimeout(() => { el.textContent = regs[ri]; el.style.opacity = 1; }, 300);
+  }, 2500);
+  document.getElementById('heroRegTxt').style.transition = 'opacity 0.3s';
 
-function startApp() {
-  document.getElementById('hero').style.display = 'none';
-  document.getElementById('about').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  switchTab('download');
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
+  /* ── NAV UTILS ── */
+  function scrollToAbout() { document.getElementById('about').scrollIntoView({ behavior:'smooth' }); }
 
-function startAppTab(tab) {
-  document.getElementById('hero').style.display = 'none';
-  document.getElementById('about').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  switchTab(tab);
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
+  function startApp() {
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('about').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    switchTab('download');
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
+  function startAppTab(tab) {
+    document.getElementById('hero').style.display = 'none';
+    document.getElementById('about').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    switchTab(tab);
+    window.scrollTo({ top:0, behavior:'smooth' });
+  }
 
-/* ── TAB SWITCHING ── */
-function switchTab(name) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('panel-' + name).classList.add('active');
-  document.getElementById('tbn-' + name).classList.add('active');
-}
+  /* ── TAB SWITCHING ── */
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + name).classList.add('active');
+    document.getElementById('tbn-' + name).classList.add('active');
+  }
 
-/* ── PUC STEP 1 ── */
-function fetchPUCRecord() {
-  const reg = document.getElementById('puc-reg').value.trim();
-  const chassis = document.getElementById('puc-chassis').value.trim();
-  const mob = document.getElementById('puc-mobile').value.trim();
-  if (!reg || !chassis || !mob) { showToast('⚠️ Please fill all required fields.'); return; }
-  if (mob.length !== 10) { showToast('⚠️ Enter a valid 10-digit mobile number.'); return; }
+  /* ── STEP 1: FETCH PUC RECORD ─────────────────────────── */
+  async function fetchPUCRecord() {
+    const reg     = document.getElementById('puc-reg').value.trim();
+    const chassis = document.getElementById('puc-chassis').value.trim();
+    const mob     = document.getElementById('puc-mobile').value.trim();
+    const fuel    = document.querySelector('input[name=pucFuel]:checked').value;
+    const state   = document.getElementById('puc-state').value;
 
-  const fuel = document.querySelector('input[name=pucFuel]:checked').value;
-  const fuelLabel = { petrol:'Petrol (BS-VI)', diesel:'Diesel (BS-VI)', cng:'CNG (BS-VI)', ev:'Electric (Exempt)' }[fuel];
+    if (!reg || !chassis || !mob) { showToast('⚠️ Please fill all required fields.'); return; }
+    if (mob.length !== 10)        { showToast('⚠️ Enter a valid 10-digit mobile number.'); return; }
 
-  document.getElementById('res-reg').textContent = reg;
-  document.getElementById('res-owner').textContent = 'RAJESH KUMAR SHARMA';
-  document.getElementById('res-class').textContent = 'LMV (Non-Transport)';
-  document.getElementById('res-fuel').textContent = fuelLabel;
-  document.getElementById('res-issued').textContent = '15 Apr 2026';
-  document.getElementById('res-valid').textContent = '14 Oct 2026';
-  document.getElementById('res-centre').textContent = 'Green Auto PUC Centre, Pune';
+    const btn = document.querySelector('#puc-step1 .btn-green');
+    btn.disabled = true; btn.textContent = '⏳ Fetching record…';
 
-  const resultBox = document.getElementById('puc-result');
-  resultBox.classList.add('show');
-  resultBox.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    try {
+      const response = await fetch(`${API_BASE}/api/puc/lookup`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ regNo: reg, chassisLast5: chassis, mobile: mob, fuelType: fuel, regState: state }),
+      });
+      const data = await response.json();
 
-  // Update progress
-  document.getElementById('psc1').classList.add('done');
-  document.getElementById('psc1').textContent = '✓';
-  document.getElementById('puc-pfill').style.width = '0%';
-  showToast('✅ PUC record found for ' + reg);
-}
+      if (!response.ok || !data.success) {
+        showToast('⚠️ ' + (data.error || 'Lookup failed'));
+        return;
+      }
 
-/* ── OTP ── */
-function goToOTP() {
-  const mob = document.getElementById('puc-mobile').value;
-  document.getElementById('otp-mobile-disp').textContent = mob.replace(/(\d{6})(\d{4})/, '******$2');
-  document.getElementById('puc-step1').style.display = 'none';
-  document.getElementById('puc-step2').style.display = '';
-  document.getElementById('psc2').classList.add('active');
-  document.getElementById('puc-pfill').style.width = '50%';
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
+      const v = data.vehicle, p = data.puc;
+      document.getElementById('res-reg').textContent    = v.regNo;
+      document.getElementById('res-owner').textContent  = v.ownerName.toUpperCase();
+      document.getElementById('res-class').textContent  = v.vehicleClass;
+      document.getElementById('res-fuel').textContent   = v.fuel;
+      document.getElementById('res-issued').textContent = formatDate(p.issuedDate);
+      document.getElementById('res-valid').textContent  = formatDate(p.expiryDate);
+      document.getElementById('res-centre').textContent = p.centreName;
 
-function backToStep1() {
-  document.getElementById('puc-step2').style.display = 'none';
-  document.getElementById('puc-step1').style.display = '';
-  document.getElementById('psc2').classList.remove('active');
-  document.getElementById('puc-pfill').style.width = '0%';
-}
+      // Store for next steps
+      window._pucLookup = data;
 
-function verifyOTP() {
-  const otp = document.getElementById('puc-otp').value;
-  if (!otp || otp.length < 4) { showToast('⚠️ Please enter the OTP sent to your mobile.'); return; }
+      const resultBox = document.getElementById('puc-result');
+      resultBox.classList.add('show');
+      resultBox.scrollIntoView({ behavior:'smooth', block:'nearest' });
+      document.getElementById('psc1').classList.add('done');
+      document.getElementById('psc1').textContent = '✓';
+      showToast('✅ PUC record found for ' + v.regNo);
 
-  const reg = document.getElementById('puc-reg').value.trim();
-  const fuel = document.querySelector('input[name=pucFuel]:checked').value;
-  const fuelLabel = { petrol:'PETROL (BS-VI)', diesel:'DIESEL (BS-VI)', cng:'CNG (BS-VI)', ev:'ELECTRIC' }[fuel];
+    } catch (err) {
+      showToast('⚠️ Network error — please check connection.');
+    } finally {
+      btn.disabled = false; btn.textContent = '🔍 Fetch PUC Record';
+    }
+  }
 
-  document.getElementById('c-reg').textContent = reg;
-  document.getElementById('c-owner').textContent = 'RAJESH KUMAR SHARMA';
-  document.getElementById('c-class').textContent = 'LMV (Non-Transport)';
-  document.getElementById('c-fuel').textContent = fuelLabel;
-  document.getElementById('c-model').textContent = 'MARUTI SWIFT VXI';
-  document.getElementById('c-certno').textContent = 'PUC/MH/2026/' + Math.floor(10000000 + Math.random()*89999999);
-  document.getElementById('c-testdate').textContent = '15 Apr 2026';
-  document.getElementById('c-validupto').textContent = '14 Oct 2026';
-  document.getElementById('c-validity').textContent = fuel === 'ev' ? 'Exempt' : '6 Months';
-  document.getElementById('c-co').textContent = fuel === 'diesel' ? '18' : '0.32';
-  document.getElementById('c-hc').textContent = fuel === 'diesel' ? '—' : '74';
-  document.getElementById('c-co2').textContent = '14.1';
-  document.getElementById('c-centre-sign').textContent = 'Green Auto PUC Centre, Pune';
+  /* ── STEP 2a: SEND OTP ────────────────────────────────── */
+  async function goToOTP() {
+    const mob = document.getElementById('puc-mobile').value.trim();
+    const reg = document.getElementById('puc-reg').value.trim();
 
-  document.getElementById('puc-step2').style.display = 'none';
-  document.getElementById('puc-step3').style.display = '';
-  document.getElementById('psc2').classList.remove('active');
-  document.getElementById('psc2').classList.add('done');
-  document.getElementById('psc2').textContent = '✓';
-  document.getElementById('psc3').classList.add('active');
-  document.getElementById('puc-pfill').style.width = '100%';
-  window.scrollTo({ top:0, behavior:'smooth' });
-  showToast('🎉 PUC Certificate ready for download!');
-}
+    const btn = document.querySelector('#puc-result .btn-green');
+    btn.disabled = true; btn.textContent = '⏳ Sending OTP…';
 
-function clearPUCForm() {
-  document.getElementById('puc-reg').value = '';
-  document.getElementById('puc-chassis').value = '';
-  document.getElementById('puc-mobile').value = '';
-  document.querySelector('input[name=pucFuel][value=petrol]').checked = true;
-  document.getElementById('puc-result').classList.remove('show');
-}
+    try {
+      const response = await fetch(`${API_BASE}/api/puc/send-otp`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ mobile: mob, regNo: reg }),
+      });
+      const data = await response.json();
 
-function resetDownload() {
-  clearPUCForm();
-  document.getElementById('puc-step1').style.display = '';
-  document.getElementById('puc-step2').style.display = 'none';
-  document.getElementById('puc-step3').style.display = 'none';
-  ['psc1','psc2','psc3'].forEach((id,i) => {
-    const el = document.getElementById(id);
-    el.classList.remove('active','done');
-    el.textContent = i+1;
-  });
-  document.getElementById('puc-pfill').style.width = '0%';
-}
+      if (!response.ok || !data.success) {
+        showToast('⚠️ ' + (data.error || 'OTP send failed'));
+        btn.disabled = false; btn.textContent = '📱 Send OTP & Continue';
+        return;
+      }
 
-function downloadCert() {
-  showToast('⬇ Downloading PUC Certificate PDF... In production, this generates a digitally signed PDF.');
-}
+      document.getElementById('otp-mobile-disp').textContent = mob.replace(/(\d{6})(\d{4})/, '******$2');
+      document.getElementById('puc-step1').style.display = 'none';
+      document.getElementById('puc-step2').style.display = '';
+      document.getElementById('psc2').classList.add('active');
+      document.getElementById('puc-pfill').style.width = '50%';
+      window.scrollTo({ top:0, behavior:'smooth' });
 
-/* ── CAPTCHA ── */
-const CC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-function refreshCaptcha() {
-  let c = '';
-  for(let i=0;i<5;i++) c += CC[Math.floor(Math.random()*CC.length)];
-  document.getElementById('captcha-val').textContent = c;
-}
+      // Dev hint
+      if (data.devOtp) showToast('🔑 DEV OTP: ' + data.devOtp + ' (remove in production)');
+      else showToast('📱 OTP sent to your mobile.');
 
-function verifyPUC() {
-  const v = document.getElementById('verify-input')?.value.trim();
-  if(!v) { showToast('⚠️ Please enter vehicle or certificate number.'); return; }
-  showToast('✅ Certificate verified — Valid until 14 Oct 2026.');
-}
+    } catch (err) {
+      showToast('⚠️ Network error');
+      btn.disabled = false; btn.textContent = '📱 Send OTP & Continue';
+    }
+  }
 
-/* ── TOAST ── */
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.style.opacity = '1';
-  setTimeout(() => { t.style.opacity = '0'; }, 4000);
-}
+  function backToStep1() {
+    document.getElementById('puc-step2').style.display = 'none';
+    document.getElementById('puc-step1').style.display = '';
+    document.getElementById('psc2').classList.remove('active');
+    document.getElementById('puc-pfill').style.width = '0%';
+  }
+
+  /* ── STEP 2b: VERIFY OTP + GET CERTIFICATE ────────────── */
+  async function verifyOTP() {
+    const otp  = document.getElementById('puc-otp').value.trim();
+    const mob  = document.getElementById('puc-mobile').value.trim();
+    const reg  = document.getElementById('puc-reg').value.trim();
+    const fuel = document.querySelector('input[name=pucFuel]:checked').value;
+    const state = document.getElementById('puc-state').value;
+
+    if (!otp || otp.length < 4) { showToast('⚠️ Please enter the OTP.'); return; }
+
+    const btn = document.querySelector('#puc-step2 .btn-green');
+    btn.disabled = true; btn.textContent = '⏳ Verifying…';
+
+    try {
+      const response = await fetch(`${API_BASE}/api/puc/verify-otp`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ mobile: mob, otp, regNo: reg, fuelType: fuel, regState: state }),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        showToast('⚠️ ' + (data.error || 'OTP verification failed'));
+        btn.disabled = false; btn.textContent = '✅ Verify & Download';
+        return;
+      }
+
+      // Populate certificate preview
+      const c = data.certificate;
+      const fuelLabel = { petrol:'PETROL (BS-VI)', diesel:'DIESEL (BS-VI)', cng:'CNG (BS-VI)', ev:'ELECTRIC (EXEMPT)', hybrid:'HYBRID' }[c.fuelType] || c.fuelType.toUpperCase();
+
+      document.getElementById('c-reg').textContent       = c.regNo;
+      document.getElementById('c-owner').textContent     = (window._pucLookup?.vehicle?.ownerName || 'VEHICLE OWNER').toUpperCase();
+      document.getElementById('c-class').textContent     = window._pucLookup?.vehicle?.vehicleClass || 'LMV';
+      document.getElementById('c-fuel').textContent      = fuelLabel;
+      document.getElementById('c-model').textContent     = ((window._pucLookup?.vehicle?.make || '') + ' ' + (window._pucLookup?.vehicle?.model || '')).trim() || 'N/A';
+      document.getElementById('c-certno').textContent    = c.certNumber;
+      document.getElementById('c-testdate').textContent  = formatDate(c.issuedDate);
+      document.getElementById('c-validupto').textContent = formatDate(c.expiryDate);
+      document.getElementById('c-validity').textContent  = c.validity;
+      document.getElementById('c-co').textContent        = c.readings.co || '0';
+      document.getElementById('c-hc').textContent        = c.readings.hc || '0';
+      document.getElementById('c-co2').textContent       = c.readings.co2 || '0';
+      document.getElementById('c-centre-sign').textContent = c.centreName;
+
+      document.getElementById('puc-step2').style.display = 'none';
+      document.getElementById('puc-step3').style.display = '';
+      document.getElementById('psc2').classList.remove('active');
+      document.getElementById('psc2').classList.add('done');
+      document.getElementById('psc2').textContent = '✓';
+      document.getElementById('psc3').classList.add('active');
+      document.getElementById('puc-pfill').style.width = '100%';
+      window.scrollTo({ top:0, behavior:'smooth' });
+      showToast('🎉 PUC Certificate ready!');
+
+    } catch (err) {
+      showToast('⚠️ Network error');
+      btn.disabled = false; btn.textContent = '✅ Verify & Download';
+    }
+  }
+
+  /* ── VERIFY TAB ───────────────────────────────────────── */
+  async function verifyPUC() {
+    const v = document.getElementById('verify-input')?.value.trim();
+    if (!v) { showToast('⚠️ Please enter a vehicle or certificate number.'); return; }
+    try {
+      const res  = await fetch(`${API_BASE}/api/puc/verify/${encodeURIComponent(v)}`);
+      const data = await res.json();
+      if (data.verified && data.valid) {
+        showToast('✅ Certificate verified — Valid until ' + formatDate(data.certificate?.expiryDate));
+      } else if (data.verified && !data.valid) {
+        showToast('⚠️ Certificate found but EXPIRED.');
+      } else {
+        showToast('❌ Certificate not found in database.');
+      }
+    } catch (_) {
+      showToast('⚠️ Verification failed — network error.');
+    }
+  }
+
+  /* ── CENTRES TAB ──────────────────────────────────────── */
+  async function searchCentres() {
+    const state    = document.querySelector('#panel-centres select:nth-of-type(1)')?.value;
+    const district = document.querySelector('#panel-centres select:nth-of-type(2)')?.value;
+    try {
+      const params = new URLSearchParams();
+      if (state)    params.append('state', state);
+      if (district) params.append('district', district);
+      const res  = await fetch(`${API_BASE}/api/puc/centres?${params}`);
+      const data = await res.json();
+      if (data.success && data.centres.length) {
+        showToast(`📍 Found ${data.centres.length} PUC centre(s) in ${district || state}`);
+      } else {
+        showToast('No centres found for selected area.');
+      }
+    } catch (_) { showToast('⚠️ Could not load centres.'); }
+  }
+
+  /* ── HELPERS ──────────────────────────────────────────── */
+  function formatDate(iso) {
+    if (!iso || iso === 'N/A (EV Exempt)') return iso || 'N/A';
+    try {
+      return new Date(iso).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' });
+    } catch (_) { return iso; }
+  }
+
+  function clearPUCForm() {
+    document.getElementById('puc-reg').value = '';
+    document.getElementById('puc-chassis').value = '';
+    document.getElementById('puc-mobile').value = '';
+    document.querySelector('input[name=pucFuel][value=petrol]').checked = true;
+    document.getElementById('puc-result').classList.remove('show');
+  }
+
+  function resetDownload() {
+    clearPUCForm();
+    window._pucLookup = null;
+    document.getElementById('puc-step1').style.display = '';
+    document.getElementById('puc-step2').style.display = 'none';
+    document.getElementById('puc-step3').style.display = 'none';
+    ['psc1','psc2','psc3'].forEach((id,i) => {
+      const el = document.getElementById(id);
+      el.classList.remove('active','done');
+      el.textContent = i + 1;
+    });
+    document.getElementById('puc-pfill').style.width = '0%';
+  }
+
+  function downloadCert() {
+    showToast('⬇ Downloading PUC Certificate PDF…');
+    // Production: call a /api/puc/download/:certNo endpoint that returns a signed PDF
+    setTimeout(() => window.print(), 800);
+  }
+
+  /* ── CAPTCHA ─────────────────────────────────────────── */
+  const CC = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  function refreshCaptcha() {
+    let c = '';
+    for (let i = 0; i < 5; i++) c += CC[Math.floor(Math.random() * CC.length)];
+    document.getElementById('captcha-val').textContent = c;
+  }
+
+  /* ── TOAST ──────────────────────────────────────────── */
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.style.opacity = '1';
+    setTimeout(() => { t.style.opacity = '0'; }, 4500);
+  }
 </script>
 </body>
 </html>

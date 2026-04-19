@@ -286,14 +286,14 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
 
 <!-- NAV -->
 <nav>
-  <a href="#" class="logo" onclick="resetToHero(event)">
+  <a href="index.html" class="logo">
     <div class="logo-icon">🚗</div>
     Vahan<span>Bridge</span>
   </a>
   <ul>
-    <li><a href="#">NOC Transfer</a></li>
-    <li><a href="#">HSRP</a></li>
-    <li><a href="#">Road Tax</a></li>
+    <li><a href="noc_transfer.html">NOC Transfer</a></li>
+    <li><a href="hsrp_portal.html">HSRP</a></li>
+    <li><a href="tax_refund.html">Road Tax</a></li>
     <li><a href="#" class="active-link">BH Series</a></li>
     <li><a href="#about">About</a></li>
   </ul>
@@ -853,25 +853,43 @@ function checkEligibility() {
   res.innerHTML = '<div class="info-box"><strong>✅ You are eligible for BH Series registration!</strong> Proceed to fill in your personal, vehicle, and employment details. Ensure all documents are ready before submission.</div>';
 }
 
-/* ── FEE CALC ── */
-function calcFee() {
-  const type = document.getElementById('vehType')?.value;
-  const cc = parseInt(document.getElementById('vehCC')?.value) || 0;
-  const fuel = document.getElementById('vehFuel')?.value;
-  let base = 0;
-  if (type === '2w') {
-    base = cc <= 40 ? 600 : cc <= 75 ? 1000 : 1500;
-  } else if (type === '4w' || type === 'lmv') {
-    base = cc <= 1000 ? 2500 : cc <= 1500 ? 3500 : 5500;
+/* ── FEE CALC — calls /api/bh/calculate-fee ── */
+  async function calcFee() {
+    const type = document.getElementById('vehType')?.value;
+    const cc   = document.getElementById('vehCC')?.value;
+    const fuel = document.getElementById('vehFuel')?.value;
+    if (!type) return;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/bh/calculate-fee`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ vehicleType: type, engineCC: cc || 0, fuelType: fuel || 'petrol' }),
+      });
+      const data = await response.json();
+      if (data.success && data.fees) {
+        const f = data.fees;
+        const feeBaseEl  = document.getElementById('feeBase');
+        const feeTotalEl = document.getElementById('feeTotal');
+        if (feeBaseEl)  feeBaseEl.textContent  = '₹ ' + f.base.toLocaleString('en-IN');
+        if (feeTotalEl) feeTotalEl.textContent  = '₹ ' + f.total.toLocaleString('en-IN') + ' (est.)';
+        window._bhFees = f;
+      }
+    } catch (_) {
+      // Fallback to client-side calc if API unreachable
+      const ccNum = parseInt(cc) || 0;
+      let base = 0;
+      if (type === '2w') base = ccNum <= 40 ? 600 : ccNum <= 75 ? 1000 : 1500;
+      else if (type === '4w' || type === 'lmv') base = ccNum <= 1000 ? 2500 : ccNum <= 1500 ? 3500 : 5500;
+      if (fuel === 'ev' || fuel === 'hybrid') base = Math.round(base * 0.5);
+      const feeBaseEl  = document.getElementById('feeBase');
+      const feeTotalEl = document.getElementById('feeTotal');
+      if (feeBaseEl && base > 0) {
+        feeBaseEl.textContent  = '₹ ' + base.toLocaleString('en-IN');
+        feeTotalEl.textContent = '₹ ' + (base + 800).toLocaleString('en-IN') + ' (est.)';
+      }
+    }
   }
-  if (fuel === 'ev' || fuel === 'hybrid') base = Math.round(base * 0.5);
-  const feeBaseEl = document.getElementById('feeBase');
-  const feeTotalEl = document.getElementById('feeTotal');
-  if (feeBaseEl && base > 0) {
-    feeBaseEl.textContent = '₹ ' + base.toLocaleString('en-IN');
-    feeTotalEl.textContent = '₹ ' + (base + 550 + 200 + 50).toLocaleString('en-IN') + ' (est.)';
-  }
-}
 
 /* ── UPLOAD GRID ── */
 function buildUploadGrid() {
@@ -944,17 +962,77 @@ function buildReview() {
 /* ── CHECKLIST ── */
 function toggleCheck(el) { el.classList.toggle('checked'); }
 
-/* ── SUBMIT ── */
-function submitApp() {
-  const decl = document.getElementById('declCheck');
-  if (!decl.checked) { showToast('⚠️ Please accept the declaration before submitting.'); return; }
-  const ref = 'BH/2025/MH/' + (70000 + Math.floor(Math.random()*29999));
-  document.getElementById('refNumber').textContent = ref;
-  document.getElementById('submitRow').style.display = 'none';
-  const panel = document.getElementById('successPanel');
-  panel.classList.add('show');
-  panel.scrollIntoView({ behavior:'smooth', block:'center' });
-}
+// ── API BASE URL ────────────────────────────────────────
+  const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:5000'
+    : 'https://vahanbridge-api.onrender.com'; // ← UPDATE after Render deploy
+
+  /* ── SUBMIT ── */
+  async function submitApp() {
+    const decl = document.getElementById('declCheck');
+    if (!decl.checked) { showToast('⚠️ Please accept the declaration before submitting.'); return; }
+
+    const btn = document.querySelector('#submitRow .btn-next');
+    btn.disabled    = true;
+    btn.textContent = '⏳ Submitting…';
+
+    const payload = {
+      // Step 1
+      eligibilityType: selectedEligType || '',
+      // Step 2 — personal
+      firstName:  document.getElementById('fname')?.value?.trim()   || '',
+      lastName:   document.getElementById('lname')?.value?.trim()   || '',
+      mobile:     document.getElementById('phone')?.value?.replace(/\D/g,'').slice(-10) || '',
+      resState:   document.getElementById('resState')?.value        || '',
+      // Step 3 — vehicle
+      vehicleType:  document.getElementById('vehType')?.value       || '',
+      fuelType:     document.getElementById('vehFuel')?.value       || '',
+      vehicleMake:  document.getElementById('vehMake')?.value       || '',
+      vehicleModel: document.getElementById('vehModel')?.value      || '',
+      engineCC:     document.getElementById('vehCC')?.value         || '',
+      vehicleYear:  document.getElementById('vehYear')?.value       || '',
+      // Step 4 — employment
+      orgName:      document.getElementById('empOrg')?.value?.trim()|| '',
+      submissionPlace: '',
+    };
+
+    if (!payload.firstName || !payload.mobile || !payload.eligibilityType || !payload.vehicleType || !payload.resState || !payload.orgName) {
+      showToast('⚠️ Please complete all required fields in Steps 1–4.');
+      btn.disabled    = false;
+      btn.textContent = '🚀 Submit Application & Proceed to Payment';
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/bh/apply`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify(payload),
+      });
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        const msg = data.errors ? data.errors.map(e => e.msg).join(', ') : (data.error || 'Submission failed.');
+        showToast('⚠️ ' + msg);
+        btn.disabled    = false;
+        btn.textContent = '🚀 Submit Application & Proceed to Payment';
+        return;
+      }
+
+      // SUCCESS
+      document.getElementById('refNumber').textContent = data.bhRef;
+      document.getElementById('submitRow').style.display = 'none';
+      const panel = document.getElementById('successPanel');
+      panel.classList.add('show');
+      panel.scrollIntoView({ behavior:'smooth', block:'center' });
+
+    } catch (err) {
+      console.error('BH submit error:', err);
+      showToast('⚠️ Network error — please check connection and retry.');
+      btn.disabled    = false;
+      btn.textContent = '🚀 Submit Application & Proceed to Payment';
+    }
+  }
 
 /* ── TOAST ── */
 function showToast(msg) {
