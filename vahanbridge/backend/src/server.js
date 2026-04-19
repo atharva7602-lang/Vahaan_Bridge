@@ -31,6 +31,7 @@ app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 // ── CORS ──────────────────────────────────────────────────
 const allowedOrigins = [
   process.env.FRONTEND_URL,
+  'https://vaahanbridge.netlify.app',   // production frontend
   'http://localhost:5500',
   'http://127.0.0.1:5500',
   'http://localhost:3000',

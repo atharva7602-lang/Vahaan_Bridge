@@ -2,39 +2,25 @@ services:
   - type: web
     name: vahanbridge-api
     env: node
-    region: singapore   # closest to India
+    region: singapore
     plan: free
     buildCommand: npm install
-    startCommand: npm start
+    startCommand: node src/server.js
     healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
       - key: DB_HOST
-        fromDatabase:
-          name: vahanbridge-db
-          property: host
+        value: shinkansen.proxy.rlwy.net
       - key: DB_PORT
-        fromDatabase:
-          name: vahanbridge-db
-          property: port
+        value: "10642"
       - key: DB_USER
-        fromDatabase:
-          name: vahanbridge-db
-          property: user
+        value: root
       - key: DB_PASSWORD
-        fromDatabase:
-          name: vahanbridge-db
-          property: password
+        value: swckvNwlKDIsFHulxjLYpdJAiuaXBOEw
       - key: DB_NAME
-        fromDatabase:
-          name: vahanbridge-db
-          property: database
+        value: railway
       - key: FRONTEND_URL
-        sync: false   # Set manually after Netlify deploy
-
-databases:
-  - name: vahanbridge-db
-    databaseName: vahanbridge
-    user: vahanbridge_user
-    plan: free
+        value: https://vaahanbridge.netlify.app
+      - key: UPLOAD_DIR
+        value: ./uploads

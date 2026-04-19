@@ -140,10 +140,10 @@ async function initSchema() {
         INDEX idx_noc_ref (noc_ref),
         INDEX idx_noc_status (status)
       )
-    \`);
+    `);
 
     // ── NOC DOCUMENT UPLOADS TABLE ────────────────────────
-    await conn.execute(\`
+    await conn.execute(`
       CREATE TABLE IF NOT EXISTS noc_documents (
         id              INT AUTO_INCREMENT PRIMARY KEY,
         application_id  INT NOT NULL,
@@ -154,7 +154,7 @@ async function initSchema() {
         UNIQUE KEY uq_app_doc (application_id, doc_type),
         FOREIGN KEY (application_id) REFERENCES noc_applications(id) ON DELETE CASCADE
       )
-    \`);
+    `);
 
 
     // ── TAX REFUND APPLICATIONS TABLE ────────────────────
@@ -183,7 +183,7 @@ async function initSchema() {
         FOREIGN KEY (user_id)    REFERENCES users(id)    ON DELETE SET NULL,
         INDEX idx_tax_ref (tax_ref)
       )
-    \`);
+    `);
 
 
     // ── BH APPLICATIONS TABLE ─────────────────────────────
@@ -222,10 +222,10 @@ async function initSchema() {
         INDEX idx_bh_ref (bh_ref),
         INDEX idx_bh_status (status)
       )
-    \`);
+    `);
 
     // ── BH DOCUMENTS TABLE ────────────────────────────────
-    await conn.execute(\`
+    await conn.execute(`
       CREATE TABLE IF NOT EXISTS bh_documents (
         id              INT AUTO_INCREMENT PRIMARY KEY,
         application_id  INT NOT NULL,
@@ -236,7 +236,7 @@ async function initSchema() {
         UNIQUE KEY uq_bh_doc (application_id, doc_type),
         FOREIGN KEY (application_id) REFERENCES bh_applications(id) ON DELETE CASCADE
       )
-    \`);
+    `);
 
 
     // ── PUC RECORDS TABLE ─────────────────────────────────
@@ -259,10 +259,10 @@ async function initSchema() {
         INDEX idx_cert (cert_number),
         INDEX idx_vehicle_puc (vehicle_id, status)
       )
-    \`);
+    `);
 
     // ── PUC CENTRES TABLE ─────────────────────────────────
-    await conn.execute(\`
+    await conn.execute(`
       CREATE TABLE IF NOT EXISTS puc_centres (
         id        INT AUTO_INCREMENT PRIMARY KEY,
         name      VARCHAR(150) NOT NULL,
@@ -276,12 +276,12 @@ async function initSchema() {
         lat       DECIMAL(10,7),
         lng       DECIMAL(10,7)
       )
-    \`);
+    `);
 
     // Seed a few PUC centres if table is empty
     const [[centreCount]] = await conn.execute('SELECT COUNT(*) as cnt FROM puc_centres');
     if (centreCount.cnt === 0) {
-      await conn.execute(\`
+      await conn.execute(`
         INSERT INTO puc_centres (name, address, state, district, pincode, contact, timing, fuel_types, lat, lng) VALUES
         ('Green Auto PUC Centre', 'Shop 14, Deccan Gymkhana Rd, Pune', 'Maharashtra', 'Pune', '411004', '020-2551-0001', '8am-8pm', 'Petrol/Diesel/CNG', 18.5195, 73.8553),
         ('Sharma Motors PUC', 'Near Shivaji Nagar, FC Road, Pune', 'Maharashtra', 'Pune', '411005', '020-2412-0002', '9am-7pm', 'Petrol/CNG', 18.5308, 73.8474),
@@ -290,7 +290,7 @@ async function initSchema() {
         ('RTO-Authorised PUC Hub', 'Opposite RTO Office, Bund Garden, Pune', 'Maharashtra', 'Pune', '411001', '020-2612-0005', '9am-5pm', 'All Fuel Types', 18.5290, 73.8733),
         ('Delhi Green PUC', 'Nehru Place, New Delhi', 'Delhi', 'South Delhi', '110019', '011-4000-0006', '8am-8pm', 'Petrol/Diesel/CNG', 28.5485, 77.2520),
         ('Bangalore Auto Emission', 'Koramangala, Bangalore', 'Karnataka', 'Bangalore Urban', '560034', '080-4100-0007', '9am-7pm', 'Petrol/Diesel', 12.9352, 77.6245)
-      \`);
+      `);
       console.log('✅ PUC centres seeded');
     }
 
