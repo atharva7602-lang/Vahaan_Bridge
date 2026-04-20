@@ -71,6 +71,11 @@ async function submitApplication(req, res) {
     const userId = userRow.id;
 
     // 2. Create vehicle record (BH = new registration, no reg_number yet)
+    // Map BH vehicle types to vehicles table enum ('private','2w','commercial')
+    const vehTableType = vehicleType === '2w' ? '2w'
+                       : vehicleType === '3w' ? 'commercial'
+                       : 'private'; // covers '4w' and 'lmv'
+
     const [vehResult] = await conn.execute(
       `INSERT INTO vehicles
          (user_id, reg_number, chassis_last5, engine_last5, make, model,
@@ -78,13 +83,13 @@ async function submitApplication(req, res) {
        VALUES (?,?,?,?,?,?,?,?,?,?)`,
       [
         userId,
-        `PENDING-${Date.now()}`,          // placeholder until BH number assigned
+        `PENDING-${Date.now()}-${Math.floor(Math.random()*9999)}`,  // placeholder until BH number assigned
         chassisNo ? chassisNo.slice(-5) : null,
         engineNo  ? engineNo.slice(-5)  : null,
         vehicleMake  || null,
         vehicleModel || null,
         vehicleYear  || null,
-        vehicleType  || '4w',
+        vehTableType,
         fuelType     || 'petrol',
         resState     || null,
       ]

@@ -1,6 +1,6 @@
 const express = require('express');
 const { body, validationResult } = require('express-validator');
-const { lookupVehicle, sendOTP, verifyOTP, getHistory, getCentres, verifyCertificate } = require('../controllers/pucController');
+const { lookupVehicle, sendOTP, verifyOTP, saveCertificate, getHistory, getCentres, verifyCertificate } = require('../controllers/pucController');
 
 const router = express.Router();
 
@@ -54,5 +54,19 @@ router.get('/centres', getCentres);
 
 // GET  /api/puc/verify/:input  — Verify certificate by cert number or reg number
 router.get('/verify/:certOrReg', verifyCertificate);
+
+
+// POST /api/puc/save  — save certificate directly without OTP
+router.post('/save',
+  [
+    body('regNo').trim().notEmpty().withMessage('Registration number required'),
+    (req, res, next) => {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) return res.status(422).json({ success: false, errors: errors.array() });
+      next();
+    },
+  ],
+  saveCertificate
+);
 
 module.exports = router;

@@ -373,7 +373,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
         <div class="progress-track"></div>
         <div class="progress-fill-bar" id="puc-pfill" style="width:0%"></div>
         <div class="p-step"><div class="p-dot active" id="psc1">1</div><div class="p-label">Vehicle</div></div>
-        <div class="p-step"><div class="p-dot" id="psc2">2</div><div class="p-label">Verify OTP</div></div>
+        <div class="p-step"><div class="p-dot" id="psc2">2</div><div class="p-label">Confirm</div></div>
         <div class="p-step"><div class="p-dot" id="psc3">3</div><div class="p-label">Download</div></div>
       </div>
     </div>
@@ -446,30 +446,18 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
             <div class="result-item"><div class="ri-label">Testing Centre</div><div class="ri-val" id="res-centre">—</div></div>
           </div>
           <div class="btn-row">
-            <button class="btn-green" onclick="goToOTP()">📱 Send OTP &amp; Continue</button>
+            <button class="btn-green" id="confirmSaveBtn" onclick="confirmAndSave()">✅ Confirm &amp; Save Certificate</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- STEP 2 -->
+    <!-- STEP 2: Saving (hidden, used as transition) -->
     <div id="puc-step2" style="display:none;">
-      <div class="form-card-white">
-        <h3>📱 Step 2 — OTP Verification</h3>
-        <div class="success-box">
-          <strong>✅ OTP Sent!</strong> An OTP has been sent to your registered mobile number <strong id="otp-mobile-disp"></strong>. Enter it below to authenticate and download your PUC certificate.
-        </div>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Enter OTP <span class="req">*</span></label>
-            <input type="text" id="puc-otp" placeholder="6-digit OTP" maxlength="6">
-            <div class="form-note">OTP valid for 10 minutes. <a href="#" style="color:var(--cyan);">Resend OTP</a></div>
-          </div>
-        </div>
-        <div class="btn-row">
-          <button class="btn-green" onclick="verifyOTP()">✅ Verify &amp; Download</button>
-          <button class="btn-back" onclick="backToStep1()">← Back</button>
-        </div>
+      <div class="form-card-white" style="text-align:center;padding:3rem 2rem;">
+        <div style="font-size:2.5rem;margin-bottom:1rem;">⏳</div>
+        <h3>Saving Certificate…</h3>
+        <p style="color:var(--muted);margin-top:0.5rem;">Please wait while we record your PUC certificate.</p>
       </div>
     </div>
 
@@ -797,76 +785,37 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
     }
   }
 
-  /* ── STEP 2a: SEND OTP ────────────────────────────────── */
-  async function goToOTP() {
-    const mob = (document.getElementById('puc-mobile').value||'').replace(/\D/g,'').replace(/^91/,'').slice(-10);
-    const reg = document.getElementById('puc-reg').value.trim();
-
-    const btn = document.querySelector('#puc-result .btn-green');
-    btn.disabled = true; btn.textContent = '⏳ Sending OTP…';
-
-    try {
-      const response = await fetch(`${API_BASE}/api/puc/send-otp`, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ mobile: mob, regNo: reg }),
-      });
-      const data = await response.json();
-
-      if (!response.ok || !data.success) {
-        showToast('⚠️ ' + (data.error || 'OTP send failed'));
-        btn.disabled = false; btn.textContent = '📱 Send OTP & Continue';
-        return;
-      }
-
-      document.getElementById('otp-mobile-disp').textContent = mob.replace(/(\d{6})(\d{4})/, '******$2');
-      document.getElementById('puc-step1').style.display = 'none';
-      document.getElementById('puc-step2').style.display = '';
-      document.getElementById('psc2').classList.add('active');
-      document.getElementById('puc-pfill').style.width = '50%';
-      window.scrollTo({ top:0, behavior:'smooth' });
-
-      // Dev hint
-      if (data.devOtp) showToast('🔑 DEV OTP: ' + data.devOtp + ' (remove in production)');
-      else showToast('📱 OTP sent to your mobile.');
-
-    } catch (err) {
-      showToast('⚠️ Network error');
-      btn.disabled = false; btn.textContent = '📱 Send OTP & Continue';
-    }
-  }
-
-  function backToStep1() {
-    document.getElementById('puc-step2').style.display = 'none';
-    document.getElementById('puc-step1').style.display = '';
-    document.getElementById('psc2').classList.remove('active');
-    document.getElementById('puc-pfill').style.width = '0%';
-  }
-
-  /* ── STEP 2b: VERIFY OTP + GET CERTIFICATE ────────────── */
-  async function verifyOTP() {
-    const otp  = document.getElementById('puc-otp').value.trim();
-    const mob  = (document.getElementById('puc-mobile').value||'').replace(/\D/g,'').replace(/^91/,'').slice(-10);
-    const reg  = document.getElementById('puc-reg').value.trim();
-    const fuel = document.querySelector('input[name=pucFuel]:checked').value;
+  /* ── STEP 2: CONFIRM & SAVE CERTIFICATE ─────────────────── */
+  async function confirmAndSave() {
+    const mob   = (document.getElementById('puc-mobile').value||'').replace(/\D/g,'').replace(/^91/,'').slice(-10);
+    const reg   = document.getElementById('puc-reg').value.trim();
+    const fuel  = document.querySelector('input[name=pucFuel]:checked').value;
     const state = document.getElementById('puc-state').value;
 
-    if (!otp || otp.length < 4) { showToast('⚠️ Please enter the OTP.'); return; }
+    const btn = document.getElementById('confirmSaveBtn');
+    btn.disabled = true; btn.textContent = '⏳ Saving…';
 
-    const btn = document.querySelector('#puc-step2 .btn-green');
-    btn.disabled = true; btn.textContent = '⏳ Verifying…';
+    // Show transition step
+    document.getElementById('puc-step1').style.display = 'none';
+    document.getElementById('puc-step2').style.display = '';
+    document.getElementById('psc2').classList.add('active');
+    document.getElementById('puc-pfill').style.width = '50%';
 
     try {
-      const response = await fetch(`${API_BASE}/api/puc/verify-otp`, {
+      const response = await fetch(`${API_BASE}/api/puc/save`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ mobile: mob, otp, regNo: reg, fuelType: fuel, regState: state }),
+        body:    JSON.stringify({ mobile: mob, regNo: reg, fuelType: fuel, regState: state }),
       });
       const data = await response.json();
 
       if (!response.ok || !data.success) {
-        showToast('⚠️ ' + (data.error || 'OTP verification failed'));
-        btn.disabled = false; btn.textContent = '✅ Verify & Download';
+        showToast('⚠️ ' + (data.error || 'Save failed. Try again.'));
+        document.getElementById('puc-step2').style.display = 'none';
+        document.getElementById('puc-step1').style.display = '';
+        document.getElementById('psc2').classList.remove('active');
+        document.getElementById('puc-pfill').style.width = '0%';
+        btn.disabled = false; btn.textContent = '✅ Confirm & Save Certificate';
         return;
       }
 
@@ -896,15 +845,27 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
       document.getElementById('psc3').classList.add('active');
       document.getElementById('puc-pfill').style.width = '100%';
       window.scrollTo({ top:0, behavior:'smooth' });
-      showToast('🎉 PUC Certificate ready!');
+      showToast('🎉 PUC Certificate saved & ready!');
 
     } catch (err) {
-      showToast('⚠️ Network error');
-      btn.disabled = false; btn.textContent = '✅ Verify & Download';
+      console.error('PUC save error:', err);
+      showToast('⚠️ Network error — please check connection.');
+      document.getElementById('puc-step2').style.display = 'none';
+      document.getElementById('puc-step1').style.display = '';
+      document.getElementById('psc2').classList.remove('active');
+      document.getElementById('puc-pfill').style.width = '0%';
+      btn.disabled = false; btn.textContent = '✅ Confirm & Save Certificate';
     }
   }
 
-  /* ── VERIFY TAB ───────────────────────────────────────── */
+  function backToStep1() {
+    document.getElementById('puc-step2').style.display = 'none';
+    document.getElementById('puc-step1').style.display = '';
+    document.getElementById('psc2').classList.remove('active');
+    document.getElementById('puc-pfill').style.width = '0%';
+  }
+
+    /* ── VERIFY TAB ───────────────────────────────────────── */
   async function verifyPUC() {
     const v = document.getElementById('verify-input')?.value.trim();
     if (!v) { showToast('⚠️ Please enter a vehicle or certificate number.'); return; }

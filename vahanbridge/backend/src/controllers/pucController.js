@@ -337,4 +337,87 @@ async function verifyCertificate(req, res) {
   }
 }
 
-module.exports = { lookupVehicle, sendOTP, verifyOTP, getHistory, getCentres, verifyCertificate };
+
+// ──────────────────────────────────────────────────────────
+// POST /api/puc/save
+// Save PUC certificate directly — no OTP required
+// Frontend calls lookup first, then this to persist to DB
+// ──────────────────────────────────────────────────────────
+async function saveCertificate(req, res) {
+  const conn = await pool.getConnection();
+  try {
+    const { regNo, fuelType, regState } = req.body;
+    if (!regNo) {
+      return res.status(400).json({ success: false, error: 'regNo is required' });
+    }
+
+    const cleanReg = regNo.toUpperCase().replace(/[\s\-]/g, '');
+    const fuel     = fuelType || 'petrol';
+    const state    = regState || 'MH';
+    const readings = generateReadings(fuel);
+    const certNo   = generateCertNo(state, cleanReg);
+    const today    = new Date().toISOString().split('T')[0];
+    const expiry   = fuel === 'ev' ? null : getExpiryDate(6);
+
+    await conn.beginTransaction();
+
+    // Upsert vehicle
+    await conn.execute(
+      `INSERT INTO vehicles (reg_number, fuel_type, reg_state)
+       VALUES (?,?,?)
+       ON DUPLICATE KEY UPDATE fuel_type=VALUES(fuel_type), reg_state=VALUES(reg_state)`,
+      [cleanReg, fuel, state]
+    );
+    const [[vRow]] = await conn.execute(
+      'SELECT id FROM vehicles WHERE reg_number = ?', [cleanReg]
+    );
+    const vehicleId = vRow.id;
+
+    // Mark previous valid records as superseded
+    await conn.execute(
+      `UPDATE puc_records SET status='expired' WHERE vehicle_id=? AND status='valid'`,
+      [vehicleId]
+    );
+
+    // Insert new PUC record
+    await conn.execute(
+      `INSERT INTO puc_records
+         (vehicle_id, cert_number, issued_date, expiry_date,
+          fuel_type, co_level, hc_level, co2_level, opacity_level,
+          centre_name, status)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?)`,
+      [
+        vehicleId, certNo, today, expiry,
+        fuel,
+        readings.co, readings.hc, readings.co2, readings.opacity,
+        'Green Auto PUC Centre',
+        fuel === 'ev' ? 'exempt' : 'valid',
+      ]
+    );
+
+    await conn.commit();
+
+    res.json({
+      success: true,
+      certificate: {
+        certNumber: certNo,
+        regNo:      cleanReg,
+        issuedDate: today,
+        expiryDate: expiry || 'N/A (EV Exempt)',
+        validity:   fuel === 'ev' ? 'Exempt' : '6 Months',
+        fuelType:   fuel,
+        readings,
+        centreName: 'Green Auto PUC Centre',
+      },
+    });
+
+  } catch (err) {
+    await conn.rollback();
+    console.error('[PUC] saveCertificate error:', err);
+    res.status(500).json({ success: false, error: 'Save failed. Please try again.' });
+  } finally {
+    conn.release();
+  }
+}
+
+module.exports = { lookupVehicle, sendOTP, verifyOTP, saveCertificate, getHistory, getCentres, verifyCertificate };

@@ -494,7 +494,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
         <div class="form-group"><label>Gender <span class="req">*</span></label><select><option value="">— Select —</option><option>Male</option><option>Female</option><option>Transgender / Others</option></select></div>
         <div class="form-group"><label>Aadhaar Number <span class="req">*</span></label><input type="text" placeholder="XXXX XXXX XXXX" maxlength="14"></div>
         <div class="form-group"><label>PAN Number <span class="req">*</span></label><input type="text" placeholder="ABCDE1234F" maxlength="10" style="text-transform:uppercase"></div>
-        <div class="form-group"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="phone" placeholder="+91 XXXXXXXXXX"><span class="form-hint">OTP will be sent for verification</span></div>
+        <div class="form-group"><label>Mobile Number <span class="req">*</span></label><input type="tel" id="phone" placeholder="+91 XXXXXXXXXX"></div>
         <div class="form-group"><label>Email Address <span class="req">*</span></label><input type="email" placeholder="your@email.gov.in"></div>
       </div>
     </div>
@@ -708,19 +708,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
       </div>
     </div>
 
-    <div class="form-card-white">
-      <h3>🔐 OTP Verification</h3>
-      <div class="form-grid">
-        <div class="form-group">
-          <label>OTP (sent to registered mobile) <span class="req">*</span></label>
-          <div style="display:flex;gap:0.5rem;">
-            <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" style="flex:1">
-            <button onclick="showToast('OTP sent to your registered mobile number.')" style="background:var(--text);color:#fff;border:none;padding:0 1rem;border-radius:10px;font-size:0.8rem;cursor:pointer;font-family:inherit;white-space:nowrap;">Send OTP</button>
-          </div>
-        </div>
-        <div class="form-group"><label>Place of Submission <span class="req">*</span></label><input type="text" placeholder="City / District"></div>
-      </div>
-    </div>
+
 
     <div id="submitRow">
       <div class="nav-row">
