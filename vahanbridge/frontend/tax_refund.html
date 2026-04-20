@@ -361,7 +361,7 @@ footer a:hover { color: #fff; }
       // Build FormData so the tax receipt file can be included
       const formData = new FormData();
       formData.append('ownerName',   document.getElementById('filingName').value.trim());
-      formData.append('mobile',      document.getElementById('filingMobile').value.trim());
+      formData.append('mobile',      (document.getElementById('filingMobile').value||'').replace(/\D/g,'').replace(/^91/,'').slice(-10));
       formData.append('regNo',       document.getElementById('regNo').value.trim());
       formData.append('prevState',   prevStateEl.value);
       formData.append('newState',    newStateEl.value);

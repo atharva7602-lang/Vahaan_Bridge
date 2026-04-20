@@ -1161,7 +1161,6 @@ footer {
 </footer>
 
 <script>
-  const API_BASE = "https://vahaan-bridge-sdp0.onrender.com";
   let currentStep = 0;
   let vehicleType = 'private';
   let selectedRTO = 1;
@@ -1405,7 +1404,7 @@ footer {
     const payload = {
       // Step 1 — Vehicle & Owner
       ownerName:    document.getElementById('ownerName')?.value?.trim()   || '',
-      mobile:       document.getElementById('mobile')?.value?.trim()      || '',
+      mobile:       (document.getElementById('mobile')?.value || '').replace(/\D/g,'').replace(/^91/, '').slice(-10) || '',
       regNo:        document.getElementById('regNo')?.value?.trim()       || '',
       chassisNo:    document.getElementById('chassisNo')?.value?.trim()   || '',
       engineNo:     document.getElementById('engineNo')?.value?.trim()    || '',

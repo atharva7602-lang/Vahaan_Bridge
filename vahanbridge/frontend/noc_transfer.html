@@ -859,7 +859,7 @@ footer .footer-sub { font-size: 0.8rem; }
     const payload = {
       ownerName:    document.getElementById('ownerName')?.value?.trim()    || '',
       aadhaar:      document.getElementById('aadhaar')?.value?.trim()      || '',
-      mobile:       document.getElementById('mobile')?.value?.trim()       || '',
+      mobile:       (document.getElementById('mobile')?.value || '').replace(/\D/g,'').replace(/^91/, '').slice(-10) || '',
       email:        document.getElementById('email')?.value?.trim()        || '',
       regNo:        document.getElementById('regNo')?.value?.trim()        || '',
       engineNo:     document.getElementById('engineNo')?.value?.trim()     || '',

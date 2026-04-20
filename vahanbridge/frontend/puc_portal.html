@@ -748,7 +748,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
   async function fetchPUCRecord() {
     const reg     = document.getElementById('puc-reg').value.trim();
     const chassis = document.getElementById('puc-chassis').value.trim();
-    const mob     = document.getElementById('puc-mobile').value.trim();
+    const mob     = (document.getElementById('puc-mobile').value||'').replace(/\D/g,'').replace(/^91/,'').slice(-10);
     const fuel    = document.querySelector('input[name=pucFuel]:checked').value;
     const state   = document.getElementById('puc-state').value;
 
@@ -799,7 +799,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
 
   /* ── STEP 2a: SEND OTP ────────────────────────────────── */
   async function goToOTP() {
-    const mob = document.getElementById('puc-mobile').value.trim();
+    const mob = (document.getElementById('puc-mobile').value||'').replace(/\D/g,'').replace(/^91/,'').slice(-10);
     const reg = document.getElementById('puc-reg').value.trim();
 
     const btn = document.querySelector('#puc-result .btn-green');
@@ -846,7 +846,7 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
   /* ── STEP 2b: VERIFY OTP + GET CERTIFICATE ────────────── */
   async function verifyOTP() {
     const otp  = document.getElementById('puc-otp').value.trim();
-    const mob  = document.getElementById('puc-mobile').value.trim();
+    const mob  = (document.getElementById('puc-mobile').value||'').replace(/\D/g,'').replace(/^91/,'').slice(-10);
     const reg  = document.getElementById('puc-reg').value.trim();
     const fuel = document.querySelector('input[name=pucFuel]:checked').value;
     const state = document.getElementById('puc-state').value;
