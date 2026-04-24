@@ -12,6 +12,7 @@ const nocRoutes  = require('./routes/noc');
 const taxRoutes  = require('./routes/tax');
 const bhRoutes   = require('./routes/bh');
 const pucRoutes  = require('./routes/puc');
+const authRoutes = require('./routes/auth');
 // Future: import more route files here
 // const taxRoutes  = require('./routes/tax');
 // const bhRoutes   = require('./routes/bh');
@@ -70,6 +71,7 @@ app.use('/api/noc',  nocRoutes);
 app.use('/api/tax',  taxRoutes);
 app.use('/api/bh',   bhRoutes);
 app.use('/api/puc',  pucRoutes);
+app.use('/api/auth', authRoutes);
 // Future routes:
 // app.use('/api/tax',  taxRoutes);
 // app.use('/api/bh',   bhRoutes);

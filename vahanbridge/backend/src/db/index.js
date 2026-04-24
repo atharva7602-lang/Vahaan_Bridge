@@ -36,11 +36,28 @@ async function initSchema() {
         full_name   VARCHAR(150) NOT NULL,
         mobile      VARCHAR(15)  NOT NULL,
         email       VARCHAR(150),
+        password    VARCHAR(255),
         created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        INDEX idx_mobile (mobile)
+        INDEX idx_mobile (mobile),
+        UNIQUE INDEX idx_email (email)
       )
     `);
+
+    // Ensure existing users table has the new password column and unique email index
+    try {
+      await conn.execute(`ALTER TABLE users ADD COLUMN password VARCHAR(255)`);
+      console.log('Migration: Added password column to users table');
+    } catch (e) {
+      // Column likely already exists
+    }
+
+    try {
+      await conn.execute(`ALTER TABLE users ADD UNIQUE INDEX idx_email (email)`);
+      console.log('Migration: Added unique index to email in users table');
+    } catch (e) {
+      // Index likely already exists or duplicate data prevents it
+    }
 
     // ── VEHICLES TABLE ────────────────────────────────────
     await conn.execute(`
