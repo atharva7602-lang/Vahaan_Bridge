@@ -54,13 +54,22 @@ async function initSchema() {
         model           VARCHAR(80),
         reg_year        YEAR,
         vehicle_type    ENUM('private','2w','commercial') DEFAULT 'private',
-        fuel_type       ENUM('petrol','diesel','cng','ev','hybrid') DEFAULT 'petrol',
+        fuel_type       ENUM('petrol','diesel','cng','lpg','ev','hybrid') DEFAULT 'petrol',
         reg_state       VARCHAR(80),
         created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
         INDEX idx_reg (reg_number)
       )
     `);
+
+    // Ensure existing tables are updated with 'lpg' in fuel_type (migration)
+    try {
+      await conn.execute(`
+        ALTER TABLE vehicles MODIFY COLUMN fuel_type ENUM('petrol','diesel','cng','lpg','ev','hybrid') DEFAULT 'petrol'
+      `);
+    } catch (e) {
+      console.log('Skipping vehicles alter table (already migrated or error):', e.message);
+    }
 
     // ── HSRP APPLICATIONS TABLE ───────────────────────────
     await conn.execute(`

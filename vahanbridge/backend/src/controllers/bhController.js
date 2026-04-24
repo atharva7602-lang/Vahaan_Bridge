@@ -83,7 +83,7 @@ async function submitApplication(req, res) {
        VALUES (?,?,?,?,?,?,?,?,?,?)`,
       [
         userId,
-        `PENDING-${Date.now()}-${Math.floor(Math.random()*9999)}`,  // placeholder until BH number assigned
+        `PENDING-${Math.floor(Math.random()*999999999)}`,  // placeholder until BH number assigned
         chassisNo ? chassisNo.slice(-5) : null,
         engineNo  ? engineNo.slice(-5)  : null,
         vehicleMake  || null,
