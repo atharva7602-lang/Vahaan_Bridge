@@ -48,7 +48,7 @@ async function submitApplication(req, res) {
         engineNo  ? engineNo.slice(-5)  : null,
         chassisNo ? chassisNo.slice(-5) : null,
         vehicleModel || null,
-        vehicleType  || 'private',
+        vehicleType === '2w' ? '2w' : (vehicleType === 'com' ? 'commercial' : 'private'),
         homeState    || null,
       ]
     );
