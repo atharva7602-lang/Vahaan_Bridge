@@ -849,6 +849,9 @@ footer { background: var(--text); color: rgba(255,255,255,0.6); padding: 2.5rem 
       document.getElementById('puc-pfill').style.width = '100%';
       window.scrollTo({ top:0, behavior:'smooth' });
       showToast('🎉 PUC Certificate saved & ready!');
+      setTimeout(() => {
+        alert("🚨 ALARM ALERT: Your PUC Certificate has been successfully generated!\n\nPlease remember to renew it before the expiry date to avoid penalties.");
+      }, 500);
 
     } catch (err) {
       console.error('PUC save error:', err);

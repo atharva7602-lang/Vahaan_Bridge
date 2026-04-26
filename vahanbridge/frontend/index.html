@@ -774,7 +774,7 @@
     </p>
     <div class="hero-actions">
       <button class="btn-primary" onclick="openModal()">Start Your Transfer →</button>
-      <button class="btn-outline" onclick="scrollTo('#features')">Explore Features</button>
+      <button class="btn-outline" onclick="scrollToSection('#features')">Explore Features</button>
     </div>
     <div class="hero-stats">
       <div class="stat">
@@ -1658,7 +1658,7 @@
   }
 
   // Scroll helper
-  function scrollTo(sel) { document.querySelector(sel)?.scrollIntoView({behavior:'smooth'}); }
+  function scrollToSection(sel) { document.querySelector(sel)?.scrollIntoView({behavior:'smooth'}); }
 
   // Close modals on overlay click
   document.querySelectorAll('.modal-overlay').forEach(el => {
