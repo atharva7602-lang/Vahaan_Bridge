@@ -61,4 +61,39 @@ function updateNavbar() {
 }
 
 // Automatically update navbar on load if auth-nav-item is present
-document.addEventListener('DOMContentLoaded', updateNavbar);
+document.addEventListener('DOMContentLoaded', () => {
+  updateNavbar();
+  initScrollCar();
+});
+
+/**
+ * Global Scroll Car Animation
+ */
+function initScrollCar() {
+  // Create car element
+  const car = document.createElement('div');
+  car.id = 'global-scroll-car';
+  car.textContent = '🚗';
+  car.style.position = 'fixed';
+  car.style.bottom = '15px';
+  car.style.left = '-60px';
+  car.style.fontSize = '3rem';
+  car.style.zIndex = '9999';
+  car.style.pointerEvents = 'none';
+  car.style.willChange = 'transform';
+  car.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.2))';
+  document.body.appendChild(car);
+
+  // Add scroll listener
+  window.addEventListener('scroll', () => {
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (docHeight <= 0) return;
+    
+    const scrollPercent = scrollTop / docHeight;
+    const windowWidth = window.innerWidth;
+    // Move from left (-60px) to right edge (+120px translation for full offscreen)
+    const translateAmount = scrollPercent * (windowWidth + 120); 
+    car.style.transform = `translateX(${translateAmount}px)`;
+  });
+}
